@@ -736,7 +736,8 @@ nav {
           <input type="number" id="setup-budget" class="setup-input" style="margin-bottom:0" placeholder="8000" value="8000">
         </div>
       </div>
-      <button class="setup-btn" onclick="saveSetup()">Get Started →</button>
+      <div id="setup-error" style="color:var(--red);font-size:13px;margin-bottom:8px;display:none;background:var(--red-dim);padding:10px 14px;border-radius:10px;width:100%;text-align:left;"></div>
+      <button class="setup-btn" id="setup-btn" onclick="saveSetup()">Get Started →</button>
       <div class="setup-hint">
         <strong>How to set up:</strong><br>
         1. Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a>, create a new spreadsheet<br>
@@ -986,22 +987,57 @@ function showMainApp() {
   document.getElementById('main-app').style.overflow = 'hidden';
 }
 
-function saveSetup() {
+async function saveSetup() {
   const url = document.getElementById('api-url-input').value.trim();
   const secret = document.getElementById('api-secret-input').value.trim();
-  if (!url) { alert('Please enter your API URL'); return; }
-  if (!secret) { alert('Please enter a shared password'); return; }
-  API_URL = url;
-  API_SECRET = secret;
-  localStorage.setItem('api_url', url);
-  localStorage.setItem('api_secret', secret);
-  
-  const income = parseFloat(document.getElementById('setup-income').value) || 28000;
-  const budget = parseFloat(document.getElementById('setup-budget').value) || 8000;
-  state.settings = { income, budget };
-  
-  showMainApp();
-  saveSettingsToSheet().then(() => loadAll());
+  const errEl = document.getElementById('setup-error');
+  const btn = document.getElementById('setup-btn');
+  errEl.style.display = 'none';
+
+  if (!url) { errEl.textContent = 'Please enter your API URL'; errEl.style.display = 'block'; return; }
+  if (!secret) { errEl.textContent = 'Please enter a password'; errEl.style.display = 'block'; return; }
+
+  // Test the connection before saving
+  btn.textContent = 'Connecting...';
+  btn.disabled = true;
+
+  try {
+    API_URL = url;
+    API_SECRET = secret;
+    const res = await apiCall('getSettings');
+    if (res.error === 'Unauthorized') {
+      errEl.textContent = '❌ Wrong password. Check your Code.gs and try again.';
+      errEl.style.display = 'block';
+      API_URL = ''; API_SECRET = '';
+      btn.textContent = 'Get Started →';
+      btn.disabled = false;
+      return;
+    }
+    if (res.error) {
+      errEl.textContent = '❌ Connection error: ' + res.error;
+      errEl.style.display = 'block';
+      API_URL = ''; API_SECRET = '';
+      btn.textContent = 'Get Started →';
+      btn.disabled = false;
+      return;
+    }
+
+    // Success — save everything
+    localStorage.setItem('api_url', url);
+    localStorage.setItem('api_secret', secret);
+    const income = parseFloat(document.getElementById('setup-income').value) || 28000;
+    const budget = parseFloat(document.getElementById('setup-budget').value) || 8000;
+    state.settings = { income, budget };
+    showMainApp();
+    saveSettingsToSheet().then(() => loadAll());
+
+  } catch(e) {
+    errEl.textContent = '❌ Could not reach server. Check the URL and your internet connection.';
+    errEl.style.display = 'block';
+    API_URL = ''; API_SECRET = '';
+    btn.textContent = 'Get Started →';
+    btn.disabled = false;
+  }
 }
 
 function confirmReset() {
@@ -1021,13 +1057,18 @@ function confirmReset() {
 // ============================================================
 async function apiCall(action, data = {}) {
   const payload = { action, secret: API_SECRET, ...data };
-  // Google Apps Script requires GET with URL params to avoid CORS/redirect issues
   const url = API_URL + '?' + new URLSearchParams(payload).toString();
   const response = await fetch(url, {
     method: 'GET',
     redirect: 'follow'
   });
-  return response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    console.error('API response was not JSON:', text);
+    throw new Error('Bad response from server: ' + text.substring(0, 100));
+  }
 }
 
 async function loadAll() {
