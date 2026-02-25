@@ -1057,20 +1057,36 @@ function confirmReset() {
 // ============================================================
 async function apiCall(action, data = {}) {
   const payload = { action, secret: API_SECRET, ...data };
-  const url = API_URL + '?' + new URLSearchParams(payload).toString();
-  // Use no-cors for writes (fire and forget), cors for reads
   const reads = ['getTransactions','getSettings','getConstants'];
+
   if (reads.includes(action)) {
-    const response = await fetch(url, { credentials: 'omit' });
-    const text = await response.text();
-    try { return JSON.parse(text); }
-    catch(e) {
-      console.error('API response:', text);
-      throw new Error('Bad response: ' + text.substring(0, 200));
-    }
+    // JSONP for reads — bypasses CORS completely
+    return new Promise((resolve, reject) => {
+      const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+      payload.callback = cbName;
+      const url = API_URL + '?' + new URLSearchParams(payload).toString();
+      const script = document.createElement('script');
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error('Request timed out'));
+      }, 15000);
+      function cleanup() {
+        clearTimeout(timeout);
+        delete window[cbName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+      window[cbName] = function(result) {
+        cleanup();
+        resolve(result);
+      };
+      script.onerror = () => { cleanup(); reject(new Error('Script load failed')); };
+      script.src = url;
+      document.head.appendChild(script);
+    });
   } else {
-    // For writes just fire and return success — data is already saved locally
-    fetch(url, { credentials: 'omit' }).catch(() => {});
+    // Fire-and-forget for writes — no-cors, data already saved locally
+    const url = API_URL + '?' + new URLSearchParams(payload).toString();
+    fetch(url, { mode: 'no-cors', credentials: 'omit' }).catch(() => {});
     return { success: true };
   }
 }
