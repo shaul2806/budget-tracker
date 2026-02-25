@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Budget">
+<title>Budget Tracker</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #161b27;
+  --bg3: #1e2535;
+  --card: #1a2030;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f2f7;
+  --text2: #8b93a8;
+  --text3: #5a6278;
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.12);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.12);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.12);
+  --blue: #60a5fa;
+  --radius: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* ===== LAYOUT ===== */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 90px;
+  -webkit-overflow-scrolling: touch;
+  padding-top: calc(var(--safe-top) + 8px);
+}
+.screen.active { display: block; }
+
+/* scrollbar */
+.screen::-webkit-scrollbar { width: 0; }
+
+/* ===== NAV ===== */
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding-bottom: var(--safe-bottom);
+  z-index: 100;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0 8px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nav-btn.active { color: var(--green); }
+.nav-btn svg { width: 22px; height: 22px; }
+.nav-btn.log-btn {
+  flex: 0 0 64px;
+}
+.log-btn-inner {
+  width: 52px; height: 52px;
+  background: var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 2px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.log-btn-inner:active { transform: scale(0.92); box-shadow: 0 2px 10px rgba(52,211,153,0.3); }
+.log-btn-inner svg { color: #0f1117; width: 26px; height: 26px; }
+
+/* ===== HEADER ===== */
+.page-header {
+  padding: 16px 20px 8px;
+}
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+.page-sub {
+  font-size: 13px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin: 0 16px 12px;
+}
+
+.card-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.big-amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.big-amount.positive { color: var(--green); }
+.big-amount.negative { color: var(--red); }
+.big-amount.warning { color: var(--amber); }
+
+.amount-sub {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+/* progress bar */
+.progress-bar {
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 99px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+.progress-fill.green { background: var(--green); }
+.progress-fill.amber { background: var(--amber); }
+.progress-fill.red { background: var(--red); }
+
+/* 2-col row */
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px 12px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 4px 0 2px;
+}
+.stat-value.positive { color: var(--green); }
+.stat-value.negative { color: var(--red); }
+.stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.stat-sub { font-size: 12px; color: var(--text2); }
+
+/* ===== TRANSACTIONS ===== */
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+.tx-item:last-child { border-bottom: none; }
+.tx-item:active { background: var(--bg3); }
+
+.tx-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.tx-icon.expense { background: var(--red-dim); }
+.tx-icon.income { background: var(--green-dim); }
+
+.tx-info { flex: 1; min-width: 0; }
+.tx-desc {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tx-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.tx-amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.tx-amount.expense { color: var(--red); }
+.tx-amount.income { color: var(--green); }
+
+.tx-group-header {
+  padding: 16px 16px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+}
+
+/* ===== LOG SCREEN ===== */
+.log-screen {
+  padding: 20px 20px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.type-toggle {
+  display: flex;
+  background: var(--bg3);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+.type-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.type-btn.active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.type-btn.expense.active { color: var(--red); }
+.type-btn.income.active { color: var(--green); }
+
+.amount-display {
+  text-align: center;
+  margin-bottom: 8px;
+}
+.amount-display-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -2px;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.amount-display-value .cursor {
+  width: 3px; height: 50px;
+  background: var(--green);
+  border-radius: 2px;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+.amount-currency {
+  font-size: 24px;
+  color: var(--text3);
+  font-weight: 400;
+  margin-right: 4px;
+  align-self: flex-start;
+  padding-top: 12px;
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.num-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.1s;
+  text-align: center;
+}
+.num-btn:active { background: var(--bg3); transform: scale(0.95); }
+.num-btn.del { font-size: 18px; }
+.num-btn.zero { }
+
+.desc-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.desc-input::placeholder { color: var(--text3); }
+.desc-input:focus { border-color: rgba(52,211,153,0.4); }
+
+.date-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  color-scheme: dark;
+}
+.date-input:focus { border-color: rgba(52,211,153,0.4); }
+
+.submit-btn {
+  width: 100%;
+  padding: 18px;
+  background: var(--green);
+  border: none;
+  border-radius: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f1117;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.3);
+}
+.submit-btn:active { transform: scale(0.98); }
+.submit-btn.expense-btn { background: var(--red); box-shadow: 0 4px 20px rgba(248,113,113,0.3); }
+
+/* ===== SETTINGS ===== */
+.settings-section {
+  margin: 0 16px 16px;
+}
+.settings-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.setting-label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+.setting-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  width: 120px;
+  text-align: right;
+  color-scheme: dark;
+}
+.setting-input:focus { border-color: rgba(52,211,153,0.4); }
+
+.constant-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+.constant-name-input {
+  flex: 1;
+  background: none;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+}
+.constant-name-input::placeholder { color: var(--text3); }
+.constant-amount-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  width: 90px;
+  text-align: right;
+  color-scheme: dark;
+}
+.del-constant-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 18px;
+  line-height: 1;
+}
+.del-constant-btn:active { color: var(--red); }
+
+.add-constant-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg3);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text3);
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.save-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--green);
+  border: none;
+  border-radius: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f1117;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* ===== SETUP SCREEN ===== */
+.setup-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+.setup-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+.setup-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.setup-sub {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+.setup-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 12px;
+  text-align: left;
+  color-scheme: dark;
+}
+.setup-input:focus { border-color: rgba(52,211,153,0.4); }
+.setup-btn {
+  width: 100%;
+  padding: 18px;
+  background: var(--green);
+  border: none;
+  border-radius: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f1117;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.setup-hint {
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.6;
+  margin-top: 16px;
+  text-align: left;
+  background: var(--bg3);
+  border-radius: 12px;
+  padding: 14px;
+}
+.setup-hint a { color: var(--blue); }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 999;
+  max-width: 320px;
+  width: calc(100% - 32px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast-header {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.toast .week-remaining { color: var(--green); }
+.toast .month-remaining { color: var(--amber); }
+.toast .red-text { color: var(--red); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px calc(24px + var(--safe-bottom));
+  width: 100%;
+  max-width: 480px;
+  border-top: 1px solid var(--border);
+}
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-btn.cancel { background: var(--bg3); color: var(--text2); }
+.modal-btn.danger { background: var(--red-dim); color: var(--red); }
+.modal-btn.save { background: var(--green); color: #0f1117; }
+.modal-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 10px;
+  color-scheme: dark;
+}
+.modal-input:focus { border-color: rgba(52,211,153,0.4); }
+
+/* ===== REPORT ===== */
+.report-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+}
+.report-row:last-child { border-bottom: none; }
+.report-row .label { color: var(--text2); }
+.report-row .value { font-family: 'Syne', sans-serif; font-weight: 600; }
+.report-row .value.positive { color: var(--green); }
+.report-row .value.negative { color: var(--red); }
+.report-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
+/* sync indicator */
+.sync-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+  margin-right: 6px;
+}
+.sync-dot.offline { background: var(--amber); }
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text3);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; }
+
+.loading { text-align: center; padding: 40px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SETUP SCREEN (shown if no API URL configured) -->
+  <div id="setup-screen" style="display:none; overflow-y:auto; flex:1; padding-bottom:40px;">
+    <div class="setup-screen">
+      <div class="setup-logo">💰</div>
+      <div class="setup-title">Budget Tracker</div>
+      <p class="setup-sub">Connect your Google Sheet to get started. Follow the setup guide to get your API URL.</p>
+      <input type="url" id="api-url-input" class="setup-input" placeholder="Paste your Google Apps Script URL here">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px;">
+        <div>
+          <div class="settings-title" style="margin-bottom:6px;">Monthly Income</div>
+          <input type="number" id="setup-income" class="setup-input" style="margin-bottom:0" placeholder="28000" value="28000">
+        </div>
+        <div>
+          <div class="settings-title" style="margin-bottom:6px;">Flexible Budget</div>
+          <input type="number" id="setup-budget" class="setup-input" style="margin-bottom:0" placeholder="8000" value="8000">
+        </div>
+      </div>
+      <button class="setup-btn" onclick="saveSetup()">Get Started →</button>
+      <div class="setup-hint">
+        <strong>How to set up:</strong><br>
+        1. Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a>, create a new spreadsheet<br>
+        2. Go to <strong>Extensions → Apps Script</strong><br>
+        3. Paste the contents of <strong>Code.gs</strong> (included in your download)<br>
+        4. Click <strong>Deploy → New deployment → Web App</strong><br>
+        5. Set "Who has access" to <strong>Anyone</strong><br>
+        6. Copy the URL and paste it above
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main-app" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+
+    <!-- HOME -->
+    <div id="screen-home" class="screen active">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="page-title">Overview</div>
+          <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;">
+            <span id="sync-dot" class="sync-dot"></span>
+            <span id="sync-label">Live</span>
+          </div>
+        </div>
+        <div class="page-sub" id="home-date"></div>
+      </div>
+
+      <!-- Weekly Card -->
+      <div class="card" id="weekly-card">
+        <div class="card-label">This week remaining</div>
+        <div class="big-amount positive" id="weekly-remaining">—</div>
+        <div class="amount-sub" id="weekly-sub"></div>
+        <div class="progress-bar"><div class="progress-fill green" id="weekly-bar" style="width:100%"></div></div>
+      </div>
+
+      <!-- Monthly + spent row -->
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-label">Monthly Left</div>
+          <div class="stat-value positive" id="monthly-remaining">—</div>
+          <div class="stat-sub" id="monthly-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Spent Today</div>
+          <div class="stat-value" id="today-spent">₪0</div>
+          <div class="stat-sub" id="today-count"></div>
+        </div>
+      </div>
+
+      <!-- Recent -->
+      <div style="padding:8px 16px 4px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="settings-title" style="margin:0">Recent</div>
+          <button onclick="switchTab('history')" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;">See all</button>
+        </div>
+      </div>
+      <div id="recent-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- LOG -->
+    <div id="screen-log" class="screen">
+      <div class="page-header">
+        <div class="page-title" id="log-title">Log Expense</div>
+      </div>
+      <div class="log-screen" style="padding-top:8px;">
+        <div class="type-toggle">
+          <button class="type-btn expense active" onclick="setType('expense')">Expense</button>
+          <button class="type-btn income" onclick="setType('income')">Income</button>
+        </div>
+
+        <div class="amount-display">
+          <div class="amount-display-value">
+            <span class="amount-currency">₪</span>
+            <span id="amount-display">0</span>
+            <span class="cursor"></span>
+          </div>
+        </div>
+
+        <div class="numpad">
+          <button class="num-btn" onclick="numpad('1')">1</button>
+          <button class="num-btn" onclick="numpad('2')">2</button>
+          <button class="num-btn" onclick="numpad('3')">3</button>
+          <button class="num-btn" onclick="numpad('4')">4</button>
+          <button class="num-btn" onclick="numpad('5')">5</button>
+          <button class="num-btn" onclick="numpad('6')">6</button>
+          <button class="num-btn" onclick="numpad('7')">7</button>
+          <button class="num-btn" onclick="numpad('8')">8</button>
+          <button class="num-btn" onclick="numpad('9')">9</button>
+          <button class="num-btn" onclick="numpad('.')">.</button>
+          <button class="num-btn zero" onclick="numpad('0')">0</button>
+          <button class="num-btn del" onclick="numpad('del')">⌫</button>
+        </div>
+
+        <input type="text" id="desc-input" class="desc-input" placeholder="What's it for? (optional)">
+        <input type="date" id="date-input" class="date-input">
+
+        <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="screen-history" class="screen">
+      <div class="page-header">
+        <div class="page-title">History</div>
+        <div class="page-sub" id="history-month"></div>
+      </div>
+      <div id="history-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="screen-settings" class="screen">
+      <div class="page-header">
+        <div class="page-title">Settings</div>
+        <div class="page-sub">Budget & constants</div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Monthly Budget</div>
+        <div class="setting-row">
+          <div class="setting-label">Income</div>
+          <input type="number" id="s-income" class="setting-input" placeholder="28000">
+        </div>
+        <div class="setting-row">
+          <div class="setting-label">Flexible budget</div>
+          <input type="number" id="s-budget" class="setting-input" placeholder="8000">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Constant Expenses</div>
+        <div id="constants-list"></div>
+        <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Month Report</div>
+        <div id="report-card" class="card" style="margin:0;padding:16px;"></div>
+      </div>
+
+      <div class="settings-section" style="margin-top:8px;">
+        <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="setting-row" style="justify-content:space-between;cursor:pointer;" onclick="confirmReset()">
+          <div class="setting-label" style="color:var(--red);">Change API URL</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3)"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAV -->
+    <nav>
+      <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </button>
+      <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+        History
+      </button>
+      <button class="nav-btn log-btn" onclick="switchTab('log')">
+        <div class="log-btn-inner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        Log
+      </button>
+      <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <div class="modal-title">Edit Entry</div>
+      <input type="number" id="edit-amount" class="modal-input" placeholder="Amount">
+      <input type="text" id="edit-desc" class="modal-input" placeholder="Description (optional)">
+      <input type="date" id="edit-date" class="modal-input" style="color-scheme:dark;">
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn danger" onclick="deleteCurrentTx()">Delete</button>
+        <button class="modal-btn save" onclick="saveEditedTx()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-header" id="toast-header"></div>
+    <div id="toast-body"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let API_URL = '';
+let state = {
+  transactions: [],
+  settings: { income: 28000, budget: 8000 },
+  constants: [],
+  isOnline: navigator.onLine
+};
+let currentType = 'expense';
+let amountStr = '0';
+let currentEditId = null;
+let offlineQueue = [];
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  API_URL = localStorage.getItem('api_url') || '';
+  offlineQueue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
+
+  if (!API_URL) {
+    document.getElementById('setup-screen').style.display = 'flex';
+    document.getElementById('setup-screen').style.flexDirection = 'column';
+  } else {
+    showMainApp();
+    await loadAll();
+  }
+
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  updateSyncIndicator();
+  updateHomeDate();
+});
+
+function showMainApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'flex';
+  document.getElementById('main-app').style.flexDirection = 'column';
+  document.getElementById('main-app').style.flex = '1';
+  document.getElementById('main-app').style.overflow = 'hidden';
+}
+
+function saveSetup() {
+  const url = document.getElementById('api-url-input').value.trim();
+  if (!url) { alert('Please enter your API URL'); return; }
+  API_URL = url;
+  localStorage.setItem('api_url', url);
+  
+  const income = parseFloat(document.getElementById('setup-income').value) || 28000;
+  const budget = parseFloat(document.getElementById('setup-budget').value) || 8000;
+  state.settings = { income, budget };
+  
+  showMainApp();
+  saveSettingsToSheet().then(() => loadAll());
+}
+
+function confirmReset() {
+  if (confirm('Change the API URL? This will keep your existing data.')) {
+    API_URL = '';
+    localStorage.removeItem('api_url');
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'flex';
+    document.getElementById('setup-screen').style.flexDirection = 'column';
+  }
+}
+
+// ============================================================
+// API
+// ============================================================
+async function apiCall(action, data = {}) {
+  const payload = { action, ...data };
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  return response.json();
+}
+
+async function loadAll() {
+  try {
+    const today = new Date();
+    const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    
+    const [txRes, settingsRes, constantsRes] = await Promise.all([
+      apiCall('getTransactions', { month: monthStr }),
+      apiCall('getSettings'),
+      apiCall('getConstants')
+    ]);
+
+    if (txRes.transactions) state.transactions = txRes.transactions;
+    if (settingsRes.settings) {
+      state.settings.income = parseFloat(settingsRes.settings.income) || 28000;
+      state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
+    }
+    if (constantsRes.constants) state.constants = constantsRes.constants;
+
+    // Process offline queue
+    if (offlineQueue.length > 0 && navigator.onLine) {
+      await processOfflineQueue();
+    }
+
+    renderHome();
+    renderHistory();
+    renderSettings();
+  } catch (e) {
+    // Use cached data
+    loadFromCache();
+    renderHome();
+    renderHistory();
+  }
+}
+
+function loadFromCache() {
+  const cached = localStorage.getItem('cached_data');
+  if (cached) {
+    const data = JSON.parse(cached);
+    state.transactions = data.transactions || [];
+    state.settings = data.settings || state.settings;
+    state.constants = data.constants || [];
+  }
+}
+
+function saveToCache() {
+  localStorage.setItem('cached_data', JSON.stringify({
+    transactions: state.transactions,
+    settings: state.settings,
+    constants: state.constants
+  }));
+}
+
+// ============================================================
+// WEEKLY BUDGET LOGIC
+// ============================================================
+function getWeekBudget(date) {
+  const d = date || new Date();
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dailyRate = state.settings.budget / daysInMonth;
+
+  // Find week boundaries (Sun-Sat)
+  const weekStart = new Date(d);
+  weekStart.setDate(d.getDate() - d.getDay()); // go to Sunday
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6); // Saturday
+
+  // Clamp to month
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
+  
+  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
+  const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+
+  // Count days in this week segment that belong to this month
+  const days = Math.round((effectiveEnd - effectiveStart) / 86400000) + 1;
+  return Math.round(dailyRate * days);
+}
+
+function getWeekRange(date) {
+  const d = date || new Date();
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  
+  const weekStart = new Date(d);
+  weekStart.setDate(d.getDate() - d.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
+
+  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
+  const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+  return { start: effectiveStart, end: effectiveEnd };
+}
+
+function getMonthSpent(monthStr) {
+  return state.transactions
+    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(monthStr))
+    .reduce((sum, t) => sum + t.amount, 0);
+}
+
+function getMonthIncome(monthStr) {
+  return state.transactions
+    .filter(t => t.type === 'income' && t.date && t.date.toString().startsWith(monthStr))
+    .reduce((sum, t) => sum + t.amount, 0);
+}
+
+function getWeekSpent() {
+  const { start, end } = getWeekRange();
+  return state.transactions
+    .filter(t => {
+      if (t.type !== 'expense') return false;
+      const txDate = new Date(t.date);
+      return txDate >= start && txDate <= end;
+    })
+    .reduce((sum, t) => sum + t.amount, 0);
+}
+
+function getTodaySpent() {
+  const todayStr = toDateStr(new Date());
+  return state.transactions
+    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(todayStr))
+    .reduce((sum, t) => sum + t.amount, 0);
+}
+
+// ============================================================
+// RENDER HOME
+// ============================================================
+function renderHome() {
+  const today = new Date();
+  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  
+  const weekBudget = getWeekBudget();
+  const weekSpent = getWeekSpent();
+  const weekRemaining = weekBudget - weekSpent;
+  
+  const monthBudget = state.settings.budget;
+  const monthSpent = getMonthSpent(monthStr);
+  const monthRemaining = monthBudget - monthSpent;
+
+  const todaySpent = getTodaySpent();
+  const todayTxs = state.transactions.filter(t => t.date && t.date.toString().startsWith(toDateStr(today)));
+
+  // Weekly card
+  const weekEl = document.getElementById('weekly-remaining');
+  weekEl.textContent = formatCurrency(weekRemaining);
+  weekEl.className = 'big-amount ' + (weekRemaining > weekBudget * 0.3 ? 'positive' : weekRemaining > 0 ? 'warning' : 'negative');
+  
+  const { start, end } = getWeekRange();
+  document.getElementById('weekly-sub').textContent = 
+    `of ₪${weekBudget.toLocaleString()} · ${formatDate(start)} – ${formatDate(end)}`;
+  
+  const weekPct = Math.max(0, Math.min(100, (weekRemaining / weekBudget) * 100));
+  const weekBar = document.getElementById('weekly-bar');
+  weekBar.style.width = weekPct + '%';
+  weekBar.className = 'progress-fill ' + (weekPct > 40 ? 'green' : weekPct > 15 ? 'amber' : 'red');
+
+  // Monthly
+  const monthEl = document.getElementById('monthly-remaining');
+  monthEl.textContent = formatCurrency(monthRemaining);
+  monthEl.className = 'stat-value ' + (monthRemaining >= 0 ? 'positive' : 'negative');
+  document.getElementById('monthly-sub').textContent = `of ₪${monthBudget.toLocaleString()} budget`;
+
+  // Today
+  document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
+  document.getElementById('today-count').textContent = todayTxs.length + ' transaction' + (todayTxs.length !== 1 ? 's' : '');
+
+  // Recent
+  const recent = [...state.transactions]
+    .sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+    .slice(0, 5);
+  
+  const recentList = document.getElementById('recent-list');
+  if (recent.length === 0) {
+    recentList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No transactions yet</p></div>';
+  } else {
+    recentList.innerHTML = recent.map(tx => renderTxItem(tx)).join('');
+  }
+
+  saveToCache();
+}
+
+function renderTxItem(tx) {
+  const isExpense = tx.type === 'expense';
+  const icon = isExpense ? '💸' : '💰';
+  const desc = tx.description || (isExpense ? 'Expense' : 'Income');
+  return `
+    <div class="tx-item" onclick="openEditModal('${tx.id}')">
+      <div class="tx-icon ${tx.type}">${icon}</div>
+      <div class="tx-info">
+        <div class="tx-desc">${escHtml(desc)}</div>
+        <div class="tx-date">${formatDateFull(new Date(tx.date))}</div>
+      </div>
+      <div class="tx-amount ${tx.type}">${isExpense ? '−' : '+'}₪${tx.amount.toLocaleString()}</div>
+    </div>`;
+}
+
+// ============================================================
+// RENDER HISTORY
+// ============================================================
+function renderHistory() {
+  const today = new Date();
+  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('history-month').textContent = 
+    today.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  const sorted = [...state.transactions]
+    .sort((a,b) => new Date(b.date) - new Date(a.date) || new Date(b.createdAt) - new Date(a.createdAt));
+  
+  if (sorted.length === 0) {
+    document.getElementById('history-list').innerHTML = 
+      '<div class="empty-state"><div class="icon">📋</div><p>No transactions this month</p></div>';
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  sorted.forEach(tx => {
+    const d = tx.date ? tx.date.toString().substring(0, 10) : 'unknown';
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(tx);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([date, txs]) => {
+    html += `<div class="tx-group-header">${formatDateFull(new Date(date))}</div>`;
+    html += txs.map(tx => renderTxItem(tx)).join('');
+  });
+
+  document.getElementById('history-list').innerHTML = html;
+}
+
+// ============================================================
+// RENDER SETTINGS
+// ============================================================
+function renderSettings() {
+  document.getElementById('s-income').value = state.settings.income;
+  document.getElementById('s-budget').value = state.settings.budget;
+  renderConstantsList();
+  renderReport();
+}
+
+function renderConstantsList() {
+  const container = document.getElementById('constants-list');
+  container.innerHTML = state.constants.map((c, i) => `
+    <div class="constant-row">
+      <input type="text" class="constant-name-input" value="${escHtml(c.name)}" 
+        onchange="updateConstant(${i}, 'name', this.value)" placeholder="Expense name">
+      <input type="number" class="constant-amount-input" value="${c.amount}"
+        onchange="updateConstant(${i}, 'amount', this.value)" placeholder="₪">
+      <button class="del-constant-btn" onclick="removeConstant(${i})">×</button>
+    </div>`).join('');
+}
+
+function renderReport() {
+  const today = new Date();
+  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  
+  const income = state.settings.income + getMonthIncome(monthStr);
+  const constantsTotal = state.constants.reduce((sum, c) => sum + c.amount, 0);
+  const varSpent = getMonthSpent(monthStr);
+  const totalSpent = constantsTotal + varSpent;
+  const saved = income - totalSpent;
+  const monthName = today.toLocaleString('default', { month: 'long' });
+
+  document.getElementById('report-card').innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text2);">${monthName} so far</div>
+    <div class="report-row">
+      <span class="label">Total income</span>
+      <span class="value positive">₪${income.toLocaleString()}</span>
+    </div>
+    <div class="report-row">
+      <span class="label">Fixed expenses</span>
+      <span class="value negative">−₪${constantsTotal.toLocaleString()}</span>
+    </div>
+    <div class="report-row">
+      <span class="label">Variable expenses</span>
+      <span class="value negative">−₪${varSpent.toLocaleString()}</span>
+    </div>
+    <div class="report-divider"></div>
+    <div class="report-row">
+      <span class="label" style="font-weight:600;color:var(--text);">Saved</span>
+      <span class="value ${saved >= 0 ? 'positive' : 'negative'}" style="font-size:20px;">₪${Math.abs(saved).toLocaleString()}${saved < 0 ? ' over' : ''}</span>
+    </div>`;
+}
+
+function addConstantRow() {
+  state.constants.push({ name: '', amount: 0 });
+  renderConstantsList();
+}
+function removeConstant(i) {
+  state.constants.splice(i, 1);
+  renderConstantsList();
+}
+function updateConstant(i, field, val) {
+  state.constants[i][field] = field === 'amount' ? parseFloat(val) || 0 : val;
+}
+
+async function saveSettings() {
+  state.settings.income = parseFloat(document.getElementById('s-income').value) || 28000;
+  state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
+  
+  // Collect constants from DOM
+  const rows = document.querySelectorAll('.constant-row');
+  state.constants = Array.from(rows).map(row => ({
+    name: row.querySelector('.constant-name-input').value,
+    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
+  })).filter(c => c.name);
+
+  await saveSettingsToSheet();
+  showToastSimple('✅ Settings saved');
+  renderHome();
+  renderReport();
+}
+
+async function saveSettingsToSheet() {
+  try {
+    await apiCall('saveSettings', { settings: { income: state.settings.income, budget: state.settings.budget } });
+    await apiCall('saveConstants', { constants: state.constants });
+  } catch (e) {
+    // offline, save to queue
+  }
+}
+
+// ============================================================
+// LOG TRANSACTION
+// ============================================================
+function setType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.type-btn.${type}`).classList.add('active');
+  const submitBtn = document.getElementById('submit-btn');
+  const logTitle = document.getElementById('log-title');
+  if (type === 'expense') {
+    submitBtn.textContent = 'Log Expense';
+    submitBtn.className = 'submit-btn expense-btn';
+    logTitle.textContent = 'Log Expense';
+  } else {
+    submitBtn.textContent = 'Log Income';
+    submitBtn.className = 'submit-btn';
+    logTitle.textContent = 'Log Income';
+  }
+}
+
+function numpad(val) {
+  if (val === 'del') {
+    amountStr = amountStr.length > 1 ? amountStr.slice(0,-1) : '0';
+  } else if (val === '.') {
+    if (!amountStr.includes('.')) amountStr += '.';
+  } else {
+    if (amountStr === '0') amountStr = val;
+    else amountStr += val;
+  }
+  document.getElementById('amount-display').textContent = amountStr;
+}
+
+async function submitTransaction() {
+  const amount = parseFloat(amountStr);
+  if (!amount || amount <= 0) { showToastSimple('⚠️ Enter an amount'); return; }
+  
+  const desc = document.getElementById('desc-input').value.trim();
+  const date = document.getElementById('date-input').value || toDateStr(new Date());
+
+  const tx = {
+    id: 'local_' + Date.now(),
+    date, type: currentType, amount, description: desc,
+    createdAt: new Date().toISOString()
+  };
+
+  // Add to state immediately
+  state.transactions.unshift(tx);
+  saveToCache();
+
+  // Try to sync
+  if (navigator.onLine) {
+    try {
+      const res = await apiCall('addTransaction', tx);
+      if (res.id) {
+        // Replace local id with server id
+        const idx = state.transactions.findIndex(t => t.id === tx.id);
+        if (idx !== -1) state.transactions[idx].id = res.id;
+      }
+    } catch (e) {
+      offlineQueue.push({ action: 'addTransaction', data: tx });
+      localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+    }
+  } else {
+    offlineQueue.push({ action: 'addTransaction', data: tx });
+    localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+  }
+
+  // Reset form
+  amountStr = '0';
+  document.getElementById('amount-display').textContent = '0';
+  document.getElementById('desc-input').value = '';
+  document.getElementById('date-input').value = toDateStr(new Date());
+
+  // Update UI
+  renderHome();
+  renderHistory();
+  showExpenseToast(tx);
+  
+  // Go back to home
+  setTimeout(() => switchTab('home'), 300);
+}
+
+function showExpenseToast(tx) {
+  const today = new Date();
+  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const weekBudget = getWeekBudget();
+  const weekSpent = getWeekSpent();
+  const weekRemaining = weekBudget - weekSpent;
+  const monthRemaining = state.settings.budget - getMonthSpent(monthStr);
+
+  const isExpense = tx.type === 'expense';
+  const header = isExpense
+    ? `💸 −₪${tx.amount.toLocaleString()}${tx.description ? ' · ' + tx.description : ''}`
+    : `💰 +₪${tx.amount.toLocaleString()}${tx.description ? ' · ' + tx.description : ''}`;
+
+  const weekClass = weekRemaining >= 0 ? 'week-remaining' : 'red-text';
+  const monthClass = monthRemaining >= 0 ? 'month-remaining' : 'red-text';
+
+  document.getElementById('toast-header').textContent = header;
+  document.getElementById('toast-body').innerHTML = isExpense ? `
+    <span class="${weekClass}">📅 Week: ₪${weekRemaining.toLocaleString()}</span> &nbsp;
+    <span class="${monthClass}">📆 Month: ₪${monthRemaining.toLocaleString()}</span>
+  ` : `<span style="color:var(--green)">✓ Income logged</span>`;
+  
+  showToast();
+}
+
+// ============================================================
+// EDIT MODAL
+// ============================================================
+function openEditModal(id) {
+  const tx = state.transactions.find(t => t.id === id);
+  if (!tx) return;
+  currentEditId = id;
+  document.getElementById('edit-amount').value = tx.amount;
+  document.getElementById('edit-desc').value = tx.description || '';
+  document.getElementById('edit-date').value = tx.date ? tx.date.toString().substring(0,10) : toDateStr(new Date());
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  currentEditId = null;
+}
+
+async function saveEditedTx() {
+  if (!currentEditId) return;
+  const idx = state.transactions.findIndex(t => t.id === currentEditId);
+  if (idx === -1) return;
+
+  state.transactions[idx].amount = parseFloat(document.getElementById('edit-amount').value) || 0;
+  state.transactions[idx].description = document.getElementById('edit-desc').value;
+  state.transactions[idx].date = document.getElementById('edit-date').value;
+
+  try {
+    await apiCall('updateTransaction', state.transactions[idx]);
+  } catch (e) {}
+
+  closeModal();
+  saveToCache();
+  renderHome();
+  renderHistory();
+  showToastSimple('✅ Updated');
+}
+
+async function deleteCurrentTx() {
+  if (!currentEditId) return;
+  if (!confirm('Delete this entry?')) return;
+
+  try {
+    await apiCall('deleteTransaction', { id: currentEditId });
+  } catch (e) {}
+
+  state.transactions = state.transactions.filter(t => t.id !== currentEditId);
+  closeModal();
+  saveToCache();
+  renderHome();
+  renderHistory();
+  showToastSimple('🗑️ Deleted');
+}
+
+// ============================================================
+// OFFLINE QUEUE
+// ============================================================
+async function processOfflineQueue() {
+  const queue = [...offlineQueue];
+  offlineQueue = [];
+  localStorage.removeItem('offline_queue');
+  
+  for (const item of queue) {
+    try {
+      await apiCall(item.action, item.data);
+    } catch (e) {
+      offlineQueue.push(item);
+    }
+  }
+  if (offlineQueue.length) localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+}
+
+function handleOnline() {
+  state.isOnline = true;
+  updateSyncIndicator();
+  if (offlineQueue.length > 0) {
+    processOfflineQueue().then(() => loadAll());
+  }
+}
+
+function handleOffline() {
+  state.isOnline = false;
+  updateSyncIndicator();
+}
+
+function updateSyncIndicator() {
+  const dot = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  if (dot && label) {
+    dot.className = 'sync-dot ' + (state.isOnline ? '' : 'offline');
+    label.textContent = state.isOnline ? 'Live' : 'Offline';
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  const navBtn = document.getElementById('nav-' + tab);
+  if (navBtn) navBtn.classList.add('active');
+  
+  if (tab === 'log') {
+    document.getElementById('date-input').value = toDateStr(new Date());
+  }
+  if (tab === 'settings') renderSettings();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function formatCurrency(n) {
+  const abs = Math.abs(n);
+  return (n < 0 ? '−' : '') + '₪' + abs.toLocaleString('en-IL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function toDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-IL', { month: 'short', day: 'numeric' });
+}
+
+function formatDateFull(d) {
+  const today = new Date();
+  const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
+  if (toDateStr(d) === toDateStr(today)) return 'Today';
+  if (toDateStr(d) === toDateStr(yesterday)) return 'Yesterday';
+  return d.toLocaleDateString('en-IL', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function updateHomeDate() {
+  const el = document.getElementById('home-date');
+  if (el) el.textContent = new Date().toLocaleDateString('en-IL', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast() {
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+function showToastSimple(msg) {
+  document.getElementById('toast-header').textContent = msg;
+  document.getElementById('toast-body').innerHTML = '';
+  showToast();
+}
+</script>
+</body>
+</html>
