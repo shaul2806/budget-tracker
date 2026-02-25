@@ -1057,22 +1057,24 @@ function confirmReset() {
 // ============================================================
 async function apiCall(action, data = {}) {
   const payload = { action, secret: API_SECRET, ...data };
-  const url = API_URL + '?' + new URLSearchParams(payload).toString();
+  const targetUrl = API_URL + '?' + new URLSearchParams(payload).toString();
   const reads = ['getTransactions','getSettings','getConstants'];
 
   if (reads.includes(action)) {
+    // Google Apps Script blocks CORS on reads — use proxy
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
     try {
-      const res = await fetch(url);
+      const res = await fetch(proxyUrl);
       const text = await res.text();
-      console.log(action, 'response:', text.substring(0, 200));
+      console.log(action + ':', text.substring(0, 300));
       return JSON.parse(text);
     } catch(e) {
-      console.error(action, 'failed:', e.message);
+      console.error(action + ' failed:', e.message);
       throw e;
     }
   } else {
-    // Fire-and-forget writes — already saved locally
-    fetch(url, { mode: 'no-cors' }).catch(() => {});
+    // Writes work fine without CORS
+    fetch(targetUrl, { mode: 'no-cors' }).catch(() => {});
     return { success: true };
   }
 }
