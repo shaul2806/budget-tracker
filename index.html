@@ -1021,9 +1021,11 @@ function confirmReset() {
 // ============================================================
 async function apiCall(action, data = {}) {
   const payload = { action, secret: API_SECRET, ...data };
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
+  // Google Apps Script requires GET with URL params to avoid CORS/redirect issues
+  const url = API_URL + '?' + new URLSearchParams(payload).toString();
+  const response = await fetch(url, {
+    method: 'GET',
+    redirect: 'follow'
   });
   return response.json();
 }
