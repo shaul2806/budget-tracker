@@ -725,6 +725,7 @@ nav {
       <div class="setup-title">Budget Tracker</div>
       <p class="setup-sub">Connect your Google Sheet to get started. Follow the setup guide to get your API URL.</p>
       <input type="url" id="api-url-input" class="setup-input" placeholder="Paste your Google Apps Script URL here">
+      <input type="password" id="api-secret-input" class="setup-input" placeholder="Shared password (from Code.gs)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px;">
         <div>
           <div class="settings-title" style="margin-bottom:6px;">Monthly Income</div>
@@ -939,6 +940,7 @@ nav {
 // STATE
 // ============================================================
 let API_URL = '';
+let API_SECRET = '';
 let state = {
   transactions: [],
   settings: { income: 28000, budget: 8000 },
@@ -959,6 +961,7 @@ window.addEventListener('load', async () => {
   }
 
   API_URL = localStorage.getItem('api_url') || '';
+  API_SECRET = localStorage.getItem('api_secret') || '';
   offlineQueue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
 
   if (!API_URL) {
@@ -985,9 +988,13 @@ function showMainApp() {
 
 function saveSetup() {
   const url = document.getElementById('api-url-input').value.trim();
+  const secret = document.getElementById('api-secret-input').value.trim();
   if (!url) { alert('Please enter your API URL'); return; }
+  if (!secret) { alert('Please enter a shared password'); return; }
   API_URL = url;
+  API_SECRET = secret;
   localStorage.setItem('api_url', url);
+  localStorage.setItem('api_secret', secret);
   
   const income = parseFloat(document.getElementById('setup-income').value) || 28000;
   const budget = parseFloat(document.getElementById('setup-budget').value) || 8000;
@@ -1000,7 +1007,9 @@ function saveSetup() {
 function confirmReset() {
   if (confirm('Change the API URL? This will keep your existing data.')) {
     API_URL = '';
+    API_SECRET = '';
     localStorage.removeItem('api_url');
+    localStorage.removeItem('api_secret');
     document.getElementById('main-app').style.display = 'none';
     document.getElementById('setup-screen').style.display = 'flex';
     document.getElementById('setup-screen').style.flexDirection = 'column';
@@ -1011,7 +1020,7 @@ function confirmReset() {
 // API
 // ============================================================
 async function apiCall(action, data = {}) {
-  const payload = { action, ...data };
+  const payload = { action, secret: API_SECRET, ...data };
   const response = await fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify(payload)
