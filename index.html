@@ -1061,16 +1061,11 @@ async function apiCall(action, data = {}) {
   const reads = ['getTransactions','getSettings','getConstants'];
 
   if (reads.includes(action)) {
-    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
-    try {
-      const res = await fetch(proxyUrl);
-      const json = await res.json();
-      console.log(action + ':', json.contents ? json.contents.substring(0, 200) : json);
-      return JSON.parse(json.contents);
-    } catch(e) {
-      console.error(action + ' failed:', e.message);
-      throw e;
-    }
+    const proxyUrl = 'https://budget-proxy.shaul2806.workers.dev/?target=' + encodeURIComponent(targetUrl);
+    const res = await fetch(proxyUrl);
+    const text = await res.text();
+    console.log(action + ':', text.substring(0, 200));
+    return JSON.parse(text);
   } else {
     fetch(targetUrl, { mode: 'no-cors' }).catch(() => {});
     return { success: true };
