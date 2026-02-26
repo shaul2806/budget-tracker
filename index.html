@@ -1479,19 +1479,35 @@ function renderReport() {
     buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
 }
 
+function syncIncomesFromDOM() {
+  state.incomes = Array.from(document.querySelectorAll('.income-row')).map(row => ({
+    name: row.querySelector('.constant-name-input').value.trim(),
+    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
+  }));
+}
+function syncConstantsFromDOM() {
+  state.constants = Array.from(document.querySelectorAll('.constant-row:not(.income-row)')).map(row => ({
+    name: row.querySelector('.constant-name-input').value.trim(),
+    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
+  }));
+}
 function addIncomeRow() {
+  syncIncomesFromDOM();
   state.incomes.push({ name: '', amount: 0 });
   renderIncomesList();
 }
 function removeIncome(i) {
+  syncIncomesFromDOM();
   state.incomes.splice(i, 1);
   renderIncomesList();
 }
 function addConstantRow() {
+  syncConstantsFromDOM();
   state.constants.push({ name: '', amount: 0 });
   renderConstantsList();
 }
 function removeConstant(i) {
+  syncConstantsFromDOM();
   state.constants.splice(i, 1);
   renderConstantsList();
 }
@@ -1499,17 +1515,11 @@ function removeConstant(i) {
 async function saveSettings() {
   state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
 
-  // Collect incomes from DOM
-  state.incomes = Array.from(document.querySelectorAll('.income-row')).map(row => ({
-    name: row.querySelector('.constant-name-input').value.trim(),
-    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
-  })).filter(i => i.name);
-
-  // Collect constants from DOM
-  state.constants = Array.from(document.querySelectorAll('.constant-row')).map(row => ({
-    name: row.querySelector('.constant-name-input').value.trim(),
-    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
-  })).filter(c => c.name);
+  // Collect from DOM with correct selectors
+  syncIncomesFromDOM();
+  syncConstantsFromDOM();
+  state.incomes   = state.incomes.filter(i => i.name);
+  state.constants = state.constants.filter(c => c.name);
 
   try {
     // Serialize arrays as JSON strings so URLSearchParams handles them correctly
