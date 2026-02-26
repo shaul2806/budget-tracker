@@ -952,6 +952,21 @@ nav {
     </div>
   </div>
 
+  <!-- New Month Modal -->
+  <div class="modal-overlay" id="new-month-modal">
+    <div class="modal">
+      <div class="modal-title">🎉 New Month!</div>
+      <p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px;">
+        Your income sources and constant expenses have been carried over from last month.
+        Please review and update any amounts that have changed, then tap Save.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
+        <button class="modal-btn save" onclick="goToSettings()">Review Settings →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast">
     <div class="toast-header" id="toast-header"></div>
@@ -967,10 +982,12 @@ let API_URL = '';
 let API_SECRET = '';
 let state = {
   transactions: [],
-  yearTransactions: [],   // all transactions this year for yearly report
+  yearTransactions: [],
   settings: { budget: 8000 },
-  constants: [],          // { name, amount } — persists in sheets
-  incomes: [],            // { name, amount } — persists in sheets
+  constants: [],
+  incomes: [],
+  constantsMonth: null,   // which month the loaded constants belong to
+  incomesMonth: null,
   isOnline: navigator.onLine
 };
 let currentType = 'expense';
@@ -1097,42 +1114,62 @@ async function apiCall(action, data = {}) {
 }
 
 async function loadAll() {
-  // Show cached data instantly
+  // Show cached data instantly while fetching
   loadFromCache();
   renderHome();
   renderHistory();
 
   try {
-    const today = new Date();
+    const today    = new Date();
     const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
     const yearStr  = String(today.getFullYear());
 
     if (offlineQueue.length > 0 && navigator.onLine) await processOfflineQueue();
 
-    // Fetch everything in parallel
-    const [txRes, settingsRes, constantsRes, incomesRes, yearTxRes] = await Promise.all([
-      apiCall('getTransactions', { month: monthStr }),
-      apiCall('getSettings'),
-      apiCall('getConstants'),
-      apiCall('getIncomes'),
-      apiCall('getTransactions', { year: yearStr })
-    ]);
+    // Sequential fetches to avoid proxy overload and race conditions
+    const txRes       = await apiCall('getTransactions', { month: monthStr });
+    const settingsRes = await apiCall('getSettings');
+    const constantsRes= await apiCall('getConstants',   { month: monthStr });
+    const incomesRes  = await apiCall('getIncomes',     { month: monthStr });
+    const yearTxRes   = await apiCall('getTransactions', { year: yearStr });
 
     if (txRes.transactions)     state.transactions     = txRes.transactions;
     if (yearTxRes.transactions) state.yearTransactions = yearTxRes.transactions;
     if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
       state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
     }
-    if (constantsRes.constants) state.constants = constantsRes.constants;
-    if (incomesRes.incomes)     state.incomes    = incomesRes.incomes;
+    if (constantsRes.constants) {
+      state.constants = constantsRes.constants;
+      state.constantsMonth = constantsRes.month;
+    }
+    if (incomesRes.incomes) {
+      state.incomes = incomesRes.incomes;
+      state.incomesMonth = incomesRes.month;
+    }
 
     saveToCache();
     renderHome();
     renderHistory();
     renderSettings();
 
+    // Check if it's a new month and no data saved yet for this month
+    checkNewMonth(monthStr);
+
   } catch (e) {
     console.error('loadAll failed:', e.message);
+  }
+}
+
+function checkNewMonth(monthStr) {
+  const lastPrompted = localStorage.getItem('new_month_prompted');
+  if (lastPrompted === monthStr) return; // already prompted this month
+  // If constants/incomes come from a previous month, prompt user
+  if (state.constantsMonth && state.constantsMonth !== monthStr) {
+    localStorage.setItem('new_month_prompted', monthStr);
+    showNewMonthModal(monthStr, state.constantsMonth);
+  } else if (!state.constantsMonth && (state.constants.length > 0 || state.incomes.length > 0)) {
+    // First time with month-aware system
+    localStorage.setItem('new_month_prompted', monthStr);
   }
 }
 
@@ -1146,6 +1183,8 @@ function loadFromCache() {
       state.settings         = data.settings         || state.settings;
       state.constants        = data.constants        || [];
       state.incomes          = data.incomes          || [];
+      state.constantsMonth   = data.constantsMonth   || null;
+      state.incomesMonth     = data.incomesMonth     || null;
     }
   } catch(e) {}
 }
@@ -1156,7 +1195,9 @@ function saveToCache() {
     yearTransactions: state.yearTransactions,
     settings:         state.settings,
     constants:        state.constants,
-    incomes:          state.incomes
+    incomes:          state.incomes,
+    constantsMonth:   state.constantsMonth,
+    incomesMonth:     state.incomesMonth
   }));
 }
 
@@ -1385,14 +1426,6 @@ function buildReportHTML(incomeTotal, constantsTotal, varSpent, extraIncomeLogge
       <span class="label">Total income</span>
       <span class="value positive">₪${totalIncome.toLocaleString()}</span>
     </div>
-    <div class="report-row" style="padding-left:12px;">
-      <span class="label" style="font-size:13px;">· Fixed (from settings)</span>
-      <span class="value" style="font-size:13px;color:var(--text2);">₪${incomeTotal.toLocaleString()}</span>
-    </div>
-    ${extraIncomeLogged > 0 ? `<div class="report-row" style="padding-left:12px;">
-      <span class="label" style="font-size:13px;">· Extra logged</span>
-      <span class="value" style="font-size:13px;color:var(--text2);">₪${extraIncomeLogged.toLocaleString()}</span>
-    </div>` : ''}
     <div class="report-row">
       <span class="label">Total expenses</span>
       <span class="value negative">−₪${totalExpense.toLocaleString()}</span>
@@ -1431,26 +1464,19 @@ function renderReport() {
   const monthCard = document.getElementById('report-month-card');
   if (monthCard) monthCard.innerHTML = buildReportHTML(fixedIncome, constantsTotal, monthVarSpent, monthExtraIncome);
 
-  // Yearly — based on yearTransactions
+  // Yearly — use yearTransactions, estimate fixed costs by months elapsed
   const yearTxs = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
-  const monthsInYear = getMonthsWithData(yearTxs, yearStr);
-
-  // Fixed income * months elapsed, constants * months elapsed
-  const monthsElapsed = today.getMonth() + 1; // Jan=1
-  const yearFixedIncome    = fixedIncome * monthsElapsed;
+  const monthsElapsed = today.getMonth() + 1;
+  // Best estimate: current month's fixed income & constants × months elapsed
+  const yearFixedIncome    = fixedIncome    * monthsElapsed;
   const yearConstantsTotal = constantsTotal * monthsElapsed;
-  const yearVarSpent       = yearTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
-  const yearExtraIncome    = yearTxs.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+  const yearVarSpent    = yearTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+  const yearExtraIncome = yearTxs.filter(t => t.type === 'income').reduce((s,t)  => s+t.amount, 0);
 
   const yearCard = document.getElementById('report-year-card');
-  if (yearCard) yearCard.innerHTML = `
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600;">${yearStr} · ${monthsElapsed} month${monthsElapsed>1?'s':''} so far</div>
-    ` + buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
-}
-
-function getMonthsWithData(txs, yearStr) {
-  const months = new Set(txs.filter(t => t.date.startsWith(yearStr)).map(t => t.date.substring(0,7)));
-  return months.size;
+  if (yearCard) yearCard.innerHTML =
+    `<div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600;">${yearStr} · ${monthsElapsed} month${monthsElapsed>1?'s':''} · fixed costs estimated</div>` +
+    buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
 }
 
 function addIncomeRow() {
@@ -1487,9 +1513,13 @@ async function saveSettings() {
 
   try {
     // Serialize arrays as JSON strings so URLSearchParams handles them correctly
-    await apiCall('saveSettings', { budget: state.settings.budget });
-    await apiCall('saveConstants', { constants: JSON.stringify(state.constants) });
-    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes)   });
+    const today = new Date();
+    const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+    await apiCall('saveSettings',  { budget: state.settings.budget });
+    await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
+    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: monthStr });
+    state.constantsMonth = monthStr;
+    state.incomesMonth   = monthStr;
     saveToCache();
     showToastSimple('✅ Settings saved');
     renderHome();
@@ -1602,7 +1632,7 @@ async function submitTransaction() {
   document.getElementById('desc-input').value = '';
   document.getElementById('date-input').value = toDateStr(new Date());
 
-  // Sync to sheets
+  // Sync to sheets — just write, no reload (avoids race condition wiping history)
   if (navigator.onLine) {
     try {
       const res = await apiCall('addTransaction', tx);
@@ -1610,9 +1640,9 @@ async function submitTransaction() {
         const idx = state.transactions.findIndex(t => t.id === tx.id);
         if (idx !== -1) state.transactions[idx].id = res.id;
         saveToCache();
+        renderHome();
+        renderHistory();
       }
-      // Reload fresh data from sheets after confirmed save
-      await loadAll();
     } catch (e) {
       offlineQueue.push({ action: 'addTransaction', data: tx });
       localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
@@ -1664,6 +1694,23 @@ function openEditModal(id) {
 function closeModal() {
   document.getElementById('edit-modal').classList.remove('open');
   currentEditId = null;
+}
+
+function showNewMonthModal(newMonth, prevMonth) {
+  const prevName = new Date(prevMonth + '-01').toLocaleString('default', { month: 'long' });
+  const modal = document.getElementById('new-month-modal');
+  modal.querySelector('p').textContent =
+    `Your income sources and constant expenses have been carried over from ${prevName}. Review and update any amounts that changed, then tap Save.`;
+  modal.classList.add('open');
+}
+
+function closeNewMonthModal() {
+  document.getElementById('new-month-modal').classList.remove('open');
+}
+
+function goToSettings() {
+  closeNewMonthModal();
+  switchTab('settings');
 }
 
 async function saveEditedTx() {
