@@ -1126,11 +1126,11 @@ async function loadAll() {
     if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
       state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
     }
-    if (constantsRes.constants) {
+    if (constantsRes.month && constantsRes.constants.length > 0) {
       state.constants = constantsRes.constants;
       state.constantsMonth = constantsRes.month;
     }
-    if (incomesRes.incomes) {
+    if (incomesRes.month && incomesRes.incomes.length > 0) {
       state.incomes = incomesRes.incomes;
       state.incomesMonth = incomesRes.month;
     }
