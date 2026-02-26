@@ -10,7 +10,7 @@
 <title>Budget Tracker</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root {
@@ -123,7 +123,7 @@ nav {
   padding: 16px 20px 8px;
 }
 .page-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 22px;
   font-weight: 800;
   color: var(--text);
@@ -153,7 +153,7 @@ nav {
 }
 
 .big-amount {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 42px;
   font-weight: 800;
   line-height: 1;
@@ -199,7 +199,7 @@ nav {
   padding: 16px;
 }
 .stat-value {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 22px;
   font-weight: 700;
   margin: 4px 0 2px;
@@ -244,7 +244,7 @@ nav {
 }
 .tx-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
 .tx-amount {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 17px;
   font-weight: 700;
   flex-shrink: 0;
@@ -274,7 +274,7 @@ nav {
   background: var(--bg3);
   border-radius: 12px;
   padding: 4px;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
 .type-btn {
   flex: 1;
@@ -299,15 +299,15 @@ nav {
 
 .amount-display {
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 .amount-display-value {
-  font-family: 'Syne', sans-serif;
-  font-size: 56px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 44px;
   font-weight: 800;
   color: var(--text);
   letter-spacing: -2px;
-  min-height: 70px;
+  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,17 +332,17 @@ nav {
 
 .numpad {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
 }
 .num-btn {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  font-family: 'Syne', sans-serif;
-  font-size: 22px;
+  border-radius: 12px;
+  padding: 13px 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 19px;
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
@@ -350,8 +350,9 @@ nav {
   text-align: center;
 }
 .num-btn:active { background: var(--bg3); transform: scale(0.95); }
-.num-btn.del { font-size: 18px; }
-.num-btn.zero { }
+.num-btn.del { font-size: 16px; }
+.op-btn { background: var(--bg3); color: var(--green); font-size: 18px; }
+.op-btn:active { background: var(--card); }
 
 .desc-input {
   width: 100%;
@@ -392,7 +393,7 @@ nav {
   background: var(--green);
   border: none;
   border-radius: 14px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 17px;
   font-weight: 700;
   color: #0f1117;
@@ -509,7 +510,7 @@ nav {
   background: var(--green);
   border: none;
   border-radius: 12px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: #0f1117;
@@ -526,12 +527,12 @@ nav {
   text-align: center;
 }
 .setup-logo {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 48px;
   margin-bottom: 8px;
 }
 .setup-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 28px;
   font-weight: 800;
   margin-bottom: 8px;
@@ -563,7 +564,7 @@ nav {
   background: var(--green);
   border: none;
   border-radius: 14px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 17px;
   font-weight: 700;
   color: #0f1117;
@@ -607,7 +608,7 @@ nav {
   transform: translateX(-50%) translateY(0);
 }
 .toast-header {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 700;
   font-size: 15px;
   margin-bottom: 4px;
@@ -636,7 +637,7 @@ nav {
   border-top: 1px solid var(--border);
 }
 .modal-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 16px;
@@ -685,7 +686,7 @@ nav {
 }
 .report-row:last-child { border-bottom: none; }
 .report-row .label { color: var(--text2); }
-.report-row .value { font-family: 'Syne', sans-serif; font-weight: 600; }
+.report-row .value { font-family: 'Outfit', sans-serif; font-weight: 600; }
 .report-row .value.positive { color: var(--green); }
 .report-row .value.negative { color: var(--red); }
 .report-divider {
@@ -817,25 +818,41 @@ nav {
           </div>
         </div>
 
+        <div id="calc-display" style="font-size:13px;color:var(--text3);text-align:right;padding:0 4px 4px;min-height:18px;"></div>
         <div class="numpad">
-          <button class="num-btn" onclick="numpad('1')">1</button>
-          <button class="num-btn" onclick="numpad('2')">2</button>
-          <button class="num-btn" onclick="numpad('3')">3</button>
-          <button class="num-btn" onclick="numpad('4')">4</button>
-          <button class="num-btn" onclick="numpad('5')">5</button>
-          <button class="num-btn" onclick="numpad('6')">6</button>
           <button class="num-btn" onclick="numpad('7')">7</button>
           <button class="num-btn" onclick="numpad('8')">8</button>
           <button class="num-btn" onclick="numpad('9')">9</button>
+          <button class="num-btn op-btn" onclick="numpad('/')">÷</button>
+          <button class="num-btn" onclick="numpad('4')">4</button>
+          <button class="num-btn" onclick="numpad('5')">5</button>
+          <button class="num-btn" onclick="numpad('6')">6</button>
+          <button class="num-btn op-btn" onclick="numpad('*')">×</button>
+          <button class="num-btn" onclick="numpad('1')">1</button>
+          <button class="num-btn" onclick="numpad('2')">2</button>
+          <button class="num-btn" onclick="numpad('3')">3</button>
+          <button class="num-btn op-btn" onclick="numpad('-')">−</button>
           <button class="num-btn" onclick="numpad('.')">.</button>
-          <button class="num-btn zero" onclick="numpad('0')">0</button>
+          <button class="num-btn" onclick="numpad('0')">0</button>
           <button class="num-btn del" onclick="numpad('del')">⌫</button>
+          <button class="num-btn op-btn" onclick="numpad('+')">+</button>
         </div>
 
         <input type="text" id="desc-input" class="desc-input" placeholder="What's it for? (optional)">
         <input type="date" id="date-input" class="date-input">
 
         <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div id="screen-report" class="screen">
+      <div class="page-header">
+        <div class="page-title">Report</div>
+        <div class="page-sub" id="report-month-label"></div>
+      </div>
+      <div style="padding: 8px 16px 16px;">
+        <div id="report-card" class="card" style="margin:0;padding:20px;"></div>
       </div>
     </div>
 
@@ -873,11 +890,6 @@ nav {
         <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
       </div>
 
-      <div class="settings-section">
-        <div class="settings-title">Month Report</div>
-        <div id="report-card" class="card" style="margin:0;padding:16px;"></div>
-      </div>
-
       <div class="settings-section" style="margin-top:8px;">
         <button class="save-btn" onclick="saveSettings()">Save Settings</button>
       </div>
@@ -906,6 +918,10 @@ nav {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
         Log
+      </button>
+      <button class="nav-btn" id="nav-report" onclick="switchTab('report')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Report
       </button>
       <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1343,6 +1359,8 @@ function renderConstantsList() {
 function renderReport() {
   const today = new Date();
   const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const monthLabelEl = document.getElementById('report-month-label');
+  if (monthLabelEl) monthLabelEl.textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
   
   const income = state.settings.income + getMonthIncome(monthStr);
   const constantsTotal = state.constants.reduce((sum, c) => sum + c.amount, 0);
@@ -1352,7 +1370,7 @@ function renderReport() {
   const monthName = today.toLocaleString('default', { month: 'long' });
 
   document.getElementById('report-card').innerHTML = `
-    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text2);">${monthName} so far</div>
+    <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text2);">${monthName} so far</div>
     <div class="report-row">
       <span class="label">Total income</span>
       <span class="value positive">₪${income.toLocaleString()}</span>
@@ -1430,14 +1448,56 @@ function setType(type) {
   }
 }
 
+let calcExpression = '';
 function numpad(val) {
+  const ops = ['+', '-', '*', '/'];
   if (val === 'del') {
-    amountStr = amountStr.length > 1 ? amountStr.slice(0,-1) : '0';
+    if (calcExpression) {
+      calcExpression = calcExpression.slice(0, -1);
+      // If expression is now just a number, sync to amountStr
+      if (!ops.some(op => calcExpression.slice(1).includes(op))) {
+        amountStr = calcExpression || '0';
+        calcExpression = '';
+      }
+    } else {
+      amountStr = amountStr.length > 1 ? amountStr.slice(0,-1) : '0';
+    }
+  } else if (ops.includes(val)) {
+    // Starting an operation
+    const current = calcExpression || amountStr;
+    calcExpression = current + val;
+    document.getElementById('calc-display').textContent = calcExpression;
+    amountStr = '0';
+    document.getElementById('amount-display').textContent = '0';
+    return;
   } else if (val === '.') {
-    if (!amountStr.includes('.')) amountStr += '.';
+    if (calcExpression && ops.some(op => calcExpression.slice(1).includes(op))) {
+      if (!amountStr.includes('.')) amountStr += '.';
+    } else {
+      if (!amountStr.includes('.')) amountStr += '.';
+    }
   } else {
-    if (amountStr === '0') amountStr = val;
-    else amountStr += val;
+    if (calcExpression) {
+      // We're entering the second operand
+      if (amountStr === '0') amountStr = val;
+      else amountStr += val;
+      // Show running expression
+      document.getElementById('calc-display').textContent = calcExpression + amountStr;
+      document.getElementById('amount-display').textContent = amountStr;
+      return;
+    } else {
+      if (amountStr === '0') amountStr = val;
+      else amountStr += val;
+    }
+  }
+  // If we have a full expression, evaluate it
+  if (calcExpression && !ops.includes(calcExpression[calcExpression.length-1])) {
+    try {
+      const result = Math.round(eval(calcExpression + amountStr) * 100) / 100;
+      document.getElementById('calc-display').textContent = calcExpression + amountStr + ' =';
+      amountStr = String(result);
+      calcExpression = '';
+    } catch(e) {}
   }
   document.getElementById('amount-display').textContent = amountStr;
 }
@@ -1465,6 +1525,8 @@ async function submitTransaction() {
 
   // Reset form
   amountStr = '0';
+  calcExpression = '';
+  document.getElementById('calc-display').textContent = '';
   document.getElementById('amount-display').textContent = '0';
   document.getElementById('desc-input').value = '';
   document.getElementById('date-input').value = toDateStr(new Date());
@@ -1621,8 +1683,11 @@ function switchTab(tab) {
   
   if (tab === 'log') {
     document.getElementById('date-input').value = toDateStr(new Date());
+    calcExpression = '';
+    document.getElementById('calc-display').textContent = '';
   }
   if (tab === 'settings') renderSettings();
+  if (tab === 'report') renderReport();
 }
 
 // ============================================================
