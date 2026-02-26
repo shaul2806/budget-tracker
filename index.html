@@ -1061,19 +1061,17 @@ async function apiCall(action, data = {}) {
   const reads = ['getTransactions','getSettings','getConstants'];
 
   if (reads.includes(action)) {
-    // Google Apps Script blocks CORS on reads — use proxy
-    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
     try {
       const res = await fetch(proxyUrl);
-      const text = await res.text();
-      console.log(action + ':', text.substring(0, 300));
-      return JSON.parse(text);
+      const json = await res.json();
+      console.log(action + ':', json.contents ? json.contents.substring(0, 200) : json);
+      return JSON.parse(json.contents);
     } catch(e) {
       console.error(action + ' failed:', e.message);
       throw e;
     }
   } else {
-    // Writes work fine without CORS
     fetch(targetUrl, { mode: 'no-cors' }).catch(() => {});
     return { success: true };
   }
