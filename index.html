@@ -1150,7 +1150,7 @@ async function loadAll() {
     saveToCache();
     renderHome();
     renderHistory();
-    renderSettings();
+    // Don't renderSettings() here — would wipe user's in-progress edits
 
     // Check if it's a new month and no data saved yet for this month
     checkNewMonth(monthStr);
@@ -1400,8 +1400,10 @@ function renderIncomesList() {
   container.innerHTML = state.incomes.map((inc, i) => `
     <div class="constant-row income-row">
       <input type="text" class="constant-name-input" value="${escHtml(inc.name)}"
-        placeholder="Income name (e.g. Sara Salary)">
-      <input type="number" class="constant-amount-input" value="${inc.amount}" placeholder="₪">
+        placeholder="Income name (e.g. Sara Salary)"
+        oninput="state.incomes[${i}].name = this.value">
+      <input type="number" class="constant-amount-input" value="${inc.amount || ''}" placeholder="₪"
+        oninput="state.incomes[${i}].amount = parseFloat(this.value) || 0">
       <button class="del-constant-btn" onclick="removeIncome(${i})">×</button>
     </div>`).join('');
 }
@@ -1411,8 +1413,10 @@ function renderConstantsList() {
   container.innerHTML = state.constants.map((c, i) => `
     <div class="constant-row">
       <input type="text" class="constant-name-input" value="${escHtml(c.name)}"
-        placeholder="Expense name">
-      <input type="number" class="constant-amount-input" value="${c.amount}" placeholder="₪">
+        placeholder="Expense name"
+        oninput="state.constants[${i}].name = this.value">
+      <input type="number" class="constant-amount-input" value="${c.amount || ''}" placeholder="₪"
+        oninput="state.constants[${i}].amount = parseFloat(this.value) || 0">
       <button class="del-constant-btn" onclick="removeConstant(${i})">×</button>
     </div>`).join('');
 }
@@ -1479,35 +1483,19 @@ function renderReport() {
     buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
 }
 
-function syncIncomesFromDOM() {
-  state.incomes = Array.from(document.querySelectorAll('.income-row')).map(row => ({
-    name: row.querySelector('.constant-name-input').value.trim(),
-    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
-  }));
-}
-function syncConstantsFromDOM() {
-  state.constants = Array.from(document.querySelectorAll('.constant-row:not(.income-row)')).map(row => ({
-    name: row.querySelector('.constant-name-input').value.trim(),
-    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
-  }));
-}
 function addIncomeRow() {
-  syncIncomesFromDOM();
   state.incomes.push({ name: '', amount: 0 });
   renderIncomesList();
 }
 function removeIncome(i) {
-  syncIncomesFromDOM();
   state.incomes.splice(i, 1);
   renderIncomesList();
 }
 function addConstantRow() {
-  syncConstantsFromDOM();
   state.constants.push({ name: '', amount: 0 });
   renderConstantsList();
 }
 function removeConstant(i) {
-  syncConstantsFromDOM();
   state.constants.splice(i, 1);
   renderConstantsList();
 }
@@ -1515,11 +1503,9 @@ function removeConstant(i) {
 async function saveSettings() {
   state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
 
-  // Collect from DOM with correct selectors
-  syncIncomesFromDOM();
-  syncConstantsFromDOM();
-  state.incomes   = state.incomes.filter(i => i.name);
-  state.constants = state.constants.filter(c => c.name);
+  // State already synced via oninput handlers — just filter empties
+  state.incomes   = state.incomes.filter(i => i.name && i.name.trim());
+  state.constants = state.constants.filter(c => c.name && c.name.trim());
 
   try {
     // Serialize arrays as JSON strings so URLSearchParams handles them correctly
