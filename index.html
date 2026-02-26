@@ -851,8 +851,13 @@ nav {
         <div class="page-title">Report</div>
         <div class="page-sub" id="report-month-label"></div>
       </div>
-      <div style="padding: 8px 16px 16px;">
-        <div id="report-card" class="card" style="margin:0;padding:20px;"></div>
+      <div style="padding: 8px 16px 0;">
+        <div class="card-label" style="padding-left:4px;margin-bottom:6px;">THIS MONTH</div>
+        <div id="report-month-card" class="card" style="margin:0 0 16px;padding:20px;"></div>
+        <div class="card-label" style="padding-left:4px;margin-bottom:6px;">YEAR TO DATE</div>
+        <div id="report-year-card" class="card" style="margin:0 0 16px;padding:20px;">
+          <div style="color:var(--text3);font-size:14px;">Loading year data...</div>
+        </div>
       </div>
     </div>
 
@@ -869,19 +874,21 @@ nav {
     <div id="screen-settings" class="screen">
       <div class="page-header">
         <div class="page-title">Settings</div>
-        <div class="page-sub">Budget & constants</div>
+        <div class="page-sub">Budget, income & expenses</div>
       </div>
 
       <div class="settings-section">
-        <div class="settings-title">Monthly Budget</div>
+        <div class="settings-title">Flexible Budget</div>
         <div class="setting-row">
-          <div class="setting-label">Income</div>
-          <input type="number" id="s-income" class="setting-input" placeholder="28000">
-        </div>
-        <div class="setting-row">
-          <div class="setting-label">Flexible budget</div>
+          <div class="setting-label">Monthly flexible budget</div>
           <input type="number" id="s-budget" class="setting-input" placeholder="8000">
         </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Income Sources</div>
+        <div id="incomes-list"></div>
+        <button class="add-constant-btn" onclick="addIncomeRow()">+ Add income source</button>
       </div>
 
       <div class="settings-section">
@@ -960,8 +967,10 @@ let API_URL = '';
 let API_SECRET = '';
 let state = {
   transactions: [],
-  settings: { income: 28000, budget: 8000 },
-  constants: [],
+  yearTransactions: [],   // all transactions this year for yearly report
+  settings: { budget: 8000 },
+  constants: [],          // { name, amount } — persists in sheets
+  incomes: [],            // { name, amount } — persists in sheets
   isOnline: navigator.onLine
 };
 let currentType = 'expense';
@@ -1088,66 +1097,66 @@ async function apiCall(action, data = {}) {
 }
 
 async function loadAll() {
-  // First show cached data instantly so UI isn't blank
+  // Show cached data instantly
   loadFromCache();
   renderHome();
   renderHistory();
 
   try {
     const today = new Date();
-    const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+    const yearStr  = String(today.getFullYear());
 
-    // Process offline queue first so sheet has latest data
-    if (offlineQueue.length > 0 && navigator.onLine) {
-      await processOfflineQueue();
-    }
+    if (offlineQueue.length > 0 && navigator.onLine) await processOfflineQueue();
 
-    // Now fetch fresh data from sheets
-    const [txRes, settingsRes, constantsRes] = await Promise.all([
+    // Fetch everything in parallel
+    const [txRes, settingsRes, constantsRes, incomesRes, yearTxRes] = await Promise.all([
       apiCall('getTransactions', { month: monthStr }),
       apiCall('getSettings'),
-      apiCall('getConstants')
+      apiCall('getConstants'),
+      apiCall('getIncomes'),
+      apiCall('getTransactions', { year: yearStr })
     ]);
 
-    if (txRes.transactions) {
-      // Replace state with authoritative sheet data
-      state.transactions = txRes.transactions;
-    }
+    if (txRes.transactions)     state.transactions     = txRes.transactions;
+    if (yearTxRes.transactions) state.yearTransactions = yearTxRes.transactions;
     if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
-      state.settings.income = parseFloat(settingsRes.settings.income) || 28000;
       state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
     }
     if (constantsRes.constants) state.constants = constantsRes.constants;
+    if (incomesRes.incomes)     state.incomes    = incomesRes.incomes;
 
-    // Save fresh data to cache
     saveToCache();
-
-    // Re-render with fresh data
     renderHome();
     renderHistory();
     renderSettings();
 
   } catch (e) {
     console.error('loadAll failed:', e.message);
-    // Keep showing cached data — already rendered above
   }
 }
 
 function loadFromCache() {
-  const cached = localStorage.getItem('cached_data');
-  if (cached) {
-    const data = JSON.parse(cached);
-    state.transactions = data.transactions || [];
-    state.settings = data.settings || state.settings;
-    state.constants = data.constants || [];
-  }
+  try {
+    const cached = localStorage.getItem('cached_data');
+    if (cached) {
+      const data = JSON.parse(cached);
+      state.transactions     = data.transactions     || [];
+      state.yearTransactions = data.yearTransactions || [];
+      state.settings         = data.settings         || state.settings;
+      state.constants        = data.constants        || [];
+      state.incomes          = data.incomes          || [];
+    }
+  } catch(e) {}
 }
 
 function saveToCache() {
   localStorage.setItem('cached_data', JSON.stringify({
-    transactions: state.transactions,
-    settings: state.settings,
-    constants: state.constants
+    transactions:     state.transactions,
+    yearTransactions: state.yearTransactions,
+    settings:         state.settings,
+    constants:        state.constants,
+    incomes:          state.incomes
   }));
 }
 
@@ -1239,6 +1248,7 @@ function renderHome() {
   const weekRemaining = weekBudget - weekSpent;
   
   const monthBudget = state.settings.budget;
+  const totalMonthlyIncome = state.incomes.reduce((s,i) => s + i.amount, 0);
   const monthSpent = getMonthSpent(monthStr);
   const monthRemaining = monthBudget - monthSpent;
 
@@ -1338,58 +1348,119 @@ function renderHistory() {
 // RENDER SETTINGS
 // ============================================================
 function renderSettings() {
-  document.getElementById('s-income').value = state.settings.income;
   document.getElementById('s-budget').value = state.settings.budget;
+  renderIncomesList();
   renderConstantsList();
   renderReport();
+}
+
+function renderIncomesList() {
+  const container = document.getElementById('incomes-list');
+  container.innerHTML = state.incomes.map((inc, i) => `
+    <div class="constant-row income-row">
+      <input type="text" class="constant-name-input" value="${escHtml(inc.name)}"
+        placeholder="Income name (e.g. Sara Salary)">
+      <input type="number" class="constant-amount-input" value="${inc.amount}" placeholder="₪">
+      <button class="del-constant-btn" onclick="removeIncome(${i})">×</button>
+    </div>`).join('');
 }
 
 function renderConstantsList() {
   const container = document.getElementById('constants-list');
   container.innerHTML = state.constants.map((c, i) => `
     <div class="constant-row">
-      <input type="text" class="constant-name-input" value="${escHtml(c.name)}" 
-        onchange="updateConstant(${i}, 'name', this.value)" placeholder="Expense name">
-      <input type="number" class="constant-amount-input" value="${c.amount}"
-        onchange="updateConstant(${i}, 'amount', this.value)" placeholder="₪">
+      <input type="text" class="constant-name-input" value="${escHtml(c.name)}"
+        placeholder="Expense name">
+      <input type="number" class="constant-amount-input" value="${c.amount}" placeholder="₪">
       <button class="del-constant-btn" onclick="removeConstant(${i})">×</button>
     </div>`).join('');
 }
 
-function renderReport() {
-  const today = new Date();
-  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  const monthLabelEl = document.getElementById('report-month-label');
-  if (monthLabelEl) monthLabelEl.textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
-  
-  const income = state.settings.income + getMonthIncome(monthStr);
-  const constantsTotal = state.constants.reduce((sum, c) => sum + c.amount, 0);
-  const varSpent = getMonthSpent(monthStr);
-  const totalSpent = constantsTotal + varSpent;
-  const saved = income - totalSpent;
-  const monthName = today.toLocaleString('default', { month: 'long' });
-
-  document.getElementById('report-card').innerHTML = `
-    <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px;color:var(--text2);">${monthName} so far</div>
+function buildReportHTML(incomeTotal, constantsTotal, varSpent, extraIncomeLogged) {
+  const totalIncome  = incomeTotal + extraIncomeLogged;
+  const totalExpense = constantsTotal + varSpent;
+  const saved        = totalIncome - totalExpense;
+  return `
     <div class="report-row">
       <span class="label">Total income</span>
-      <span class="value positive">₪${income.toLocaleString()}</span>
+      <span class="value positive">₪${totalIncome.toLocaleString()}</span>
     </div>
-    <div class="report-row">
-      <span class="label">Fixed expenses</span>
-      <span class="value negative">−₪${constantsTotal.toLocaleString()}</span>
+    <div class="report-row" style="padding-left:12px;">
+      <span class="label" style="font-size:13px;">· Fixed (from settings)</span>
+      <span class="value" style="font-size:13px;color:var(--text2);">₪${incomeTotal.toLocaleString()}</span>
     </div>
+    ${extraIncomeLogged > 0 ? `<div class="report-row" style="padding-left:12px;">
+      <span class="label" style="font-size:13px;">· Extra logged</span>
+      <span class="value" style="font-size:13px;color:var(--text2);">₪${extraIncomeLogged.toLocaleString()}</span>
+    </div>` : ''}
     <div class="report-row">
-      <span class="label">Variable expenses</span>
-      <span class="value negative">−₪${varSpent.toLocaleString()}</span>
+      <span class="label">Total expenses</span>
+      <span class="value negative">−₪${totalExpense.toLocaleString()}</span>
+    </div>
+    <div class="report-row" style="padding-left:12px;">
+      <span class="label" style="font-size:13px;">· Constant</span>
+      <span class="value" style="font-size:13px;color:var(--text2);">₪${constantsTotal.toLocaleString()}</span>
+    </div>
+    <div class="report-row" style="padding-left:12px;">
+      <span class="label" style="font-size:13px;">· Variable</span>
+      <span class="value" style="font-size:13px;color:var(--text2);">₪${varSpent.toLocaleString()}</span>
     </div>
     <div class="report-divider"></div>
     <div class="report-row">
-      <span class="label" style="font-weight:600;color:var(--text);">Saved</span>
-      <span class="value ${saved >= 0 ? 'positive' : 'negative'}" style="font-size:20px;">₪${Math.abs(saved).toLocaleString()}${saved < 0 ? ' over' : ''}</span>
+      <span class="label" style="font-weight:600;color:var(--text);">Balance</span>
+      <span class="value ${saved >= 0 ? 'positive' : 'negative'}" style="font-size:22px;font-weight:700;">
+        ${saved >= 0 ? '+' : '−'}₪${Math.abs(saved).toLocaleString()}
+      </span>
     </div>`;
 }
 
+function renderReport() {
+  const today    = new Date();
+  const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+  const yearStr  = String(today.getFullYear());
+
+  const monthLabelEl = document.getElementById('report-month-label');
+  if (monthLabelEl) monthLabelEl.textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  // Monthly
+  const fixedIncome      = state.incomes.reduce((s,i) => s+i.amount, 0);
+  const constantsTotal   = state.constants.reduce((s,c) => s+c.amount, 0);
+  const monthVarSpent    = getMonthSpent(monthStr);
+  const monthExtraIncome = getMonthIncome(monthStr);
+
+  const monthCard = document.getElementById('report-month-card');
+  if (monthCard) monthCard.innerHTML = buildReportHTML(fixedIncome, constantsTotal, monthVarSpent, monthExtraIncome);
+
+  // Yearly — based on yearTransactions
+  const yearTxs = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
+  const monthsInYear = getMonthsWithData(yearTxs, yearStr);
+
+  // Fixed income * months elapsed, constants * months elapsed
+  const monthsElapsed = today.getMonth() + 1; // Jan=1
+  const yearFixedIncome    = fixedIncome * monthsElapsed;
+  const yearConstantsTotal = constantsTotal * monthsElapsed;
+  const yearVarSpent       = yearTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+  const yearExtraIncome    = yearTxs.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
+
+  const yearCard = document.getElementById('report-year-card');
+  if (yearCard) yearCard.innerHTML = `
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600;">${yearStr} · ${monthsElapsed} month${monthsElapsed>1?'s':''} so far</div>
+    ` + buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
+}
+
+function getMonthsWithData(txs, yearStr) {
+  const months = new Set(txs.filter(t => t.date.startsWith(yearStr)).map(t => t.date.substring(0,7)));
+  return months.size;
+}
+
+function addIncomeRow() {
+  state.incomes.push({ name: '', amount: 0 });
+  renderIncomesList();
+}
+function removeIncome(i) {
+  state.incomes.splice(i, 1);
+  renderIncomesList();
+}
 function addConstantRow() {
   state.constants.push({ name: '', amount: 0 });
   renderConstantsList();
@@ -1398,33 +1469,33 @@ function removeConstant(i) {
   state.constants.splice(i, 1);
   renderConstantsList();
 }
-function updateConstant(i, field, val) {
-  state.constants[i][field] = field === 'amount' ? parseFloat(val) || 0 : val;
-}
 
 async function saveSettings() {
-  state.settings.income = parseFloat(document.getElementById('s-income').value) || 28000;
   state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
-  
+
+  // Collect incomes from DOM
+  state.incomes = Array.from(document.querySelectorAll('.income-row')).map(row => ({
+    name: row.querySelector('.constant-name-input').value.trim(),
+    amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
+  })).filter(i => i.name);
+
   // Collect constants from DOM
-  const rows = document.querySelectorAll('.constant-row');
-  state.constants = Array.from(rows).map(row => ({
-    name: row.querySelector('.constant-name-input').value,
+  state.constants = Array.from(document.querySelectorAll('.constant-row')).map(row => ({
+    name: row.querySelector('.constant-name-input').value.trim(),
     amount: parseFloat(row.querySelector('.constant-amount-input').value) || 0
   })).filter(c => c.name);
 
-  await saveSettingsToSheet();
-  showToastSimple('✅ Settings saved');
-  renderHome();
-  renderReport();
-}
-
-async function saveSettingsToSheet() {
   try {
-    await apiCall('saveSettings', { settings: { income: state.settings.income, budget: state.settings.budget } });
-    await apiCall('saveConstants', { constants: state.constants });
-  } catch (e) {
-    // offline, save to queue
+    // Serialize arrays as JSON strings so URLSearchParams handles them correctly
+    await apiCall('saveSettings', { budget: state.settings.budget });
+    await apiCall('saveConstants', { constants: JSON.stringify(state.constants) });
+    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes)   });
+    saveToCache();
+    showToastSimple('✅ Settings saved');
+    renderHome();
+    renderReport();
+  } catch(e) {
+    showToastSimple('⚠️ Could not save — check connection');
   }
 }
 
