@@ -1063,18 +1063,12 @@ function confirmReset() {
 async function apiCall(action, data = {}) {
   const payload = { action, secret: API_SECRET, ...data };
   const targetUrl = API_URL + '?' + new URLSearchParams(payload).toString();
-  const reads = ['getTransactions','getSettings','getConstants'];
+  const proxyUrl = 'https://budget-proxy.shaul2806.workers.dev/?target=' + encodeURIComponent(targetUrl);
 
-  if (reads.includes(action)) {
-    const proxyUrl = 'https://budget-proxy.shaul2806.workers.dev/?target=' + encodeURIComponent(targetUrl);
-    const res = await fetch(proxyUrl);
-    const text = await res.text();
-    console.log(action + ':', text.substring(0, 200));
-    return JSON.parse(text);
-  } else {
-    fetch(targetUrl, { mode: 'no-cors' }).catch(() => {});
-    return { success: true };
-  }
+  const res = await fetch(proxyUrl);
+  const text = await res.text();
+  console.log(action + ':', text.substring(0, 200));
+  return JSON.parse(text);
 }
 
 async function loadAll() {
@@ -1461,19 +1455,31 @@ async function submitTransaction() {
     createdAt: new Date().toISOString()
   };
 
-  // Add to state immediately
+  // Add to local state immediately so UI updates instantly
   state.transactions.unshift(tx);
   saveToCache();
+  renderHome();
+  renderHistory();
+  showExpenseToast(tx);
+  setTimeout(() => switchTab('home'), 300);
 
-  // Try to sync
+  // Reset form
+  amountStr = '0';
+  document.getElementById('amount-display').textContent = '0';
+  document.getElementById('desc-input').value = '';
+  document.getElementById('date-input').value = toDateStr(new Date());
+
+  // Sync to sheets
   if (navigator.onLine) {
     try {
       const res = await apiCall('addTransaction', tx);
       if (res.id) {
-        // Replace local id with server id
         const idx = state.transactions.findIndex(t => t.id === tx.id);
         if (idx !== -1) state.transactions[idx].id = res.id;
+        saveToCache();
       }
+      // Reload fresh data from sheets after confirmed save
+      await loadAll();
     } catch (e) {
       offlineQueue.push({ action: 'addTransaction', data: tx });
       localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
@@ -1482,23 +1488,6 @@ async function submitTransaction() {
     offlineQueue.push({ action: 'addTransaction', data: tx });
     localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
   }
-
-  // Reset form
-  amountStr = '0';
-  document.getElementById('amount-display').textContent = '0';
-  document.getElementById('desc-input').value = '';
-  document.getElementById('date-input').value = toDateStr(new Date());
-
-  // Update UI immediately with local data
-  renderHome();
-  renderHistory();
-  showExpenseToast(tx);
-  
-  // Go back to home
-  setTimeout(() => switchTab('home'), 300);
-
-  // After 2 seconds reload from sheets to get authoritative data + any partner entries
-  setTimeout(() => loadAll(), 2000);
 }
 
 function showExpenseToast(tx) {
