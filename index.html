@@ -727,16 +727,7 @@ nav {
       <p class="setup-sub">Connect your Google Sheet to get started. Follow the setup guide to get your API URL.</p>
       <input type="url" id="api-url-input" class="setup-input" placeholder="Paste your Google Apps Script URL here">
       <input type="password" id="api-secret-input" class="setup-input" placeholder="Shared password (from Code.gs)">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px;">
-        <div>
-          <div class="settings-title" style="margin-bottom:6px;">Monthly Income</div>
-          <input type="number" id="setup-income" class="setup-input" style="margin-bottom:0" placeholder="28000" value="28000">
-        </div>
-        <div>
-          <div class="settings-title" style="margin-bottom:6px;">Flexible Budget</div>
-          <input type="number" id="setup-budget" class="setup-input" style="margin-bottom:0" placeholder="8000" value="8000">
-        </div>
-      </div>
+
       <div id="setup-error" style="color:var(--red);font-size:13px;margin-bottom:8px;display:none;background:var(--red-dim);padding:10px 14px;border-radius:10px;width:100%;text-align:left;"></div>
       <button class="setup-btn" id="setup-btn" onclick="saveSetup()">Get Started →</button>
       <div class="setup-hint">
@@ -1069,14 +1060,11 @@ async function saveSetup() {
       return;
     }
 
-    // Success — save everything
+    // Success — save and go
     localStorage.setItem('api_url', url);
     localStorage.setItem('api_secret', secret);
-    const income = parseFloat(document.getElementById('setup-income').value) || 28000;
-    const budget = parseFloat(document.getElementById('setup-budget').value) || 8000;
-    state.settings = { income, budget };
     showMainApp();
-    saveSettingsToSheet().then(() => loadAll());
+    loadAll();
 
   } catch(e) {
     errEl.textContent = '❌ Could not reach server. Check the URL and your internet connection.';
