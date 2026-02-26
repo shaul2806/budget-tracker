@@ -977,6 +977,11 @@ window.addEventListener('load', async () => {
   window.addEventListener('offline', handleOffline);
   updateSyncIndicator();
   updateHomeDate();
+
+  // Auto-refresh from sheets every 30 seconds
+  setInterval(() => {
+    if (navigator.onLine && API_URL) loadAll();
+  }, 30000);
 });
 
 function showMainApp() {
@@ -1073,36 +1078,48 @@ async function apiCall(action, data = {}) {
 }
 
 async function loadAll() {
+  // First show cached data instantly so UI isn't blank
+  loadFromCache();
+  renderHome();
+  renderHistory();
+
   try {
     const today = new Date();
     const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-    
+
+    // Process offline queue first so sheet has latest data
+    if (offlineQueue.length > 0 && navigator.onLine) {
+      await processOfflineQueue();
+    }
+
+    // Now fetch fresh data from sheets
     const [txRes, settingsRes, constantsRes] = await Promise.all([
       apiCall('getTransactions', { month: monthStr }),
       apiCall('getSettings'),
       apiCall('getConstants')
     ]);
 
-    if (txRes.transactions) state.transactions = txRes.transactions;
-    if (settingsRes.settings) {
+    if (txRes.transactions) {
+      // Replace state with authoritative sheet data
+      state.transactions = txRes.transactions;
+    }
+    if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
       state.settings.income = parseFloat(settingsRes.settings.income) || 28000;
       state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
     }
     if (constantsRes.constants) state.constants = constantsRes.constants;
 
-    // Process offline queue
-    if (offlineQueue.length > 0 && navigator.onLine) {
-      await processOfflineQueue();
-    }
+    // Save fresh data to cache
+    saveToCache();
 
+    // Re-render with fresh data
     renderHome();
     renderHistory();
     renderSettings();
+
   } catch (e) {
-    // Use cached data
-    loadFromCache();
-    renderHome();
-    renderHistory();
+    console.error('loadAll failed:', e.message);
+    // Keep showing cached data — already rendered above
   }
 }
 
@@ -1472,13 +1489,16 @@ async function submitTransaction() {
   document.getElementById('desc-input').value = '';
   document.getElementById('date-input').value = toDateStr(new Date());
 
-  // Update UI
+  // Update UI immediately with local data
   renderHome();
   renderHistory();
   showExpenseToast(tx);
   
   // Go back to home
   setTimeout(() => switchTab('home'), 300);
+
+  // After 2 seconds reload from sheets to get authoritative data + any partner entries
+  setTimeout(() => loadAll(), 2000);
 }
 
 function showExpenseToast(tx) {
