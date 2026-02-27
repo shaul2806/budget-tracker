@@ -1156,15 +1156,29 @@ async function loadAll() {
 
 function checkNewMonth(monthStr) {
   const lastPrompted = localStorage.getItem('new_month_prompted');
-  if (lastPrompted === monthStr) return; // already prompted this month
-  // If constants/incomes come from a previous month, prompt user
+  if (lastPrompted === monthStr) return; // already handled this month
+  localStorage.setItem('new_month_prompted', monthStr);
+
+  // If loaded data is from a previous month, auto-save to new month in sheets
+  // so yearly report always has complete data even if user changes nothing
   if (state.constantsMonth && state.constantsMonth !== monthStr) {
-    localStorage.setItem('new_month_prompted', monthStr);
-    showNewMonthModal(monthStr, state.constantsMonth);
-  } else if (!state.constantsMonth && (state.constants.length > 0 || state.incomes.length > 0)) {
-    // First time with month-aware system
-    localStorage.setItem('new_month_prompted', monthStr);
+    autoSaveNewMonth(monthStr, state.constantsMonth);
   }
+}
+
+async function autoSaveNewMonth(newMonth, prevMonth) {
+  try {
+    // Silently carry over previous month values into new month in sheets
+    await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: newMonth });
+    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: newMonth });
+    state.constantsMonth = newMonth;
+    state.incomesMonth   = newMonth;
+    saveToCache();
+  } catch(e) {
+    console.error('Auto-save new month failed:', e.message);
+  }
+  // Show modal so user can update amounts if needed
+  showNewMonthModal(newMonth, prevMonth);
 }
 
 function loadFromCache() {
@@ -1201,45 +1215,42 @@ function saveToCache() {
 // WEEKLY BUDGET LOGIC
 // ============================================================
 function getWeekBudget(date) {
-  const d = date || new Date();
-  const year = d.getFullYear();
-  const month = d.getMonth();
+  const now = date || new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const day = now.getDate();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const dailyRate = state.settings.budget / daysInMonth;
 
-  // Find week boundaries (Sun-Sat)
-  const weekStart = new Date(d);
-  weekStart.setDate(d.getDate() - d.getDay()); // go to Sunday
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6); // Saturday
-
-  // Clamp to month
+  // Strip time — use pure midnight dates for all comparisons
+  const weekStart = new Date(year, month, day - now.getDay());       // Sunday midnight
+  const weekEnd   = new Date(year, month, day - now.getDay() + 6);   // Saturday midnight
   const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
-  
-  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
-  const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+  const monthEnd   = new Date(year, month + 1, 0);
 
-  // Count days in this week segment that belong to this month
-  const days = Math.round((effectiveEnd - effectiveStart) / 86400000) + 1;
+  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
+  const effectiveEnd   = weekEnd   > monthEnd   ? monthEnd   : weekEnd;
+
+  // Pure integer day difference — no time component to cause rounding issues
+  const msPerDay = 86400000;
+  const days = Math.round((effectiveEnd - effectiveStart) / msPerDay) + 1;
   return Math.round(dailyRate * days);
 }
 
 function getWeekRange(date) {
-  const d = date || new Date();
-  const year = d.getFullYear();
-  const month = d.getMonth();
-  
-  const weekStart = new Date(d);
-  weekStart.setDate(d.getDate() - d.getDay());
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
+  const now = date || new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const day = now.getDate();
 
+  // Strip time — midnight dates only
+  const weekStart  = new Date(year, month, day - now.getDay());
+  const weekEnd    = new Date(year, month, day - now.getDay() + 6);
   const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
+  const monthEnd   = new Date(year, month + 1, 0);
 
   const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
-  const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+  const effectiveEnd   = weekEnd   > monthEnd   ? monthEnd   : weekEnd;
   return { start: effectiveStart, end: effectiveEnd };
 }
 
