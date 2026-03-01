@@ -948,12 +948,12 @@ nav {
     <div class="modal">
       <div class="modal-title">🎉 New Month!</div>
       <p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px;">
-        Your income sources and constant expenses have been carried over from last month.
-        Please review and update any amounts that have changed, then tap Save.
+        New month! Your income sources and constant expenses from last month are shown.
+        Review any amounts that changed and tap <strong>Save Settings</strong> to confirm — this records them for the yearly report.
       </p>
       <div class="modal-actions">
         <button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
-        <button class="modal-btn save" onclick="goToSettings()">Review Settings →</button>
+        <button class="modal-btn save" onclick="goToSettings()">Review &amp; Save →</button>
       </div>
     </div>
   </div>
@@ -1130,16 +1130,17 @@ async function loadAll() {
 
   try {
     const today    = new Date();
-    const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+    const txMonthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0'); // YYYY-MM for transaction date filtering
+    const settingsMonthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM for constants/incomes (no date conversion)
     const yearStr  = String(today.getFullYear());
 
     if (offlineQueue.length > 0 && navigator.onLine) await processOfflineQueue();
 
     // Sequential fetches to avoid proxy overload and race conditions
-    const txRes       = await apiCall('getTransactions',   { month: monthStr });
+    const txRes       = await apiCall('getTransactions',   { month: txMonthStr });
     const settingsRes = await apiCall('getSettings');
-    const constantsRes= await apiCall('getConstants',      { month: monthStr });
-    const incomesRes  = await apiCall('getIncomes',        { month: monthStr });
+    const constantsRes= await apiCall('getConstants',      { month: settingsMonthStr });
+    const incomesRes  = await apiCall('getIncomes',        { month: settingsMonthStr });
     const yearTxRes   = await apiCall('getTransactions',   { year: yearStr });
     const yearSumRes  = await apiCall('getYearlySummary',  { year: yearStr });
 
@@ -1166,7 +1167,7 @@ async function loadAll() {
     // Don't renderSettings() here — would wipe user's in-progress edits
 
     // Check if it's a new month and no data saved yet for this month
-    checkNewMonth(monthStr);
+    checkNewMonth(settingsMonthStr);
 
   } catch (e) {
     console.error('loadAll failed:', e.message);
@@ -1175,29 +1176,15 @@ async function loadAll() {
 
 function checkNewMonth(monthStr) {
   const lastPrompted = localStorage.getItem('new_month_prompted');
-  if (lastPrompted === monthStr) return; // already handled this month
+  if (lastPrompted === monthStr) return;
   localStorage.setItem('new_month_prompted', monthStr);
 
-  // If loaded data is from a previous month, auto-save to new month in sheets
-  // so yearly report always has complete data even if user changes nothing
+  // Data is already displayed from previous month (loaded as fallback).
+  // Just show the modal — user taps Save Settings to write the new month.
+  // This avoids race conditions between two phones both auto-saving.
   if (state.constantsMonth && state.constantsMonth !== monthStr) {
-    autoSaveNewMonth(monthStr, state.constantsMonth);
+    showNewMonthModal(monthStr, state.constantsMonth);
   }
-}
-
-async function autoSaveNewMonth(newMonth, prevMonth) {
-  try {
-    // Silently carry over previous month values into new month in sheets
-    await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: newMonth });
-    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: newMonth });
-    state.constantsMonth = newMonth;
-    state.incomesMonth   = newMonth;
-    saveToCache();
-  } catch(e) {
-    console.error('Auto-save new month failed:', e.message);
-  }
-  // Show modal so user can update amounts if needed
-  showNewMonthModal(newMonth, prevMonth);
 }
 
 function loadFromCache() {
@@ -1544,7 +1531,7 @@ async function saveSettings() {
 
   try {
     const today = new Date();
-    const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+    const monthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM — no dashes so Sheets can't convert to date
     const r1 = await apiCall('saveSettings',  { budget: state.settings.budget });
     const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
     const r3 = await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: monthStr });
