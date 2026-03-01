@@ -958,6 +958,11 @@ nav {
     </div>
   </div>
 
+  <!-- Update Banner -->
+  <div id="update-banner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--green);color:#000;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;z-index:999;cursor:pointer;" onclick="window.location.reload()">
+    ✨ Update available — tap to refresh
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast">
     <div class="toast-header" id="toast-header"></div>
@@ -993,7 +998,21 @@ let activeTab = 'home';
 // ============================================================
 window.addEventListener('load', async () => {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // When a new service worker is found, show update banner
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'activated') {
+            showUpdateBanner();
+          }
+        });
+      });
+      // Check for updates every time app comes to foreground
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) reg.update();
+      });
+    }).catch(() => {});
   }
 
   API_URL = localStorage.getItem('api_url') || '';
@@ -1874,6 +1893,11 @@ function showToast() {
   toast.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+function showUpdateBanner() {
+  const banner = document.getElementById('update-banner');
+  if (banner) banner.style.display = 'block';
 }
 
 function showToastSimple(msg) {
