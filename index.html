@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -14,55 +15,55 @@
 
 <style>
 :root {
-  --bg: #0f1117;
-  --bg2: #161b27;
-  --bg3: #1e2535;
-  --card: #1a2030;
-  --border: rgba(255,255,255,0.07);
-  --text: #f0f2f7;
-  --text2: #8b93a8;
-  --text3: #5a6278;
-  --green: #34d399;
-  --green-dim: rgba(52,211,153,0.12);
-  --red: #f87171;
-  --red-dim: rgba(248,113,113,0.12);
-  --amber: #fbbf24;
-  --amber-dim: rgba(251,191,36,0.12);
-  --blue: #60a5fa;
-  --radius: 16px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+--bg: #0f1117;
+--bg2: #161b27;
+--bg3: #1e2535;
+--card: #1a2030;
+--border: rgba(255,255,255,0.07);
+--text: #f0f2f7;
+--text2: #8b93a8;
+--text3: #5a6278;
+--green: #34d399;
+--green-dim: rgba(52,211,153,0.12);
+--red: #f87171;
+--red-dim: rgba(248,113,113,0.12);
+--amber: #fbbf24;
+--amber-dim: rgba(251,191,36,0.12);
+--blue: #60a5fa;
+--radius: 16px;
+--safe-top: env(safe-area-inset-top, 0px);
+--safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  overflow: hidden;
-  overscroll-behavior: none;
+height: 100%;
+background: var(--bg);
+color: var(--text);
+font-family: 'DM Sans', sans-serif;
+overflow: hidden;
+overscroll-behavior: none;
 }
 
 /* ===== LAYOUT ===== */
 #app {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  position: relative;
+display: flex;
+flex-direction: column;
+height: 100%;
+max-width: 480px;
+margin: 0 auto;
+position: relative;
 }
 
 .screen {
-  display: none;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 0 90px;
-  -webkit-overflow-scrolling: touch;
-  padding-top: calc(var(--safe-top) + 8px);
+display: none;
+flex: 1;
+overflow-y: auto;
+overflow-x: hidden;
+padding: 0 0 90px;
+-webkit-overflow-scrolling: touch;
+padding-top: calc(var(--safe-top) + 8px);
 }
 .screen.active { display: block; }
 
@@ -71,115 +72,115 @@ html, body {
 
 /* ===== NAV ===== */
 nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding-bottom: var(--safe-bottom);
-  z-index: 100;
+position: fixed;
+bottom: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 100%;
+max-width: 480px;
+background: var(--bg2);
+border-top: 1px solid var(--border);
+display: flex;
+align-items: center;
+padding-bottom: var(--safe-bottom);
+z-index: 100;
 }
 
 .nav-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 10px 0 8px;
-  background: none;
-  border: none;
-  color: var(--text3);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.2s;
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 3px;
+padding: 10px 0 8px;
+background: none;
+border: none;
+color: var(--text3);
+font-family: 'DM Sans', sans-serif;
+font-size: 11px;
+font-weight: 500;
+cursor: pointer;
+transition: color 0.2s;
 }
 .nav-btn.active { color: var(--green); }
 .nav-btn svg { width: 22px; height: 22px; }
 .nav-btn.log-btn {
-  flex: 0 0 64px;
+flex: 0 0 64px;
 }
 .log-btn-inner {
-  width: 52px; height: 52px;
-  background: var(--green);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 2px;
-  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
-  transition: transform 0.15s, box-shadow 0.15s;
+width: 52px; height: 52px;
+background: var(--green);
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+margin-bottom: 2px;
+box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+transition: transform 0.15s, box-shadow 0.15s;
 }
 .log-btn-inner:active { transform: scale(0.92); box-shadow: 0 2px 10px rgba(52,211,153,0.3); }
 .log-btn-inner svg { color: #0f1117; width: 26px; height: 26px; }
 
 /* ===== HEADER ===== */
 .page-header {
-  padding: 16px 20px 8px;
+padding: 16px 20px 8px;
 }
 .page-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
+font-family: 'Outfit', sans-serif;
+font-size: 22px;
+font-weight: 800;
+color: var(--text);
 }
 .page-sub {
-  font-size: 13px;
-  color: var(--text3);
-  margin-top: 2px;
+font-size: 13px;
+color: var(--text3);
+margin-top: 2px;
 }
 
 /* ===== CARDS ===== */
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin: 0 16px 12px;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 20px;
+margin: 0 16px 12px;
 }
 
 .card-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 6px;
+font-size: 11px;
+font-weight: 600;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+color: var(--text3);
+margin-bottom: 6px;
 }
 
 .big-amount {
-  font-family: 'Outfit', sans-serif;
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: 4px;
+font-family: 'Outfit', sans-serif;
+font-size: 42px;
+font-weight: 800;
+line-height: 1;
+margin-bottom: 4px;
 }
 .big-amount.positive { color: var(--green); }
 .big-amount.negative { color: var(--red); }
 .big-amount.warning { color: var(--amber); }
 
 .amount-sub {
-  font-size: 13px;
-  color: var(--text2);
+font-size: 13px;
+color: var(--text2);
 }
 
 /* progress bar */
 .progress-bar {
-  height: 6px;
-  background: var(--bg3);
-  border-radius: 99px;
-  margin-top: 14px;
-  overflow: hidden;
+height: 6px;
+background: var(--bg3);
+border-radius: 99px;
+margin-top: 14px;
+overflow: hidden;
 }
 .progress-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.5s ease;
+height: 100%;
+border-radius: 99px;
+transition: width 0.5s ease;
 }
 .progress-fill.green { background: var(--green); }
 .progress-fill.amber { background: var(--amber); }
@@ -187,22 +188,22 @@ nav {
 
 /* 2-col row */
 .stat-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 0 16px 12px;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 12px;
+padding: 0 16px 12px;
 }
 .stat-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 16px;
 }
 .stat-value {
-  font-family: 'Outfit', sans-serif;
-  font-size: 22px;
-  font-weight: 700;
-  margin: 4px 0 2px;
+font-family: 'Outfit', sans-serif;
+font-size: 22px;
+font-weight: 700;
+margin: 4px 0 2px;
 }
 .stat-value.positive { color: var(--green); }
 .stat-value.negative { color: var(--red); }
@@ -211,143 +212,143 @@ nav {
 
 /* ===== TRANSACTIONS ===== */
 .tx-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.15s;
-  position: relative;
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 14px 16px;
+border-bottom: 1px solid var(--border);
+cursor: pointer;
+transition: background 0.15s;
+position: relative;
 }
 .tx-item:last-child { border-bottom: none; }
 .tx-item:active { background: var(--bg3); }
 
 .tx-icon {
-  width: 40px; height: 40px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  font-size: 18px;
+width: 40px; height: 40px;
+border-radius: 12px;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+font-size: 18px;
 }
 .tx-icon.expense { background: var(--red-dim); }
 .tx-icon.income { background: var(--green-dim); }
 
 .tx-info { flex: 1; min-width: 0; }
 .tx-desc {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+font-size: 15px;
+font-weight: 500;
+color: var(--text);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 .tx-date { font-size: 12px; color: var(--text3); margin-top: 2px; }
 .tx-amount {
-  font-family: 'Outfit', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  flex-shrink: 0;
+font-family: 'Outfit', sans-serif;
+font-size: 17px;
+font-weight: 700;
+flex-shrink: 0;
 }
 .tx-amount.expense { color: var(--red); }
 .tx-amount.income { color: var(--green); }
 
 .tx-group-header {
-  padding: 16px 16px 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text3);
+padding: 16px 16px 6px;
+font-size: 11px;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.1em;
+color: var(--text3);
 }
 
 /* ===== LOG SCREEN ===== */
 .log-screen {
-  padding: 20px 20px 100px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+padding: 20px 20px 100px;
+display: flex;
+flex-direction: column;
+gap: 0;
 }
 
 .type-toggle {
-  display: flex;
-  background: var(--bg3);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 10px;
+display: flex;
+background: var(--bg3);
+border-radius: 12px;
+padding: 4px;
+margin-bottom: 10px;
 }
 .type-btn {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  background: none;
-  border-radius: 9px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text3);
-  cursor: pointer;
-  transition: all 0.2s;
+flex: 1;
+padding: 10px;
+border: none;
+background: none;
+border-radius: 9px;
+font-family: 'DM Sans', sans-serif;
+font-size: 14px;
+font-weight: 600;
+color: var(--text3);
+cursor: pointer;
+transition: all 0.2s;
 }
 .type-btn.active {
-  background: var(--card);
-  color: var(--text);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+background: var(--card);
+color: var(--text);
+box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .type-btn.expense.active { color: var(--red); }
 .type-btn.income.active { color: var(--green); }
 
 .amount-display {
-  text-align: center;
-  margin-bottom: 4px;
+text-align: center;
+margin-bottom: 4px;
 }
 .amount-display-value {
-  font-family: 'Outfit', sans-serif;
-  font-size: 44px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -2px;
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
+font-family: 'Outfit', sans-serif;
+font-size: 44px;
+font-weight: 800;
+color: var(--text);
+letter-spacing: -2px;
+min-height: 54px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0;
 }
 .amount-display-value .cursor {
-  width: 3px; height: 50px;
-  background: var(--green);
-  border-radius: 2px;
-  animation: blink 1s infinite;
-  margin-left: 2px;
+width: 3px; height: 50px;
+background: var(--green);
+border-radius: 2px;
+animation: blink 1s infinite;
+margin-left: 2px;
 }
 @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 .amount-currency {
-  font-size: 24px;
-  color: var(--text3);
-  font-weight: 400;
-  margin-right: 4px;
-  align-self: flex-start;
-  padding-top: 12px;
+font-size: 24px;
+color: var(--text3);
+font-weight: 400;
+margin-right: 4px;
+align-self: flex-start;
+padding-top: 12px;
 }
 
 .numpad {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 6px;
+margin-bottom: 12px;
 }
 .num-btn {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 13px 6px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 19px;
-  font-weight: 600;
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.1s;
-  text-align: center;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 13px 6px;
+font-family: 'Outfit', sans-serif;
+font-size: 19px;
+font-weight: 600;
+color: var(--text);
+cursor: pointer;
+transition: all 0.1s;
+text-align: center;
 }
 .num-btn:active { background: var(--bg3); transform: scale(0.95); }
 .num-btn.del { font-size: 16px; }
@@ -355,263 +356,263 @@ nav {
 .op-btn:active { background: var(--card); }
 
 .desc-input {
-  width: 100%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  margin-bottom: 12px;
-  transition: border-color 0.2s;
+width: 100%;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 14px 16px;
+font-family: 'DM Sans', sans-serif;
+font-size: 15px;
+color: var(--text);
+outline: none;
+margin-bottom: 12px;
+transition: border-color 0.2s;
 }
 .desc-input::placeholder { color: var(--text3); }
 .desc-input:focus { border-color: rgba(52,211,153,0.4); }
 
 .date-input {
-  width: 100%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  margin-bottom: 20px;
-  transition: border-color 0.2s;
-  -webkit-appearance: none;
-  color-scheme: dark;
+width: 100%;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 14px 16px;
+font-family: 'DM Sans', sans-serif;
+font-size: 15px;
+color: var(--text);
+outline: none;
+margin-bottom: 20px;
+transition: border-color 0.2s;
+-webkit-appearance: none;
+color-scheme: dark;
 }
 .date-input:focus { border-color: rgba(52,211,153,0.4); }
 
 .submit-btn {
-  width: 100%;
-  padding: 18px;
-  background: var(--green);
-  border: none;
-  border-radius: 14px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: #0f1117;
-  cursor: pointer;
-  transition: all 0.15s;
-  box-shadow: 0 4px 20px rgba(52,211,153,0.3);
+width: 100%;
+padding: 18px;
+background: var(--green);
+border: none;
+border-radius: 14px;
+font-family: 'Outfit', sans-serif;
+font-size: 17px;
+font-weight: 700;
+color: #0f1117;
+cursor: pointer;
+transition: all 0.15s;
+box-shadow: 0 4px 20px rgba(52,211,153,0.3);
 }
 .submit-btn:active { transform: scale(0.98); }
 .submit-btn.expense-btn { background: var(--red); box-shadow: 0 4px 20px rgba(248,113,113,0.3); }
 
 /* ===== SETTINGS ===== */
 .settings-section {
-  margin: 0 16px 16px;
+margin: 0 16px 16px;
 }
 .settings-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text3);
-  margin-bottom: 8px;
-  padding-left: 4px;
+font-size: 12px;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.08em;
+color: var(--text3);
+margin-bottom: 8px;
+padding-left: 4px;
 }
 .setting-row {
-  display: flex;
-  align-items: center;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 8px;
+display: flex;
+align-items: center;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 14px 16px;
+margin-bottom: 8px;
 }
 .setting-label {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
+flex: 1;
+font-size: 15px;
+font-weight: 500;
+color: var(--text);
 }
 .setting-input {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  width: 120px;
-  text-align: right;
-  color-scheme: dark;
+background: var(--bg3);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 8px 12px;
+font-family: 'DM Sans', sans-serif;
+font-size: 15px;
+color: var(--text);
+outline: none;
+width: 120px;
+text-align: right;
+color-scheme: dark;
 }
 .setting-input:focus { border-color: rgba(52,211,153,0.4); }
 
 .constant-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 8px;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 12px 16px;
+margin-bottom: 8px;
 }
 .constant-name-input {
-  flex: 1;
-  background: none;
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  min-width: 0;
+flex: 1;
+background: none;
+border: none;
+font-family: 'DM Sans', sans-serif;
+font-size: 15px;
+color: var(--text);
+outline: none;
+min-width: 0;
 }
 .constant-name-input::placeholder { color: var(--text3); }
 .constant-amount-input {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  width: 90px;
-  text-align: right;
-  color-scheme: dark;
+background: var(--bg3);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 6px 10px;
+font-family: 'DM Sans', sans-serif;
+font-size: 14px;
+color: var(--text);
+outline: none;
+width: 90px;
+text-align: right;
+color-scheme: dark;
 }
 .del-constant-btn {
-  background: none;
-  border: none;
-  color: var(--text3);
-  cursor: pointer;
-  padding: 4px;
-  font-size: 18px;
-  line-height: 1;
+background: none;
+border: none;
+color: var(--text3);
+cursor: pointer;
+padding: 4px;
+font-size: 18px;
+line-height: 1;
 }
 .del-constant-btn:active { color: var(--red); }
 
 .add-constant-btn {
-  width: 100%;
-  padding: 12px;
-  background: var(--bg3);
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--text3);
-  cursor: pointer;
-  margin-bottom: 8px;
+width: 100%;
+padding: 12px;
+background: var(--bg3);
+border: 1px dashed var(--border);
+border-radius: 12px;
+font-family: 'DM Sans', sans-serif;
+font-size: 14px;
+color: var(--text3);
+cursor: pointer;
+margin-bottom: 8px;
 }
 .save-btn {
-  width: 100%;
-  padding: 16px;
-  background: var(--green);
-  border: none;
-  border-radius: 12px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #0f1117;
-  cursor: pointer;
-  margin-top: 8px;
+width: 100%;
+padding: 16px;
+background: var(--green);
+border: none;
+border-radius: 12px;
+font-family: 'Outfit', sans-serif;
+font-size: 16px;
+font-weight: 700;
+color: #0f1117;
+cursor: pointer;
+margin-top: 8px;
 }
 
 /* ===== SETUP SCREEN ===== */
 .setup-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 24px;
-  text-align: center;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 40px 24px;
+text-align: center;
 }
 .setup-logo {
-  font-family: 'Outfit', sans-serif;
-  font-size: 48px;
-  margin-bottom: 8px;
+font-family: 'Outfit', sans-serif;
+font-size: 48px;
+margin-bottom: 8px;
 }
 .setup-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 8px;
+font-family: 'Outfit', sans-serif;
+font-size: 28px;
+font-weight: 800;
+margin-bottom: 8px;
 }
 .setup-sub {
-  font-size: 15px;
-  color: var(--text2);
-  line-height: 1.6;
-  margin-bottom: 32px;
+font-size: 15px;
+color: var(--text2);
+line-height: 1.6;
+margin-bottom: 32px;
 }
 .setup-input {
-  width: 100%;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  margin-bottom: 12px;
-  text-align: left;
-  color-scheme: dark;
+width: 100%;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 16px;
+font-family: 'DM Sans', sans-serif;
+font-size: 14px;
+color: var(--text);
+outline: none;
+margin-bottom: 12px;
+text-align: left;
+color-scheme: dark;
 }
 .setup-input:focus { border-color: rgba(52,211,153,0.4); }
 .setup-btn {
-  width: 100%;
-  padding: 18px;
-  background: var(--green);
-  border: none;
-  border-radius: 14px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: #0f1117;
-  cursor: pointer;
-  margin-top: 8px;
+width: 100%;
+padding: 18px;
+background: var(--green);
+border: none;
+border-radius: 14px;
+font-family: 'Outfit', sans-serif;
+font-size: 17px;
+font-weight: 700;
+color: #0f1117;
+cursor: pointer;
+margin-top: 8px;
 }
 .setup-hint {
-  font-size: 12px;
-  color: var(--text3);
-  line-height: 1.6;
-  margin-top: 16px;
-  text-align: left;
-  background: var(--bg3);
-  border-radius: 12px;
-  padding: 14px;
+font-size: 12px;
+color: var(--text3);
+line-height: 1.6;
+margin-top: 16px;
+text-align: left;
+background: var(--bg3);
+border-radius: 12px;
+padding: 14px;
 }
 .setup-hint a { color: var(--blue); }
 
 /* ===== TOAST ===== */
 .toast {
-  position: fixed;
-  top: calc(var(--safe-top) + 16px);
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  z-index: 999;
-  max-width: 320px;
-  width: calc(100% - 32px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
+position: fixed;
+top: calc(var(--safe-top) + 16px);
+left: 50%;
+transform: translateX(-50%) translateY(-20px);
+background: var(--bg2);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 14px 20px;
+font-size: 14px;
+font-weight: 500;
+z-index: 999;
+max-width: 320px;
+width: calc(100% - 32px);
+box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+opacity: 0;
+transition: all 0.3s ease;
+pointer-events: none;
 }
 .toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+opacity: 1;
+transform: translateX(-50%) translateY(0);
 }
 .toast-header {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 4px;
+font-family: 'Outfit', sans-serif;
+font-weight: 700;
+font-size: 15px;
+margin-bottom: 4px;
 }
 .toast .week-remaining { color: var(--green); }
 .toast .month-remaining { color: var(--amber); }
@@ -619,70 +620,70 @@ nav {
 
 /* ===== MODAL ===== */
 .modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 200;
-  align-items: flex-end;
-  justify-content: center;
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+z-index: 200;
+align-items: flex-end;
+justify-content: center;
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: var(--bg2);
-  border-radius: 20px 20px 0 0;
-  padding: 24px 20px calc(24px + var(--safe-bottom));
-  width: 100%;
-  max-width: 480px;
-  border-top: 1px solid var(--border);
+background: var(--bg2);
+border-radius: 20px 20px 0 0;
+padding: 24px 20px calc(24px + var(--safe-bottom));
+width: 100%;
+max-width: 480px;
+border-top: 1px solid var(--border);
 }
 .modal-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 16px;
+font-family: 'Outfit', sans-serif;
+font-size: 18px;
+font-weight: 700;
+margin-bottom: 16px;
 }
 .modal-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
+display: flex;
+gap: 10px;
+margin-top: 20px;
 }
 .modal-btn {
-  flex: 1;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
+flex: 1;
+padding: 14px;
+border: none;
+border-radius: 12px;
+font-family: 'DM Sans', sans-serif;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
 }
 .modal-btn.cancel { background: var(--bg3); color: var(--text2); }
 .modal-btn.danger { background: var(--red-dim); color: var(--red); }
 .modal-btn.save { background: var(--green); color: #0f1117; }
 .modal-input {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  margin-bottom: 10px;
-  color-scheme: dark;
+width: 100%;
+background: var(--bg3);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: 12px 14px;
+font-family: 'DM Sans', sans-serif;
+font-size: 15px;
+color: var(--text);
+outline: none;
+margin-bottom: 10px;
+color-scheme: dark;
 }
 .modal-input:focus { border-color: rgba(52,211,153,0.4); }
 
 /* ===== REPORT ===== */
 .report-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 15px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 0;
+border-bottom: 1px solid var(--border);
+font-size: 15px;
 }
 .report-row:last-child { border-bottom: none; }
 .report-row .label { color: var(--text2); }
@@ -690,284 +691,326 @@ nav {
 .report-row .value.positive { color: var(--green); }
 .report-row .value.negative { color: var(--red); }
 .report-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 8px 0;
+height: 1px;
+background: var(--border);
+margin: 8px 0;
 }
 
 /* sync indicator */
 .sync-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-  display: inline-block;
-  margin-right: 6px;
+width: 8px; height: 8px;
+border-radius: 50%;
+background: var(--green);
+display: inline-block;
+margin-right: 6px;
 }
 .sync-dot.offline { background: var(--amber); }
 
 .empty-state {
-  text-align: center;
-  padding: 48px 20px;
-  color: var(--text3);
+text-align: center;
+padding: 48px 20px;
+color: var(--text3);
 }
 .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
 .empty-state p { font-size: 15px; }
 
 .loading { text-align: center; padding: 40px; color: var(--text3); }
 </style>
+
 </head>
 <body>
 <div id="app">
 
-  <!-- SETUP SCREEN (shown if no API URL configured) -->
-  <div id="setup-screen" style="display:none; overflow-y:auto; flex:1; padding-bottom:40px;">
-    <div class="setup-screen">
-      <div class="setup-logo">💰</div>
-      <div class="setup-title">Budget Tracker</div>
-      <p class="setup-sub">Connect your Google Sheet to get started. Follow the setup guide to get your API URL.</p>
-      <input type="url" id="api-url-input" class="setup-input" placeholder="Paste your Google Apps Script URL here">
-      <input type="password" id="api-secret-input" class="setup-input" placeholder="Shared password (from Code.gs)">
+<!-- SETUP SCREEN (shown if no API URL configured) -->
 
-      <div id="setup-error" style="color:var(--red);font-size:13px;margin-bottom:8px;display:none;background:var(--red-dim);padding:10px 14px;border-radius:10px;width:100%;text-align:left;"></div>
-      <button class="setup-btn" id="setup-btn" onclick="saveSetup()">Get Started →</button>
-      <div class="setup-hint">
-        <strong>How to set up:</strong><br>
-        1. Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a>, create a new spreadsheet<br>
-        2. Go to <strong>Extensions → Apps Script</strong><br>
-        3. Paste the contents of <strong>Code.gs</strong> (included in your download)<br>
-        4. Click <strong>Deploy → New deployment → Web App</strong><br>
-        5. Set "Who has access" to <strong>Anyone</strong><br>
-        6. Copy the URL and paste it above
-      </div>
-    </div>
-  </div>
+<div id="setup-screen" style="display:none; overflow-y:auto; flex:1; padding-bottom:40px;">
+<div class="setup-screen">
+<div class="setup-logo">💰</div>
+<div class="setup-title">Budget Tracker</div>
+<p class="setup-sub">Connect your Google Sheet to get started. Follow the setup guide to get your API URL.</p>
+<input type="url" id="api-url-input" class="setup-input" placeholder="Paste your Google Apps Script URL here">
+<input type="password" id="api-secret-input" class="setup-input" placeholder="Shared password (from Code.gs)">
 
-  <!-- MAIN APP -->
-  <div id="main-app" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+```
+<div id="setup-error" style="color:var(--red);font-size:13px;margin-bottom:8px;display:none;background:var(--red-dim);padding:10px 14px;border-radius:10px;width:100%;text-align:left;"></div>
+<button class="setup-btn" id="setup-btn" onclick="saveSetup()">Get Started →</button>
+<div class="setup-hint">
+<strong>How to set up:</strong><br>
+1. Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a>, create a new spreadsheet<br>
+2. Go to <strong>Extensions → Apps Script</strong><br>
+3. Paste the contents of <strong>Code.gs</strong> (included in your download)<br>
+4. Click <strong>Deploy → New deployment → Web App</strong><br>
+5. Set "Who has access" to <strong>Anyone</strong><br>
+6. Copy the URL and paste it above
+</div>
+</div>
+```
 
-    <!-- HOME -->
-    <div id="screen-home" class="screen active">
-      <div class="page-header">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="page-title">Overview</div>
-          <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;">
-            <span id="sync-dot" class="sync-dot"></span>
-            <span id="sync-label">Live</span>
-          </div>
-        </div>
-        <div class="page-sub" id="home-date"></div>
-      </div>
+</div>
 
-      <!-- Weekly Card -->
-      <div class="card" id="weekly-card">
-        <div class="card-label">This week remaining</div>
-        <div class="big-amount positive" id="weekly-remaining">—</div>
-        <div class="amount-sub" id="weekly-sub"></div>
-        <div class="progress-bar"><div class="progress-fill green" id="weekly-bar" style="width:100%"></div></div>
-      </div>
+<!-- MAIN APP -->
 
-      <!-- Monthly + spent row -->
-      <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-label">Monthly Left</div>
-          <div class="stat-value positive" id="monthly-remaining">—</div>
-          <div class="stat-sub" id="monthly-sub"></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Spent Today</div>
-          <div class="stat-value" id="today-spent">₪0</div>
-          <div class="stat-sub" id="today-count"></div>
-        </div>
-      </div>
+<div id="main-app" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
 
-      <!-- Recent -->
-      <div style="padding:8px 16px 4px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="settings-title" style="margin:0">Recent</div>
-          <button onclick="switchTab('history')" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;">See all</button>
-        </div>
-      </div>
-      <div id="recent-list"><div class="loading">Loading...</div></div>
-    </div>
+```
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+<div class="page-header">
+<div style="display:flex;align-items:center;justify-content:space-between;">
+<div class="page-title">Overview</div>
+<div style="font-size:12px;color:var(--text3);display:flex;align-items:center;">
+<span id="sync-dot" class="sync-dot"></span>
+<span id="sync-label">Live</span>
+</div>
+</div>
+<div class="page-sub" id="home-date"></div>
+</div>
 
-    <!-- LOG -->
-    <div id="screen-log" class="screen">
-      <div class="page-header">
-        <div class="page-title" id="log-title">Log Expense</div>
-      </div>
-      <div class="log-screen" style="padding-top:8px;">
-        <div class="type-toggle">
-          <button class="type-btn expense active" onclick="setType('expense')">Expense</button>
-          <button class="type-btn income" onclick="setType('income')">Income</button>
-        </div>
+<!-- Weekly Card -->
+<div class="card" id="weekly-card">
+<div class="card-label">This week remaining</div>
+<div class="big-amount positive" id="weekly-remaining">—</div>
+<div class="amount-sub" id="weekly-sub"></div>
+<div class="progress-bar"><div class="progress-fill green" id="weekly-bar" style="width:100%"></div></div>
+</div>
 
-        <div class="amount-display">
-          <div class="amount-display-value">
-            <span class="amount-currency">₪</span>
-            <span id="amount-display">0</span>
-            <span class="cursor"></span>
-          </div>
-        </div>
+<!-- Monthly + spent row -->
+<div class="stat-row">
+<div class="stat-card">
+<div class="stat-label">Monthly Left</div>
+<div class="stat-value positive" id="monthly-remaining">—</div>
+<div class="stat-sub" id="monthly-sub"></div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Spent Today</div>
+<div class="stat-value" id="today-spent">₪0</div>
+<div class="stat-sub" id="today-count"></div>
+</div>
+</div>
 
-        <div id="calc-display" style="font-size:13px;color:var(--text3);text-align:right;padding:0 4px 4px;min-height:18px;"></div>
-        <div class="numpad">
-          <button class="num-btn" onclick="numpad('7')">7</button>
-          <button class="num-btn" onclick="numpad('8')">8</button>
-          <button class="num-btn" onclick="numpad('9')">9</button>
-          <button class="num-btn op-btn" onclick="numpad('/')">÷</button>
-          <button class="num-btn" onclick="numpad('4')">4</button>
-          <button class="num-btn" onclick="numpad('5')">5</button>
-          <button class="num-btn" onclick="numpad('6')">6</button>
-          <button class="num-btn op-btn" onclick="numpad('*')">×</button>
-          <button class="num-btn" onclick="numpad('1')">1</button>
-          <button class="num-btn" onclick="numpad('2')">2</button>
-          <button class="num-btn" onclick="numpad('3')">3</button>
-          <button class="num-btn op-btn" onclick="numpad('-')">−</button>
-          <button class="num-btn" onclick="numpad('.')">.</button>
-          <button class="num-btn" onclick="numpad('0')">0</button>
-          <button class="num-btn del" onclick="numpad('del')">⌫</button>
-          <button class="num-btn op-btn" onclick="numpad('+')">+</button>
-        </div>
+<!-- Recent -->
+<div style="padding:8px 16px 4px;">
+<div style="display:flex;align-items:center;justify-content:space-between;">
+<div class="settings-title" style="margin:0">Recent</div>
+<button onclick="switchTab('history')" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;">See all</button>
+</div>
+</div>
+<div id="recent-list"><div class="loading">Loading...</div></div>
+</div>
 
-        <input type="text" id="desc-input" class="desc-input" placeholder="What's it for? (optional)">
-        <input type="date" id="date-input" class="date-input">
+<!-- LOG -->
+<div id="screen-log" class="screen">
+<div class="page-header">
+<div class="page-title" id="log-title">Log Expense</div>
+</div>
+<div class="log-screen" style="padding-top:8px;">
+<div class="type-toggle">
+<button class="type-btn expense active" onclick="setType('expense')">Expense</button>
+<button class="type-btn income" onclick="setType('income')">Income</button>
+</div>
 
-        <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
-      </div>
-    </div>
+<div class="amount-display">
+<div class="amount-display-value">
+<span class="amount-currency">₪</span>
+<span id="amount-display">0</span>
+<span class="cursor"></span>
+</div>
+</div>
 
-    <!-- REPORT -->
-    <div id="screen-report" class="screen">
-      <div class="page-header">
-        <div class="page-title">Report</div>
-        <div class="page-sub" id="report-month-label"></div>
-      </div>
-      <div style="padding: 8px 16px 0;">
-        <div class="card-label" style="padding-left:4px;margin-bottom:6px;">THIS MONTH</div>
-        <div id="report-month-card" class="card" style="margin:0 0 16px;padding:20px;"></div>
-        <div class="card-label" style="padding-left:4px;margin-bottom:6px;">YEAR TO DATE</div>
-        <div id="report-year-card" class="card" style="margin:0 0 16px;padding:20px;">
-          <div style="color:var(--text3);font-size:14px;">Loading year data...</div>
-        </div>
-      </div>
-    </div>
+<div id="calc-display" style="font-size:13px;color:var(--text3);text-align:right;padding:0 4px 4px;min-height:18px;"></div>
+<div class="numpad">
+<button class="num-btn" onclick="numpad('7')">7</button>
+<button class="num-btn" onclick="numpad('8')">8</button>
+<button class="num-btn" onclick="numpad('9')">9</button>
+<button class="num-btn op-btn" onclick="numpad('/')">÷</button>
+<button class="num-btn" onclick="numpad('4')">4</button>
+<button class="num-btn" onclick="numpad('5')">5</button>
+<button class="num-btn" onclick="numpad('6')">6</button>
+<button class="num-btn op-btn" onclick="numpad('*')">×</button>
+<button class="num-btn" onclick="numpad('1')">1</button>
+<button class="num-btn" onclick="numpad('2')">2</button>
+<button class="num-btn" onclick="numpad('3')">3</button>
+<button class="num-btn op-btn" onclick="numpad('-')">−</button>
+<button class="num-btn" onclick="numpad('.')">.</button>
+<button class="num-btn" onclick="numpad('0')">0</button>
+<button class="num-btn del" onclick="numpad('del')">⌫</button>
+<button class="num-btn op-btn" onclick="numpad('+')">+</button>
+</div>
 
-    <!-- HISTORY -->
-    <div id="screen-history" class="screen">
-      <div class="page-header">
-        <div class="page-title">History</div>
-        <div class="page-sub" id="history-month"></div>
-      </div>
-      <div id="history-list"><div class="loading">Loading...</div></div>
-    </div>
+<input type="text" id="desc-input" class="desc-input" placeholder="What's it for? (optional)">
+<input type="date" id="date-input" class="date-input">
 
-    <!-- SETTINGS -->
-    <div id="screen-settings" class="screen">
-      <div class="page-header">
-        <div class="page-title">Settings</div>
-        <div class="page-sub">Budget, income & expenses</div>
-      </div>
+<button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
+</div>
+</div>
 
-      <div class="settings-section">
-        <div class="settings-title">Flexible Budget</div>
-        <div class="setting-row">
-          <div class="setting-label">Monthly flexible budget</div>
-          <input type="number" id="s-budget" class="setting-input" placeholder="8000">
-        </div>
-      </div>
+<!-- REPORT -->
+<div id="screen-report" class="screen">
+<div class="page-header">
+<div class="page-title">Report</div>
+<div class="page-sub" id="report-month-label"></div>
+</div>
+<div style="padding: 8px 16px 0;">
+<div class="card-label" style="padding-left:4px;margin-bottom:6px;">THIS MONTH</div>
+<div id="report-month-card" class="card" style="margin:0 0 16px;padding:20px;"></div>
+<div class="card-label" style="padding-left:4px;margin-bottom:6px;">YEAR TO DATE</div>
+<div id="report-year-card" class="card" style="margin:0 0 16px;padding:20px;">
+<div style="color:var(--text3);font-size:14px;">Loading year data...</div>
+</div>
+</div>
+</div>
 
-      <div class="settings-section">
-        <div class="settings-title">Income Sources</div>
-        <div id="incomes-list"></div>
-        <button class="add-constant-btn" onclick="addIncomeRow()">+ Add income source</button>
-      </div>
+<!-- HISTORY -->
+<div id="screen-history" class="screen">
+<div class="page-header">
+<div class="page-title">History</div>
+<div class="page-sub" id="history-month"></div>
+</div>
+<div id="history-list"><div class="loading">Loading...</div></div>
+</div>
 
-      <div class="settings-section">
-        <div class="settings-title">Constant Expenses</div>
-        <div id="constants-list"></div>
-        <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
-      </div>
+<!-- SETTINGS -->
+<div id="screen-settings" class="screen">
+<div class="page-header">
+<div class="page-title">Settings</div>
+<div class="page-sub">Budget, income & expenses</div>
+</div>
 
-      <div class="settings-section" style="margin-top:8px;">
-        <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-      </div>
+<div class="settings-section">
+<div class="settings-title">Flexible Budget</div>
+<div class="setting-row">
+<div class="setting-label">Monthly flexible budget</div>
+<input type="number" id="s-budget" class="setting-input" placeholder="8000">
+</div>
+</div>
 
-      <div class="settings-section">
-        <div class="setting-row" style="justify-content:space-between;cursor:pointer;" onclick="confirmReset()">
-          <div class="setting-label" style="color:var(--red);">Change API URL</div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3)"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-      </div>
+<div class="settings-section">
+<div class="settings-title">Income Sources</div>
+<div id="incomes-list"></div>
+<button class="add-constant-btn" onclick="addIncomeRow()">+ Add income source</button>
+</div>
 
-    </div>
+<div class="settings-section">
+<div class="settings-title">Constant Expenses</div>
+<div id="constants-list"></div>
+<button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
+</div>
 
-    <!-- NAV -->
-    <nav>
-      <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Home
-      </button>
-      <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-        History
-      </button>
-      <button class="nav-btn log-btn" onclick="switchTab('log')">
-        <div class="log-btn-inner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>
-        Log
-      </button>
-      <button class="nav-btn" id="nav-report" onclick="switchTab('report')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Report
-      </button>
-      <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </button>
-    </nav>
-  </div>
+<div class="settings-section" style="margin-top:8px;">
+<button class="save-btn" onclick="saveSettings()">Save Settings</button>
+</div>
 
-  <!-- Edit Modal -->
-  <div class="modal-overlay" id="edit-modal">
-    <div class="modal">
-      <div class="modal-title">Edit Entry</div>
-      <input type="number" id="edit-amount" class="modal-input" placeholder="Amount">
-      <input type="text" id="edit-desc" class="modal-input" placeholder="Description (optional)">
-      <input type="date" id="edit-date" class="modal-input" style="color-scheme:dark;">
-      <div class="modal-actions">
-        <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
-        <button class="modal-btn danger" onclick="deleteCurrentTx()">Delete</button>
-        <button class="modal-btn save" onclick="saveEditedTx()">Save</button>
-      </div>
-    </div>
-  </div>
+<div class="settings-section">
+<div class="settings-title">Your Profile</div>
+<div class="setting-row" style="justify-content:space-between;cursor:pointer;" onclick="showNamePrompt()">
+<div class="setting-label">Your name</div>
+<div style="color:var(--text2);font-size:14px;" id="my-name-display">Not set</div>
+</div>
+<div class="setting-row" style="justify-content:space-between;cursor:pointer;margin-top:4px;" onclick="confirmReset()">
+<div class="setting-label" style="color:var(--red);">Change API URL</div>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3)"><path d="m9 18 6-6-6-6"/></svg>
+</div>
+</div>
 
-  <!-- New Month Modal -->
-  <div class="modal-overlay" id="new-month-modal">
-    <div class="modal">
-      <div class="modal-title">🎉 New Month!</div>
-      <p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px;">
-        New month! Your income sources and constant expenses from last month are shown.
-        Review any amounts that changed and tap <strong>Save Settings</strong> to confirm — this records them for the yearly report.
-      </p>
-      <div class="modal-actions">
-        <button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
-        <button class="modal-btn save" onclick="goToSettings()">Review &amp; Save →</button>
-      </div>
-    </div>
-  </div>
+</div>
 
-  <!-- Update Banner -->
-  <div id="update-banner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--green);color:#000;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;z-index:999;cursor:pointer;" onclick="window.location.reload()">
-    ✨ Update available — tap to refresh
-  </div>
+<!-- NAV -->
+<nav>
+<button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+Home
+</button>
+<button class="nav-btn" id="nav-history" onclick="switchTab('history')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+History
+</button>
+<button class="nav-btn log-btn" onclick="switchTab('log')">
+<div class="log-btn-inner">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</div>
+Log
+</button>
+<button class="nav-btn" id="nav-report" onclick="switchTab('report')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+Report
+</button>
+<button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+Settings
+</button>
+</nav>
+```
 
-  <!-- Toast -->
-  <div class="toast" id="toast">
-    <div class="toast-header" id="toast-header"></div>
-    <div id="toast-body"></div>
-  </div>
+</div>
+
+<!-- Edit Modal -->
+
+<div class="modal-overlay" id="edit-modal">
+<div class="modal">
+<div class="modal-title">Edit Entry</div>
+<input type="number" id="edit-amount" class="modal-input" placeholder="Amount">
+<input type="text" id="edit-desc" class="modal-input" placeholder="Description (optional)">
+<input type="date" id="edit-date" class="modal-input" style="color-scheme:dark;">
+<div class="modal-actions">
+<button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+<button class="modal-btn danger" onclick="deleteCurrentTx()">Delete</button>
+<button class="modal-btn save" onclick="saveEditedTx()">Save</button>
+</div>
+</div>
+</div>
+
+<!-- Name Prompt Modal -->
+
+<div class="modal-overlay" id="name-modal" style="z-index:300;">
+<div class="modal">
+<div class="modal-title">👋 Who are you?</div>
+<p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px;">
+This helps identify who logged each transaction when you review history together.
+</p>
+<input type="text" id="name-input" class="setup-input" placeholder="Your name (e.g. Shaul)"
+style="margin-bottom:16px;width:100%;"
+onkeydown="if(event.key==='Enter')saveName()">
+<div class="modal-actions">
+<button class="modal-btn save" onclick="saveName()" style="width:100%;">Save</button>
+</div>
+</div>
+</div>
+
+<!-- Partner Activity Banner -->
+
+<div id="partner-banner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--blue);color:#000;padding:10px 16px;font-size:13px;font-weight:600;z-index:250;cursor:pointer;border-radius:0 0 12px 12px;" onclick="dismissPartnerBanner()">
+<span id="partner-banner-text"></span>
+<span style="float:right;opacity:0.7;">✕</span>
+</div>
+
+<!-- New Month Modal -->
+
+<div class="modal-overlay" id="new-month-modal">
+<div class="modal">
+<div class="modal-title">🎉 New Month!</div>
+<p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px;">
+New month! Your income sources and constant expenses from last month are shown.
+Review any amounts that changed and tap <strong>Save Settings</strong> to confirm — this records them for the yearly report.
+</p>
+<div class="modal-actions">
+<button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
+<button class="modal-btn save" onclick="goToSettings()">Review &amp; Save →</button>
+</div>
+</div>
+</div>
+
+<!-- Update Banner -->
+
+<div id="update-banner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--green);color:#000;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;z-index:999;cursor:pointer;" onclick="window.location.reload()">
+✨ Update available — tap to refresh
+</div>
+
+<!-- Toast -->
+
+<div class="toast" id="toast">
+<div class="toast-header" id="toast-header"></div>
+<div id="toast-body"></div>
+</div>
 </div>
 
 <script>
@@ -976,16 +1019,18 @@ nav {
 // ============================================================
 let API_URL = '';
 let API_SECRET = '';
+let MY_NAME = ''; // set once at first launch, stored in localStorage
 let state = {
-  transactions: [],
-  yearTransactions: [],
-  yearlySummary: null,    // { monthlyConstants: {}, monthlyIncomes: {} }
-  settings: { budget: 8000 },
-  constants: [],
-  incomes: [],
-  constantsMonth: null,
-  incomesMonth: null,
-  isOnline: navigator.onLine
+transactions: [],
+yearTransactions: [],
+yearlySummary: null,
+settings: { budget: 8000 },
+constants: [],
+incomes: [],
+constantsMonth: null,
+incomesMonth: null,
+settingsLoaded: false, // true once settings have been loaded from sheets
+isOnline: navigator.onLine
 };
 let currentType = 'expense';
 let amountStr = '0';
@@ -997,901 +1042,1044 @@ let activeTab = 'home';
 // INIT
 // ============================================================
 window.addEventListener('load', async () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      // When a new service worker is found, show update banner
-      reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'activated') {
-            showUpdateBanner();
-          }
-        });
-      });
-      // Check for updates every time app comes to foreground
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) reg.update();
-      });
-    }).catch(() => {});
-  }
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('sw.js').then(reg => {
+// When a new service worker is found, show update banner
+reg.addEventListener('updatefound', () => {
+const newSW = reg.installing;
+newSW.addEventListener('statechange', () => {
+if (newSW.state === 'activated') {
+showUpdateBanner();
+}
+});
+});
+// Check for updates every time app comes to foreground
+document.addEventListener('visibilitychange', () => {
+if (!document.hidden) reg.update();
+});
+}).catch(() => {});
+}
 
-  API_URL = localStorage.getItem('api_url') || '';
-  API_SECRET = localStorage.getItem('api_secret') || '';
-  offlineQueue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
+API_URL = localStorage.getItem('api_url') || '';
+API_SECRET = localStorage.getItem('api_secret') || '';
+MY_NAME = localStorage.getItem('my_name') || '';
+offlineQueue = JSON.parse(localStorage.getItem('offline_queue') || '[]');
 
-  if (!API_URL) {
-    document.getElementById('setup-screen').style.display = 'flex';
-    document.getElementById('setup-screen').style.flexDirection = 'column';
-  } else {
-    showMainApp();
-    await loadAll();
-  }
+if (!API_URL) {
+document.getElementById('setup-screen').style.display = 'flex';
+document.getElementById('setup-screen').style.flexDirection = 'column';
+} else {
+showMainApp();
+await loadAll();
+if (!MY_NAME) showNamePrompt();
+}
 
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
-  updateSyncIndicator();
-  updateHomeDate();
+window.addEventListener('online', handleOnline);
+window.addEventListener('offline', handleOffline);
+updateSyncIndicator();
+updateHomeDate();
 
-  // Auto-refresh every 30 seconds, but not while editing settings
-  setInterval(() => {
-    if (navigator.onLine && API_URL && activeTab !== 'settings') loadAll();
-  }, 30000);
+// Auto-refresh every 30 seconds, but not while editing settings
+setInterval(() => {
+if (navigator.onLine && API_URL && activeTab !== 'settings') loadAll();
+}, 30000);
 });
 
 function showMainApp() {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'flex';
-  document.getElementById('main-app').style.flexDirection = 'column';
-  document.getElementById('main-app').style.flex = '1';
-  document.getElementById('main-app').style.overflow = 'hidden';
+document.getElementById('setup-screen').style.display = 'none';
+document.getElementById('main-app').style.display = 'flex';
+document.getElementById('main-app').style.flexDirection = 'column';
+document.getElementById('main-app').style.flex = '1';
+document.getElementById('main-app').style.overflow = 'hidden';
 }
 
 async function saveSetup() {
-  const url = document.getElementById('api-url-input').value.trim();
-  const secret = document.getElementById('api-secret-input').value.trim();
-  const errEl = document.getElementById('setup-error');
-  const btn = document.getElementById('setup-btn');
-  errEl.style.display = 'none';
+const url = document.getElementById('api-url-input').value.trim();
+const secret = document.getElementById('api-secret-input').value.trim();
+const errEl = document.getElementById('setup-error');
+const btn = document.getElementById('setup-btn');
+errEl.style.display = 'none';
 
-  if (!url) { errEl.textContent = 'Please enter your API URL'; errEl.style.display = 'block'; return; }
-  if (!secret) { errEl.textContent = 'Please enter a password'; errEl.style.display = 'block'; return; }
+if (!url) { errEl.textContent = 'Please enter your API URL'; errEl.style.display = 'block'; return; }
+if (!secret) { errEl.textContent = 'Please enter a password'; errEl.style.display = 'block'; return; }
 
-  // Test the connection before saving
-  btn.textContent = 'Connecting...';
-  btn.disabled = true;
+// Test the connection before saving
+btn.textContent = 'Connecting...';
+btn.disabled = true;
 
-  try {
-    API_URL = url;
-    API_SECRET = secret;
-    const res = await apiCall('getSettings');
-    if (res.error === 'Unauthorized') {
-      errEl.textContent = '❌ Wrong password. Check your Code.gs and try again.';
-      errEl.style.display = 'block';
-      API_URL = ''; API_SECRET = '';
-      btn.textContent = 'Get Started →';
-      btn.disabled = false;
-      return;
-    }
-    if (res.error) {
-      errEl.textContent = '❌ Connection error: ' + res.error;
-      errEl.style.display = 'block';
-      API_URL = ''; API_SECRET = '';
-      btn.textContent = 'Get Started →';
-      btn.disabled = false;
-      return;
-    }
+try {
+API_URL = url;
+API_SECRET = secret;
+const res = await apiCall('getSettings');
+if (res.error === 'Unauthorized') {
+errEl.textContent = '❌ Wrong password. Check your Code.gs and try again.';
+errEl.style.display = 'block';
+API_URL = ''; API_SECRET = '';
+btn.textContent = 'Get Started →';
+btn.disabled = false;
+return;
+}
+if (res.error) {
+errEl.textContent = '❌ Connection error: ' + res.error;
+errEl.style.display = 'block';
+API_URL = ''; API_SECRET = '';
+btn.textContent = 'Get Started →';
+btn.disabled = false;
+return;
+}
 
-    // Success — save and go
-    localStorage.setItem('api_url', url);
-    localStorage.setItem('api_secret', secret);
-    showMainApp();
-    loadAll();
+// Success — save and go
+localStorage.setItem('api_url', url);
+localStorage.setItem('api_secret', secret);
+showMainApp();
+loadAll();
 
-  } catch(e) {
-    errEl.textContent = '❌ Could not reach server. Check the URL and your internet connection.';
-    errEl.style.display = 'block';
-    API_URL = ''; API_SECRET = '';
-    btn.textContent = 'Get Started →';
-    btn.disabled = false;
-  }
+} catch(e) {
+errEl.textContent = '❌ Could not reach server. Check the URL and your internet connection.';
+errEl.style.display = 'block';
+API_URL = ''; API_SECRET = '';
+btn.textContent = 'Get Started →';
+btn.disabled = false;
+}
 }
 
 function confirmReset() {
-  if (confirm('Change the API URL? This will keep your existing data.')) {
-    API_URL = '';
-    API_SECRET = '';
-    localStorage.removeItem('api_url');
-    localStorage.removeItem('api_secret');
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('setup-screen').style.display = 'flex';
-    document.getElementById('setup-screen').style.flexDirection = 'column';
-  }
+if (confirm('Change the API URL? This will keep your existing data.')) {
+API_URL = '';
+API_SECRET = '';
+localStorage.removeItem('api_url');
+localStorage.removeItem('api_secret');
+localStorage.removeItem('cached_data');
+state.settingsLoaded = false;
+state.constants = [];
+state.incomes = [];
+state.transactions = [];
+state.yearTransactions = [];
+document.getElementById('main-app').style.display = 'none';
+document.getElementById('setup-screen').style.display = 'flex';
+document.getElementById('setup-screen').style.flexDirection = 'column';
+}
 }
 
 // ============================================================
 // API
 // ============================================================
 async function apiCall(action, data = {}) {
-  const payload = { action, secret: API_SECRET, ...data };
-  const targetUrl = API_URL + '?' + new URLSearchParams(payload).toString();
-  const proxyUrl = 'https://budget-proxy.shaul2806.workers.dev/?target=' + encodeURIComponent(targetUrl);
+const payload = { action, secret: API_SECRET, ...data };
+const targetUrl = API_URL + '?' + new URLSearchParams(payload).toString();
+const proxyUrl = 'https://budget-proxy.shaul2806.workers.dev/?target=' + encodeURIComponent(targetUrl);
 
-  const res = await fetch(proxyUrl);
-  const text = await res.text();
-  console.log(action + ':', text.substring(0, 200));
-  return JSON.parse(text);
+const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout
+try {
+const res = await fetch(proxyUrl, { signal: controller.signal });
+const text = await res.text();
+console.log(action + ':', text.substring(0, 200));
+return JSON.parse(text);
+} finally {
+clearTimeout(timeout);
+}
 }
 
 async function loadAll() {
-  // Show cached data instantly while fetching
-  loadFromCache();
-  renderHome();
-  renderHistory();
+// Show cached data instantly while fetching
+loadFromCache();
+renderHome();
+renderHistory();
 
-  try {
-    const today    = new Date();
-    const txMonthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0'); // YYYY-MM for transaction date filtering
-    const settingsMonthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM for constants/incomes (no date conversion)
-    const yearStr  = String(today.getFullYear());
+try {
+const today = new Date();
+const txMonthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0'); // YYYY-MM for transaction date filtering
+const settingsMonthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM for constants/incomes (no date conversion)
+const yearStr = String(today.getFullYear());
 
-    if (offlineQueue.length > 0 && navigator.onLine) await processOfflineQueue();
+if (offlineQueue.length > 0 && navigator.onLine) await processOfflineQueue();
 
-    // Sequential fetches to avoid proxy overload and race conditions
-    const txRes       = await apiCall('getTransactions',   { month: txMonthStr });
-    const settingsRes = await apiCall('getSettings');
-    const constantsRes= await apiCall('getConstants',      { month: settingsMonthStr });
-    const incomesRes  = await apiCall('getIncomes',        { month: settingsMonthStr });
-    const yearTxRes   = await apiCall('getTransactions',   { year: yearStr });
-    const yearSumRes  = await apiCall('getYearlySummary',  { year: yearStr });
+// Sequential fetches to avoid proxy overload and race conditions
+const txRes = await apiCall('getTransactions', { month: txMonthStr });
+const settingsRes = await apiCall('getSettings');
+const constantsRes= await apiCall('getConstants', { month: settingsMonthStr });
+const incomesRes = await apiCall('getIncomes', { month: settingsMonthStr });
+const yearTxRes = await apiCall('getTransactions', { year: yearStr });
+const yearSumRes = await apiCall('getYearlySummary', { year: yearStr });
 
-    if (txRes.transactions)     state.transactions     = txRes.transactions;
-    if (yearTxRes.transactions) state.yearTransactions = yearTxRes.transactions;
-    if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
-      state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
-    }
-    if (constantsRes.month && constantsRes.constants.length > 0) {
-      state.constants = constantsRes.constants;
-      state.constantsMonth = constantsRes.month;
-    }
-    if (incomesRes.month && incomesRes.incomes.length > 0) {
-      state.incomes = incomesRes.incomes;
-      state.incomesMonth = incomesRes.month;
-    }
-    if (yearSumRes && yearSumRes.monthlyIncomes) {
-      state.yearlySummary = yearSumRes;
-    }
+if (txRes.transactions) state.transactions = txRes.transactions;
+if (yearTxRes.transactions) state.yearTransactions = yearTxRes.transactions;
 
-    saveToCache();
-    renderHome();
-    renderHistory();
-    // Don't renderSettings() here — would wipe user's in-progress edits
+// Update budget setting always (it's just a number, safe to sync)
+if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
+state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
+}
 
-    // Check if it's a new month and no data saved yet for this month
-    checkNewMonth(settingsMonthStr);
+// Only load incomes/constants from sheets if:
+// a) not yet loaded this session, OR
+// b) we're not currently on the settings tab (don't overwrite in-progress edits)
+if (!state.settingsLoaded || activeTab !== 'settings') {
+if (constantsRes.month && constantsRes.constants.length > 0) {
+state.constants = constantsRes.constants;
+state.constantsMonth = constantsRes.month;
+}
+if (incomesRes.month && incomesRes.incomes.length > 0) {
+state.incomes = incomesRes.incomes;
+state.incomesMonth = incomesRes.month;
+}
+state.settingsLoaded = true;
+}
 
-  } catch (e) {
-    console.error('loadAll failed:', e.message);
-  }
+if (yearSumRes && yearSumRes.monthlyIncomes) {
+state.yearlySummary = yearSumRes;
+}
+
+// Check for partner transactions (new entries not logged by me)
+checkPartnerActivity(txRes.transactions || []);
+
+saveToCache();
+renderHome();
+renderHistory();
+// Don't renderSettings() here — would wipe user's in-progress edits
+
+// Check if it's a new month and no data saved yet for this month
+checkNewMonth(settingsMonthStr);
+
+} catch (e) {
+console.error('loadAll failed:', e.message);
+}
 }
 
 function checkNewMonth(monthStr) {
-  const lastPrompted = localStorage.getItem('new_month_prompted');
-  if (lastPrompted === monthStr) return;
-  localStorage.setItem('new_month_prompted', monthStr);
+const lastPrompted = localStorage.getItem('new_month_prompted');
+if (lastPrompted === monthStr) return;
+localStorage.setItem('new_month_prompted', monthStr);
 
-  // Data is already displayed from previous month (loaded as fallback).
-  // Just show the modal — user taps Save Settings to write the new month.
-  // This avoids race conditions between two phones both auto-saving.
-  if (state.constantsMonth && state.constantsMonth !== monthStr) {
-    showNewMonthModal(monthStr, state.constantsMonth);
-  }
+// Data is already displayed from previous month (loaded as fallback).
+// Just show the modal — user taps Save Settings to write the new month.
+// This avoids race conditions between two phones both auto-saving.
+if (state.constantsMonth && state.constantsMonth !== monthStr) {
+showNewMonthModal(monthStr, state.constantsMonth);
+}
 }
 
 function loadFromCache() {
-  try {
-    const cached = localStorage.getItem('cached_data');
-    if (cached) {
-      const data = JSON.parse(cached);
-      state.transactions     = data.transactions     || [];
-      state.yearTransactions = data.yearTransactions || [];
-      state.yearlySummary    = data.yearlySummary    || null;
-      state.settings         = data.settings         || state.settings;
-      state.constants        = data.constants        || [];
-      state.incomes          = data.incomes          || [];
-      state.constantsMonth   = data.constantsMonth   || null;
-      state.incomesMonth     = data.incomesMonth     || null;
-    }
-  } catch(e) {}
+try {
+const cached = localStorage.getItem('cached_data');
+if (cached) {
+const data = JSON.parse(cached);
+state.transactions = data.transactions || [];
+state.yearTransactions = data.yearTransactions || [];
+state.yearlySummary = data.yearlySummary || null;
+state.settings = data.settings || state.settings;
+state.constants = data.constants || [];
+state.incomes = data.incomes || [];
+state.constantsMonth = data.constantsMonth || null;
+state.incomesMonth = data.incomesMonth || null;
+}
+} catch(e) {}
 }
 
 function saveToCache() {
-  localStorage.setItem('cached_data', JSON.stringify({
-    transactions:     state.transactions,
-    yearTransactions: state.yearTransactions,
-    yearlySummary:    state.yearlySummary,
-    settings:         state.settings,
-    constants:        state.constants,
-    incomes:          state.incomes,
-    constantsMonth:   state.constantsMonth,
-    incomesMonth:     state.incomesMonth
-  }));
+localStorage.setItem('cached_data', JSON.stringify({
+transactions: state.transactions,
+yearTransactions: state.yearTransactions,
+yearlySummary: state.yearlySummary,
+settings: state.settings,
+constants: state.constants,
+incomes: state.incomes,
+constantsMonth: state.constantsMonth,
+incomesMonth: state.incomesMonth
+}));
 }
 
 // ============================================================
 // WEEKLY BUDGET LOGIC
 // ============================================================
 function getWeekBudget(date) {
-  const now = date || new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const day = now.getDate();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const dailyRate = state.settings.budget / daysInMonth;
+const now = date || new Date();
+const year = now.getFullYear();
+const month = now.getMonth();
+const day = now.getDate();
+const daysInMonth = new Date(year, month + 1, 0).getDate();
+const dailyRate = state.settings.budget / daysInMonth;
 
-  // Strip time — use pure midnight dates for all comparisons
-  const weekStart = new Date(year, month, day - now.getDay());       // Sunday midnight
-  const weekEnd   = new Date(year, month, day - now.getDay() + 6);   // Saturday midnight
-  const monthStart = new Date(year, month, 1);
-  const monthEnd   = new Date(year, month + 1, 0);
+// Strip time — use pure midnight dates for all comparisons
+const weekStart = new Date(year, month, day - now.getDay()); // Sunday midnight
+const weekEnd = new Date(year, month, day - now.getDay() + 6); // Saturday midnight
+const monthStart = new Date(year, month, 1);
+const monthEnd = new Date(year, month + 1, 0);
 
-  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
-  const effectiveEnd   = weekEnd   > monthEnd   ? monthEnd   : weekEnd;
+const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
+const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
 
-  // Pure integer day difference — no time component to cause rounding issues
-  const msPerDay = 86400000;
-  const days = Math.round((effectiveEnd - effectiveStart) / msPerDay) + 1;
-  return Math.round(dailyRate * days);
+// Pure integer day difference — no time component to cause rounding issues
+const msPerDay = 86400000;
+const days = Math.round((effectiveEnd - effectiveStart) / msPerDay) + 1;
+return Math.round(dailyRate * days);
 }
 
 function getWeekRange(date) {
-  const now = date || new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const day = now.getDate();
+const now = date || new Date();
+const year = now.getFullYear();
+const month = now.getMonth();
+const day = now.getDate();
 
-  // Strip time — midnight dates only
-  const weekStart  = new Date(year, month, day - now.getDay());
-  const weekEnd    = new Date(year, month, day - now.getDay() + 6);
-  const monthStart = new Date(year, month, 1);
-  const monthEnd   = new Date(year, month + 1, 0);
+// Strip time — midnight dates only
+const weekStart = new Date(year, month, day - now.getDay());
+const weekEnd = new Date(year, month, day - now.getDay() + 6);
+const monthStart = new Date(year, month, 1);
+const monthEnd = new Date(year, month + 1, 0);
 
-  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
-  const effectiveEnd   = weekEnd   > monthEnd   ? monthEnd   : weekEnd;
-  return { start: effectiveStart, end: effectiveEnd };
+const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
+const effectiveEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+return { start: effectiveStart, end: effectiveEnd };
 }
 
 function getMonthSpent(monthStr) {
-  return state.transactions
-    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(monthStr))
-    .reduce((sum, t) => sum + t.amount, 0);
+return state.transactions
+.filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(monthStr))
+.reduce((sum, t) => sum + t.amount, 0);
 }
 
 function getMonthIncome(monthStr) {
-  return state.transactions
-    .filter(t => t.type === 'income' && t.date && t.date.toString().startsWith(monthStr))
-    .reduce((sum, t) => sum + t.amount, 0);
+return state.transactions
+.filter(t => t.type === 'income' && t.date && t.date.toString().startsWith(monthStr))
+.reduce((sum, t) => sum + t.amount, 0);
 }
 
 function getWeekSpent() {
-  const { start, end } = getWeekRange();
-  return state.transactions
-    .filter(t => {
-      if (t.type !== 'expense') return false;
-      const txDate = parseLocalDate(t.date);
-      return txDate >= start && txDate <= end;
-    })
-    .reduce((sum, t) => sum + t.amount, 0);
+const { start, end } = getWeekRange();
+return state.transactions
+.filter(t => {
+if (t.type !== 'expense') return false;
+const txDate = parseLocalDate(t.date);
+return txDate >= start && txDate <= end;
+})
+.reduce((sum, t) => sum + t.amount, 0);
 }
 
 function getTodaySpent() {
-  const todayStr = toDateStr(new Date());
-  return state.transactions
-    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(todayStr))
-    .reduce((sum, t) => sum + t.amount, 0);
+const todayStr = toDateStr(new Date());
+return state.transactions
+.filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(todayStr))
+.reduce((sum, t) => sum + t.amount, 0);
 }
 
 // ============================================================
 // RENDER HOME
 // ============================================================
 function renderHome() {
-  const today = new Date();
-  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  
-  const weekBudget = getWeekBudget();
-  const weekSpent = getWeekSpent();
-  const weekRemaining = weekBudget - weekSpent;
-  
-  const monthBudget = state.settings.budget;
-  const totalMonthlyIncome = state.incomes.reduce((s,i) => s + i.amount, 0);
-  const monthSpent = getMonthSpent(monthStr);
-  const monthRemaining = monthBudget - monthSpent;
+const today = new Date();
+const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
 
-  const todaySpent = getTodaySpent();
-  const todayTxs = state.transactions.filter(t => t.date && t.date.toString().startsWith(toDateStr(today)));
+const weekBudget = getWeekBudget();
+const weekSpent = getWeekSpent();
+const weekRemaining = weekBudget - weekSpent;
 
-  // Weekly card
-  const weekEl = document.getElementById('weekly-remaining');
-  weekEl.textContent = formatCurrency(weekRemaining);
-  weekEl.className = 'big-amount ' + (weekRemaining > weekBudget * 0.3 ? 'positive' : weekRemaining > 0 ? 'warning' : 'negative');
-  
-  const { start, end } = getWeekRange();
-  document.getElementById('weekly-sub').textContent = 
-    `of ₪${weekBudget.toLocaleString()} · ${formatDate(start)} – ${formatDate(end)}`;
-  
-  const weekPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekRemaining / weekBudget) * 100)) : 0;
-  const weekBar = document.getElementById('weekly-bar');
-  weekBar.style.width = weekPct + '%';
-  weekBar.className = 'progress-fill ' + (weekPct > 40 ? 'green' : weekPct > 15 ? 'amber' : 'red');
+const monthBudget = state.settings.budget;
+const totalMonthlyIncome = state.incomes.reduce((s,i) => s + i.amount, 0);
+const monthSpent = getMonthSpent(monthStr);
+const monthRemaining = monthBudget - monthSpent;
 
-  // Monthly
-  const monthEl = document.getElementById('monthly-remaining');
-  monthEl.textContent = formatCurrency(monthRemaining);
-  monthEl.className = 'stat-value ' + (monthRemaining >= 0 ? 'positive' : 'negative');
-  document.getElementById('monthly-sub').textContent = `of ₪${monthBudget.toLocaleString()} budget`;
+const todaySpent = getTodaySpent();
+const todayTxs = state.transactions.filter(t => t.date && t.date.toString().startsWith(toDateStr(today)));
 
-  // Today
-  document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
-  document.getElementById('today-count').textContent = todayTxs.length + ' transaction' + (todayTxs.length !== 1 ? 's' : '');
+// Weekly card
+const weekEl = document.getElementById('weekly-remaining');
+weekEl.textContent = formatCurrency(weekRemaining);
+weekEl.className = 'big-amount ' + (weekRemaining > weekBudget * 0.3 ? 'positive' : weekRemaining > 0 ? 'warning' : 'negative');
 
-  // Recent
-  const recent = [...state.transactions]
-    .sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
-    .slice(0, 5);
-  
-  const recentList = document.getElementById('recent-list');
-  if (recent.length === 0) {
-    recentList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No transactions yet</p></div>';
-  } else {
-    recentList.innerHTML = recent.map(tx => renderTxItem(tx)).join('');
-  }
+const { start, end } = getWeekRange();
+document.getElementById('weekly-sub').textContent =
+`of ₪${weekBudget.toLocaleString()} · ${formatDate(start)} – ${formatDate(end)}`;
 
-  saveToCache();
+const weekPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekRemaining / weekBudget) * 100)) : 0;
+const weekBar = document.getElementById('weekly-bar');
+weekBar.style.width = weekPct + '%';
+weekBar.className = 'progress-fill ' + (weekPct > 40 ? 'green' : weekPct > 15 ? 'amber' : 'red');
+
+// Monthly
+const monthEl = document.getElementById('monthly-remaining');
+monthEl.textContent = formatCurrency(monthRemaining);
+monthEl.className = 'stat-value ' + (monthRemaining >= 0 ? 'positive' : 'negative');
+document.getElementById('monthly-sub').textContent = `of ₪${monthBudget.toLocaleString()} budget`;
+
+// Today
+document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
+document.getElementById('today-count').textContent = todayTxs.length + ' transaction' + (todayTxs.length !== 1 ? 's' : '');
+
+// Recent
+const recent = [...state.transactions]
+.sort((a,b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+.slice(0, 5);
+
+const recentList = document.getElementById('recent-list');
+if (recent.length === 0) {
+recentList.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No transactions yet</p></div>';
+} else {
+recentList.innerHTML = recent.map(tx => renderTxItem(tx)).join('');
+}
+
+saveToCache();
 }
 
 function renderTxItem(tx) {
-  const isExpense = tx.type === 'expense';
-  const icon = isExpense ? '💸' : '💰';
-  const desc = tx.description || (isExpense ? 'Expense' : 'Income');
-  return `
-    <div class="tx-item" onclick="openEditModal('${tx.id}')">
-      <div class="tx-icon ${tx.type}">${icon}</div>
-      <div class="tx-info">
-        <div class="tx-desc">${escHtml(desc)}</div>
-        <div class="tx-date">${formatDateFull(parseLocalDate(tx.date))}</div>
-      </div>
-      <div class="tx-amount ${tx.type}">${isExpense ? '−' : '+'}₪${tx.amount.toLocaleString()}</div>
-    </div>`;
+const isExpense = tx.type === 'expense';
+const icon = isExpense ? '💸' : '💰';
+const desc = tx.description || (isExpense ? 'Expense' : 'Income');
+return `
+<div class="tx-item" onclick="openEditModal('${tx.id}')">
+<div class="tx-icon ${tx.type}">${icon}</div>
+<div class="tx-info">
+<div class="tx-desc">${escHtml(desc)}</div>
+<div class="tx-date">${formatDateFull(parseLocalDate(tx.date))}${tx.person && tx.person !== MY_NAME ? ' · <span style="color:var(--blue);font-size:11px;">' + escHtml(tx.person) + '</span>' : ''}</div>
+</div>
+<div class="tx-amount ${tx.type}">${isExpense ? '−' : '+'}₪${tx.amount.toLocaleString()}</div>
+</div>`;
 }
 
 // ============================================================
 // RENDER HISTORY
 // ============================================================
 function renderHistory() {
-  const today = new Date();
-  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  document.getElementById('history-month').textContent = 
-    today.toLocaleString('default', { month: 'long', year: 'numeric' });
+const today = new Date();
+const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+document.getElementById('history-month').textContent =
+today.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-  const sorted = [...state.transactions]
-    .sort((a,b) => parseLocalDate(b.date) - parseLocalDate(a.date) || new Date(b.createdAt) - new Date(a.createdAt));
-  
-  if (sorted.length === 0) {
-    document.getElementById('history-list').innerHTML = 
-      '<div class="empty-state"><div class="icon">📋</div><p>No transactions this month</p></div>';
-    return;
-  }
+const sorted = [...state.transactions]
+.sort((a,b) => parseLocalDate(b.date) - parseLocalDate(a.date) || new Date(b.createdAt) - new Date(a.createdAt));
 
-  // Group by date
-  const groups = {};
-  sorted.forEach(tx => {
-    const d = tx.date ? tx.date.toString().substring(0, 10) : 'unknown';
-    if (!groups[d]) groups[d] = [];
-    groups[d].push(tx);
-  });
+if (sorted.length === 0) {
+document.getElementById('history-list').innerHTML =
+'<div class="empty-state"><div class="icon">📋</div><p>No transactions this month</p></div>';
+return;
+}
 
-  let html = '';
-  Object.entries(groups).forEach(([date, txs]) => {
-    html += `<div class="tx-group-header">${formatDateFull(parseLocalDate(date))}</div>`;
-    html += txs.map(tx => renderTxItem(tx)).join('');
-  });
+// Group by date
+const groups = {};
+sorted.forEach(tx => {
+const d = tx.date ? tx.date.toString().substring(0, 10) : 'unknown';
+if (!groups[d]) groups[d] = [];
+groups[d].push(tx);
+});
 
-  document.getElementById('history-list').innerHTML = html;
+let html = '';
+Object.entries(groups).forEach(([date, txs]) => {
+html += `<div class="tx-group-header">${formatDateFull(parseLocalDate(date))}</div>`;
+html += txs.map(tx => renderTxItem(tx)).join('');
+});
+
+document.getElementById('history-list').innerHTML = html;
 }
 
 // ============================================================
 // RENDER SETTINGS
 // ============================================================
 function renderSettings() {
-  document.getElementById('s-budget').value = state.settings.budget;
-  renderIncomesList();
-  renderConstantsList();
-  renderReport();
+document.getElementById('s-budget').value = state.settings.budget;
+renderIncomesList();
+renderConstantsList();
+renderMyName();
+renderReport();
 }
 
 function renderIncomesList() {
-  const container = document.getElementById('incomes-list');
-  container.innerHTML = state.incomes.map((inc, i) => `
-    <div class="constant-row income-row">
-      <input type="text" class="constant-name-input" value="${escHtml(inc.name)}"
-        placeholder="Income name (e.g. Sara Salary)"
-        oninput="state.incomes[${i}].name = this.value">
-      <input type="number" class="constant-amount-input" value="${inc.amount || ''}" placeholder="₪"
-        oninput="state.incomes[${i}].amount = parseFloat(this.value) || 0">
-      <button class="del-constant-btn" onclick="removeIncome(${i})">×</button>
-    </div>`).join('');
+const container = document.getElementById('incomes-list');
+container.innerHTML = state.incomes.map((inc, i) => `
+<div class="constant-row income-row">
+<input type="text" class="constant-name-input" value="${escHtml(inc.name)}"
+placeholder="Income name (e.g. Sara Salary)"
+oninput="state.incomes[${i}].name = this.value">
+<input type="number" class="constant-amount-input" value="${inc.amount || ''}" placeholder="₪"
+oninput="state.incomes[${i}].amount = parseFloat(this.value) || 0">
+<button class="del-constant-btn" onclick="removeIncome(${i})">×</button>
+</div>`).join('');
 }
 
 function renderConstantsList() {
-  const container = document.getElementById('constants-list');
-  container.innerHTML = state.constants.map((c, i) => `
-    <div class="constant-row">
-      <input type="text" class="constant-name-input" value="${escHtml(c.name)}"
-        placeholder="Expense name"
-        oninput="state.constants[${i}].name = this.value">
-      <input type="number" class="constant-amount-input" value="${c.amount || ''}" placeholder="₪"
-        oninput="state.constants[${i}].amount = parseFloat(this.value) || 0">
-      <button class="del-constant-btn" onclick="removeConstant(${i})">×</button>
-    </div>`).join('');
+const container = document.getElementById('constants-list');
+container.innerHTML = state.constants.map((c, i) => `
+<div class="constant-row">
+<input type="text" class="constant-name-input" value="${escHtml(c.name)}"
+placeholder="Expense name"
+oninput="state.constants[${i}].name = this.value">
+<input type="number" class="constant-amount-input" value="${c.amount || ''}" placeholder="₪"
+oninput="state.constants[${i}].amount = parseFloat(this.value) || 0">
+<button class="del-constant-btn" onclick="removeConstant(${i})">×</button>
+</div>`).join('');
 }
 
 function buildReportHTML(incomeTotal, constantsTotal, varSpent, extraIncomeLogged) {
-  const totalIncome  = incomeTotal + extraIncomeLogged;
-  const totalExpense = constantsTotal + varSpent;
-  const saved        = totalIncome - totalExpense;
-  return `
-    <div class="report-row">
-      <span class="label">Total income</span>
-      <span class="value positive">₪${totalIncome.toLocaleString()}</span>
-    </div>
-    <div class="report-row">
-      <span class="label">Total expenses</span>
-      <span class="value negative">−₪${totalExpense.toLocaleString()}</span>
-    </div>
-    <div class="report-row" style="padding-left:12px;">
-      <span class="label" style="font-size:13px;">· Constant</span>
-      <span class="value" style="font-size:13px;color:var(--text2);">₪${constantsTotal.toLocaleString()}</span>
-    </div>
-    <div class="report-row" style="padding-left:12px;">
-      <span class="label" style="font-size:13px;">· Variable</span>
-      <span class="value" style="font-size:13px;color:var(--text2);">₪${varSpent.toLocaleString()}</span>
-    </div>
-    <div class="report-divider"></div>
-    <div class="report-row">
-      <span class="label" style="font-weight:600;color:var(--text);">Balance</span>
-      <span class="value ${saved >= 0 ? 'positive' : 'negative'}" style="font-size:22px;font-weight:700;">
-        ${saved >= 0 ? '+' : '−'}₪${Math.abs(saved).toLocaleString()}
-      </span>
-    </div>`;
+const totalIncome = incomeTotal + extraIncomeLogged;
+const totalExpense = constantsTotal + varSpent;
+const saved = totalIncome - totalExpense;
+return `
+<div class="report-row">
+<span class="label">Total income</span>
+<span class="value positive">₪${totalIncome.toLocaleString()}</span>
+</div>
+<div class="report-row">
+<span class="label">Total expenses</span>
+<span class="value negative">−₪${totalExpense.toLocaleString()}</span>
+</div>
+<div class="report-row" style="padding-left:12px;">
+<span class="label" style="font-size:13px;">· Constant</span>
+<span class="value" style="font-size:13px;color:var(--text2);">₪${constantsTotal.toLocaleString()}</span>
+</div>
+<div class="report-row" style="padding-left:12px;">
+<span class="label" style="font-size:13px;">· Variable</span>
+<span class="value" style="font-size:13px;color:var(--text2);">₪${varSpent.toLocaleString()}</span>
+</div>
+<div class="report-divider"></div>
+<div class="report-row">
+<span class="label" style="font-weight:600;color:var(--text);">Balance</span>
+<span class="value ${saved >= 0 ? 'positive' : 'negative'}" style="font-size:22px;font-weight:700;">
+${saved >= 0 ? '+' : '−'}₪${Math.abs(saved).toLocaleString()}
+</span>
+</div>`;
 }
 
 function renderReport() {
-  const today    = new Date();
-  const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
-  const yearStr  = String(today.getFullYear());
+const today = new Date();
+const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+const yearStr = String(today.getFullYear());
 
-  const monthLabelEl = document.getElementById('report-month-label');
-  if (monthLabelEl) monthLabelEl.textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+const monthLabelEl = document.getElementById('report-month-label');
+if (monthLabelEl) monthLabelEl.textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-  // Monthly
-  const fixedIncome      = state.incomes.reduce((s,i) => s+i.amount, 0);
-  const constantsTotal   = state.constants.reduce((s,c) => s+c.amount, 0);
-  const monthVarSpent    = getMonthSpent(monthStr);
-  const monthExtraIncome = getMonthIncome(monthStr);
+// Monthly
+const fixedIncome = state.incomes.reduce((s,i) => s+i.amount, 0);
+const constantsTotal = state.constants.reduce((s,c) => s+c.amount, 0);
+const monthVarSpent = getMonthSpent(monthStr);
+const monthExtraIncome = getMonthIncome(monthStr);
 
-  const monthCard = document.getElementById('report-month-card');
-  if (monthCard) monthCard.innerHTML = buildReportHTML(fixedIncome, constantsTotal, monthVarSpent, monthExtraIncome);
+const monthCard = document.getElementById('report-month-card');
+if (monthCard) monthCard.innerHTML = buildReportHTML(fixedIncome, constantsTotal, monthVarSpent, monthExtraIncome);
 
-  // Yearly — use actual per-month income/constants from sheets via getYearlySummary
-  const yearTxs = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
-  const monthsElapsed = today.getMonth() + 1;
-  const yearVarSpent    = yearTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
-  const yearExtraIncome = yearTxs.filter(t => t.type === 'income').reduce((s,t)  => s+t.amount, 0);
+// Yearly — use actual per-month income/constants from sheets via getYearlySummary
+const yearTxs = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
+const monthsElapsed = today.getMonth() + 1;
+const yearVarSpent = yearTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
+const yearExtraIncome = yearTxs.filter(t => t.type === 'income').reduce((s,t) => s+t.amount, 0);
 
-  // Sum actual per-month data if available, otherwise fall back to current × months
-  let yearFixedIncome = 0, yearConstantsTotal = 0;
-  const ys = state.yearlySummary;
-  if (ys && ys.monthlyIncomes && Object.keys(ys.monthlyIncomes).length > 0) {
-    yearFixedIncome    = Object.values(ys.monthlyIncomes).reduce((s,v) => s+v, 0);
-    yearConstantsTotal = Object.values(ys.monthlyConstants || {}).reduce((s,v) => s+v, 0);
-  } else {
-    yearFixedIncome    = fixedIncome    * monthsElapsed;
-    yearConstantsTotal = constantsTotal * monthsElapsed;
-  }
+// Sum actual per-month data if available, otherwise fall back to current × months
+let yearFixedIncome = 0, yearConstantsTotal = 0;
+const ys = state.yearlySummary;
+if (ys && ys.monthlyIncomes && Object.keys(ys.monthlyIncomes).length > 0) {
+yearFixedIncome = Object.values(ys.monthlyIncomes).reduce((s,v) => s+v, 0);
+yearConstantsTotal = Object.values(ys.monthlyConstants || {}).reduce((s,v) => s+v, 0);
+} else {
+yearFixedIncome = fixedIncome * monthsElapsed;
+yearConstantsTotal = constantsTotal * monthsElapsed;
+}
 
-  const yearCard = document.getElementById('report-year-card');
-  const dataSource = (ys && Object.keys(ys.monthlyIncomes||{}).length > 0) ? 'actual data' : 'estimated';
-  if (yearCard) yearCard.innerHTML =
-    `<div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600;">${yearStr} · ${monthsElapsed} month${monthsElapsed>1?'s':''} · ${dataSource}</div>` +
-    buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
+const yearCard = document.getElementById('report-year-card');
+const dataSource = (ys && Object.keys(ys.monthlyIncomes||{}).length > 0) ? 'actual data' : 'estimated';
+if (yearCard) yearCard.innerHTML =
+`<div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-weight:600;">${yearStr} · ${monthsElapsed} month${monthsElapsed>1?'s':''} · ${dataSource}</div>` +
+buildReportHTML(yearFixedIncome, yearConstantsTotal, yearVarSpent, yearExtraIncome);
 }
 
 function addIncomeRow() {
-  state.incomes.push({ name: '', amount: 0 });
-  renderIncomesList();
+state.incomes.push({ name: '', amount: 0 });
+renderIncomesList();
 }
 function removeIncome(i) {
-  state.incomes.splice(i, 1);
-  renderIncomesList();
+state.incomes.splice(i, 1);
+renderIncomesList();
 }
 function addConstantRow() {
-  state.constants.push({ name: '', amount: 0 });
-  renderConstantsList();
+state.constants.push({ name: '', amount: 0 });
+renderConstantsList();
 }
 function removeConstant(i) {
-  state.constants.splice(i, 1);
-  renderConstantsList();
+state.constants.splice(i, 1);
+renderConstantsList();
 }
 
 async function saveSettings() {
-  state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
+state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
 
-  // State already synced via oninput handlers — just filter empties
-  state.incomes   = state.incomes.filter(i => i.name && i.name.trim());
-  state.constants = state.constants.filter(c => c.name && c.name.trim());
+// State already synced via oninput handlers — just filter empties
+state.incomes = state.incomes.filter(i => i.name && i.name.trim());
+state.constants = state.constants.filter(c => c.name && c.name.trim());
 
-  try {
-    const today = new Date();
-    const monthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM — no dashes so Sheets can't convert to date
-    const r1 = await apiCall('saveSettings',  { budget: state.settings.budget });
-    const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
-    const r3 = await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: monthStr });
-    const err = r1.error || r2.error || r3.error;
-    if (err) { showToastSimple('⚠️ Save error: ' + err); return; }
-    state.constantsMonth = monthStr;
-    state.incomesMonth   = monthStr;
-    saveToCache();
-    showToastSimple('✅ Settings saved');
-    renderHome();
-    renderReport();
-  } catch(e) {
-    showToastSimple('⚠️ Could not save — check connection');
-  }
+try {
+const today = new Date();
+const monthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM — no dashes so Sheets can't convert to date
+const r1 = await apiCall('saveSettings', { budget: state.settings.budget });
+const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
+const r3 = await apiCall('saveIncomes', { incomes: JSON.stringify(state.incomes), month: monthStr });
+const err = r1.error || r2.error || r3.error;
+if (err) { showToastSimple('⚠️ Save error: ' + err); return; }
+state.constantsMonth = monthStr;
+state.incomesMonth = monthStr;
+saveToCache();
+showToastSimple('✅ Settings saved');
+renderHome();
+renderReport();
+} catch(e) {
+showToastSimple('⚠️ Could not save — check connection');
+}
 }
 
 // ============================================================
 // LOG TRANSACTION
 // ============================================================
 function setType(type) {
-  currentType = type;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.type-btn.${type}`).classList.add('active');
-  const submitBtn = document.getElementById('submit-btn');
-  const logTitle = document.getElementById('log-title');
-  if (type === 'expense') {
-    submitBtn.textContent = 'Log Expense';
-    submitBtn.className = 'submit-btn expense-btn';
-    logTitle.textContent = 'Log Expense';
-  } else {
-    submitBtn.textContent = 'Log Income';
-    submitBtn.className = 'submit-btn';
-    logTitle.textContent = 'Log Income';
-  }
+currentType = type;
+document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+document.querySelector(`.type-btn.${type}`).classList.add('active');
+const submitBtn = document.getElementById('submit-btn');
+const logTitle = document.getElementById('log-title');
+if (type === 'expense') {
+submitBtn.textContent = 'Log Expense';
+submitBtn.className = 'submit-btn expense-btn';
+logTitle.textContent = 'Log Expense';
+} else {
+submitBtn.textContent = 'Log Income';
+submitBtn.className = 'submit-btn';
+logTitle.textContent = 'Log Income';
+}
 }
 
 let calcExpression = '';
 function numpad(val) {
-  const ops = ['+', '-', '*', '/'];
-  if (val === 'del') {
-    if (calcExpression) {
-      calcExpression = calcExpression.slice(0, -1);
-      // If expression is now just a number, sync to amountStr
-      if (!ops.some(op => calcExpression.slice(1).includes(op))) {
-        amountStr = calcExpression || '0';
-        calcExpression = '';
-      }
-    } else {
-      amountStr = amountStr.length > 1 ? amountStr.slice(0,-1) : '0';
-    }
-  } else if (ops.includes(val)) {
-    // Starting an operation
-    const current = calcExpression || amountStr;
-    calcExpression = current + val;
-    document.getElementById('calc-display').textContent = calcExpression;
-    amountStr = '0';
-    document.getElementById('amount-display').textContent = '0';
-    return;
-  } else if (val === '.') {
-    if (calcExpression && ops.some(op => calcExpression.slice(1).includes(op))) {
-      if (!amountStr.includes('.')) amountStr += '.';
-    } else {
-      if (!amountStr.includes('.')) amountStr += '.';
-    }
-  } else {
-    if (calcExpression) {
-      // We're entering the second operand
-      if (amountStr === '0') amountStr = val;
-      else amountStr += val;
-      // Show running expression
-      document.getElementById('calc-display').textContent = calcExpression + amountStr;
-      document.getElementById('amount-display').textContent = amountStr;
-      return;
-    } else {
-      if (amountStr === '0') amountStr = val;
-      else amountStr += val;
-    }
-  }
-  // If we have a full expression, evaluate it
-  if (calcExpression && !ops.includes(calcExpression[calcExpression.length-1])) {
-    try {
-      const result = Math.round(eval(calcExpression + amountStr) * 100) / 100;
-      document.getElementById('calc-display').textContent = calcExpression + amountStr + ' =';
-      amountStr = String(result);
-      calcExpression = '';
-    } catch(e) {}
-  }
-  document.getElementById('amount-display').textContent = amountStr;
+const ops = ['+', '-', '*', '/'];
+if (val === 'del') {
+if (calcExpression) {
+calcExpression = calcExpression.slice(0, -1);
+// If expression is now just a number, sync to amountStr
+if (!ops.some(op => calcExpression.slice(1).includes(op))) {
+amountStr = calcExpression || '0';
+calcExpression = '';
+}
+} else {
+amountStr = amountStr.length > 1 ? amountStr.slice(0,-1) : '0';
+}
+} else if (ops.includes(val)) {
+// Starting an operation
+const current = calcExpression || amountStr;
+calcExpression = current + val;
+document.getElementById('calc-display').textContent = calcExpression;
+amountStr = '0';
+document.getElementById('amount-display').textContent = '0';
+return;
+} else if (val === '.') {
+if (calcExpression && ops.some(op => calcExpression.slice(1).includes(op))) {
+if (!amountStr.includes('.')) amountStr += '.';
+} else {
+if (!amountStr.includes('.')) amountStr += '.';
+}
+} else {
+if (calcExpression) {
+// We're entering the second operand
+if (amountStr === '0') amountStr = val;
+else amountStr += val;
+// Show running expression
+document.getElementById('calc-display').textContent = calcExpression + amountStr;
+document.getElementById('amount-display').textContent = amountStr;
+return;
+} else {
+if (amountStr === '0') amountStr = val;
+else amountStr += val;
+}
+}
+// If we have a full expression, evaluate it
+if (calcExpression && !ops.includes(calcExpression[calcExpression.length-1])) {
+try {
+const result = Math.round(safeMath(calcExpression + amountStr) * 100) / 100;
+document.getElementById('calc-display').textContent = calcExpression + amountStr + ' =';
+amountStr = String(result);
+calcExpression = '';
+} catch(e) {}
+}
+document.getElementById('amount-display').textContent = amountStr;
 }
 
 async function submitTransaction() {
-  const amount = parseFloat(amountStr);
-  if (!amount || amount <= 0) { showToastSimple('⚠️ Enter an amount'); return; }
-  
-  const desc = document.getElementById('desc-input').value.trim();
-  const date = document.getElementById('date-input').value || toDateStr(new Date());
+const amount = parseFloat(amountStr);
+if (!amount || amount <= 0) { showToastSimple('⚠️ Enter an amount'); return; }
 
-  const tx = {
-    id: 'local_' + Date.now(),
-    date, type: currentType, amount, description: desc,
-    createdAt: new Date().toISOString()
-  };
+const desc = document.getElementById('desc-input').value.trim();
+const date = document.getElementById('date-input').value || toDateStr(new Date());
 
-  // Add to local state immediately so UI updates instantly
-  state.transactions.unshift(tx);
-  saveToCache();
-  renderHome();
-  renderHistory();
-  showExpenseToast(tx);
-  setTimeout(() => switchTab('home'), 300);
+const tx = {
+id: 'local_' + Date.now(),
+date, type: currentType, amount, description: desc,
+person: MY_NAME || 'Me',
+createdAt: new Date().toISOString()
+};
 
-  // Reset form
-  amountStr = '0';
-  calcExpression = '';
-  document.getElementById('calc-display').textContent = '';
-  document.getElementById('amount-display').textContent = '0';
-  document.getElementById('desc-input').value = '';
-  document.getElementById('date-input').value = toDateStr(new Date());
+// Add to local state immediately so UI updates instantly
+state.transactions.unshift(tx);
+state.yearTransactions.unshift(tx); // keep yearly in sync too
+saveToCache();
+renderHome();
+renderHistory();
+showExpenseToast(tx);
+setTimeout(() => switchTab('home'), 300);
 
-  // Sync to sheets — just write, no reload (avoids race condition wiping history)
-  if (navigator.onLine) {
-    try {
-      const res = await apiCall('addTransaction', tx);
-      if (res.id) {
-        const idx = state.transactions.findIndex(t => t.id === tx.id);
-        if (idx !== -1) state.transactions[idx].id = res.id;
-        saveToCache();
-        renderHome();
-        renderHistory();
-      }
-    } catch (e) {
-      offlineQueue.push({ action: 'addTransaction', data: tx });
-      localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
-    }
-  } else {
-    offlineQueue.push({ action: 'addTransaction', data: tx });
-    localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
-  }
+// Reset form
+amountStr = '0';
+calcExpression = '';
+document.getElementById('calc-display').textContent = '';
+document.getElementById('amount-display').textContent = '0';
+document.getElementById('desc-input').value = '';
+document.getElementById('date-input').value = toDateStr(new Date());
+
+// Sync to sheets — just write, no reload (avoids race condition wiping history)
+if (navigator.onLine) {
+try {
+const res = await apiCall('addTransaction', tx);
+if (res.id) {
+const idx = state.transactions.findIndex(t => t.id === tx.id);
+if (idx !== -1) state.transactions[idx].id = res.id;
+saveToCache();
+renderHome();
+renderHistory();
+}
+} catch (e) {
+offlineQueue.push({ action: 'addTransaction', data: tx });
+localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+}
+} else {
+offlineQueue.push({ action: 'addTransaction', data: tx });
+localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+}
 }
 
 function showExpenseToast(tx) {
-  const today = new Date();
-  const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
-  const weekBudget = getWeekBudget();
-  const weekSpent = getWeekSpent();
-  const weekRemaining = weekBudget - weekSpent;
-  const monthRemaining = state.settings.budget - getMonthSpent(monthStr);
+const today = new Date();
+const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+const weekBudget = getWeekBudget();
+const weekSpent = getWeekSpent();
+const weekRemaining = weekBudget - weekSpent;
+const monthRemaining = state.settings.budget - getMonthSpent(monthStr);
 
-  const isExpense = tx.type === 'expense';
-  const header = isExpense
-    ? `💸 −₪${tx.amount.toLocaleString()}${tx.description ? ' · ' + tx.description : ''}`
-    : `💰 +₪${tx.amount.toLocaleString()}${tx.description ? ' · ' + tx.description : ''}`;
+const isExpense = tx.type === 'expense';
+const header = isExpense
+? `💸 −₪${tx.amount.toLocaleString()}${tx.description ? ' · ' + tx.description : ''}`
+: `💰 +₪${tx.amount.toLocaleString()}${tx.description ? ' · ' + tx.description : ''}`;
 
-  const weekClass = weekRemaining >= 0 ? 'week-remaining' : 'red-text';
-  const monthClass = monthRemaining >= 0 ? 'month-remaining' : 'red-text';
+const weekClass = weekRemaining >= 0 ? 'week-remaining' : 'red-text';
+const monthClass = monthRemaining >= 0 ? 'month-remaining' : 'red-text';
 
-  document.getElementById('toast-header').textContent = header;
-  document.getElementById('toast-body').innerHTML = isExpense ? `
-    <span class="${weekClass}">📅 Week: ₪${weekRemaining.toLocaleString()}</span> &nbsp;
-    <span class="${monthClass}">📆 Month: ₪${monthRemaining.toLocaleString()}</span>
-  ` : `<span style="color:var(--green)">✓ Income logged</span>`;
-  
-  showToast();
+document.getElementById('toast-header').textContent = header;
+document.getElementById('toast-body').innerHTML = isExpense ? `
+<span class="${weekClass}">📅 Week: ₪${weekRemaining.toLocaleString()}</span> &nbsp;
+<span class="${monthClass}">📆 Month: ₪${monthRemaining.toLocaleString()}</span>
+` : `<span style="color:var(--green)">✓ Income logged</span>`;
+
+showToast();
 }
 
 // ============================================================
 // EDIT MODAL
 // ============================================================
 function openEditModal(id) {
-  const tx = state.transactions.find(t => t.id === id);
-  if (!tx) return;
-  currentEditId = id;
-  document.getElementById('edit-amount').value = tx.amount;
-  document.getElementById('edit-desc').value = tx.description || '';
-  document.getElementById('edit-date').value = tx.date ? tx.date.toString().substring(0,10) : toDateStr(new Date());
-  document.getElementById('edit-modal').classList.add('open');
+const tx = state.transactions.find(t => t.id === id);
+if (!tx) return;
+currentEditId = id;
+document.getElementById('edit-amount').value = tx.amount;
+document.getElementById('edit-desc').value = tx.description || '';
+document.getElementById('edit-date').value = tx.date ? tx.date.toString().substring(0,10) : toDateStr(new Date());
+document.getElementById('edit-modal').classList.add('open');
 }
 
 function closeModal() {
-  document.getElementById('edit-modal').classList.remove('open');
-  currentEditId = null;
+document.getElementById('edit-modal').classList.remove('open');
+currentEditId = null;
 }
 
 function showNewMonthModal(newMonth, prevMonth) {
-  const prevName = new Date(prevMonth + '-01').toLocaleString('default', { month: 'long' });
-  const modal = document.getElementById('new-month-modal');
-  modal.querySelector('p').textContent =
-    `Your income sources and constant expenses have been carried over from ${prevName}. Review and update any amounts that changed, then tap Save.`;
-  modal.classList.add('open');
+const prevName = new Date(prevMonth + '-01').toLocaleString('default', { month: 'long' });
+const modal = document.getElementById('new-month-modal');
+modal.querySelector('p').textContent =
+`Your income sources and constant expenses have been carried over from ${prevName}. Review and update any amounts that changed, then tap Save.`;
+modal.classList.add('open');
 }
 
 function closeNewMonthModal() {
-  document.getElementById('new-month-modal').classList.remove('open');
+document.getElementById('new-month-modal').classList.remove('open');
 }
 
 function goToSettings() {
-  closeNewMonthModal();
-  switchTab('settings');
+closeNewMonthModal();
+switchTab('settings');
 }
 
 async function saveEditedTx() {
-  if (!currentEditId) return;
-  const idx = state.transactions.findIndex(t => t.id === currentEditId);
-  if (idx === -1) return;
+if (!currentEditId) return;
+const idx = state.transactions.findIndex(t => t.id === currentEditId);
+if (idx === -1) return;
 
-  state.transactions[idx].amount = parseFloat(document.getElementById('edit-amount').value) || 0;
-  state.transactions[idx].description = document.getElementById('edit-desc').value;
-  state.transactions[idx].date = document.getElementById('edit-date').value;
+state.transactions[idx].amount = parseFloat(document.getElementById('edit-amount').value) || 0;
+state.transactions[idx].description = document.getElementById('edit-desc').value;
+state.transactions[idx].date = document.getElementById('edit-date').value;
 
-  // Mirror update in yearTransactions
-  const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
-  if (yearIdx !== -1) state.yearTransactions[yearIdx] = { ...state.transactions[idx] };
+// Mirror update in yearTransactions
+const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
+if (yearIdx !== -1) state.yearTransactions[yearIdx] = { ...state.transactions[idx] };
 
-  try {
-    await apiCall('updateTransaction', state.transactions[idx]);
-  } catch (e) {}
+try {
+await apiCall('updateTransaction', state.transactions[idx]);
+} catch (e) {}
 
-  closeModal();
-  saveToCache();
-  renderHome();
-  renderHistory();
-  showToastSimple('✅ Updated');
+closeModal();
+saveToCache();
+renderHome();
+renderHistory();
+showToastSimple('✅ Updated');
 }
 
 async function deleteCurrentTx() {
-  if (!currentEditId) return;
-  if (!confirm('Delete this entry?')) return;
+if (!currentEditId) return;
+if (!confirm('Delete this entry?')) return;
 
-  try {
-    await apiCall('deleteTransaction', { id: currentEditId });
-  } catch (e) {}
+const idToDelete = currentEditId;
+// Check if it's a local-only tx (not yet synced)
+const isLocalOnly = idToDelete.startsWith('local_');
 
-  state.transactions = state.transactions.filter(t => t.id !== currentEditId);
-  state.yearTransactions = state.yearTransactions.filter(t => t.id !== currentEditId);
-  closeModal();
-  saveToCache();
-  renderHome();
-  renderHistory();
-  showToastSimple('🗑️ Deleted');
+if (!isLocalOnly) {
+try {
+const res = await apiCall('deleteTransaction', { id: idToDelete });
+if (res.error) {
+showToastSimple('⚠️ Could not delete from server — try again');
+return; // don't remove locally if server failed
+}
+} catch (e) {
+showToastSimple('⚠️ Offline — delete will retry when connected');
+offlineQueue.push({ action: 'deleteTransaction', data: { id: idToDelete } });
+localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+}
+}
+
+state.transactions = state.transactions.filter(t => t.id !== idToDelete);
+state.yearTransactions = state.yearTransactions.filter(t => t.id !== idToDelete);
+closeModal();
+saveToCache();
+renderHome();
+renderHistory();
+showToastSimple('🗑️ Deleted');
 }
 
 // ============================================================
 // OFFLINE QUEUE
 // ============================================================
 async function processOfflineQueue() {
-  const queue = [...offlineQueue];
-  offlineQueue = [];
-  localStorage.removeItem('offline_queue');
-  
-  for (const item of queue) {
-    try {
-      await apiCall(item.action, item.data);
-    } catch (e) {
-      offlineQueue.push(item);
-    }
-  }
-  if (offlineQueue.length) localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+const queue = [...offlineQueue];
+offlineQueue = [];
+localStorage.removeItem('offline_queue');
+
+for (const item of queue) {
+try {
+await apiCall(item.action, item.data);
+} catch (e) {
+offlineQueue.push(item);
+}
+}
+if (offlineQueue.length) localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
 }
 
 function handleOnline() {
-  state.isOnline = true;
-  updateSyncIndicator();
-  if (offlineQueue.length > 0) {
-    processOfflineQueue().then(() => loadAll());
-  }
+state.isOnline = true;
+updateSyncIndicator();
+if (offlineQueue.length > 0) {
+processOfflineQueue().then(() => loadAll());
+}
 }
 
 function handleOffline() {
-  state.isOnline = false;
-  updateSyncIndicator();
+state.isOnline = false;
+updateSyncIndicator();
 }
 
 function updateSyncIndicator() {
-  const dot = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-label');
-  if (dot && label) {
-    dot.className = 'sync-dot ' + (state.isOnline ? '' : 'offline');
-    label.textContent = state.isOnline ? 'Live' : 'Offline';
-  }
+const dot = document.getElementById('sync-dot');
+const label = document.getElementById('sync-label');
+if (dot && label) {
+dot.className = 'sync-dot ' + (state.isOnline ? '' : 'offline');
+label.textContent = state.isOnline ? 'Live' : 'Offline';
+}
 }
 
 // ============================================================
 // NAVIGATION
 // ============================================================
 function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + tab).classList.add('active');
-  const navBtn = document.getElementById('nav-' + tab);
-  if (navBtn) navBtn.classList.add('active');
-  
-  if (tab === 'log') {
-    document.getElementById('date-input').value = toDateStr(new Date());
-    calcExpression = '';
-    document.getElementById('calc-display').textContent = '';
-  }
-  if (tab === 'settings') renderSettings();
-  if (tab === 'report') renderReport();
+activeTab = tab;
+document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+document.getElementById('screen-' + tab).classList.add('active');
+const navBtn = document.getElementById('nav-' + tab);
+if (navBtn) navBtn.classList.add('active');
+
+if (tab === 'log') {
+document.getElementById('date-input').value = toDateStr(new Date());
+calcExpression = '';
+document.getElementById('calc-display').textContent = '';
+}
+if (tab === 'settings') renderSettings();
+if (tab === 'report') renderReport();
 }
 
 // ============================================================
 // UTILS
 // ============================================================
 function formatCurrency(n) {
-  const abs = Math.abs(n);
-  return (n < 0 ? '−' : '') + '₪' + abs.toLocaleString('en-IL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const abs = Math.abs(n);
+return (n < 0 ? '−' : '') + '₪' + abs.toLocaleString('en-IL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 function toDateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function formatDate(d) {
-  return d.toLocaleDateString('en-IL', { month: 'short', day: 'numeric' });
+return d.toLocaleDateString('en-IL', { month: 'short', day: 'numeric' });
 }
 
 function parseLocalDate(dateStr) {
-  // Parse YYYY-MM-DD as local time (not UTC) to avoid day-off errors
-  if (!dateStr) return new Date();
-  const s = dateStr.toString().substring(0, 10);
-  const [y, m, d] = s.split('-').map(Number);
-  return new Date(y, m - 1, d);
+// Parse YYYY-MM-DD as local time (not UTC) to avoid day-off errors
+if (!dateStr) return new Date();
+const s = dateStr.toString().substring(0, 10);
+const [y, m, d] = s.split('-').map(Number);
+return new Date(y, m - 1, d);
 }
 
 function formatDateFull(d) {
-  const today = new Date();
-  const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
-  if (toDateStr(d) === toDateStr(today)) return 'Today';
-  if (toDateStr(d) === toDateStr(yesterday)) return 'Yesterday';
-  return d.toLocaleDateString('en-IL', { weekday: 'short', month: 'short', day: 'numeric' });
+const today = new Date();
+const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
+if (toDateStr(d) === toDateStr(today)) return 'Today';
+if (toDateStr(d) === toDateStr(yesterday)) return 'Yesterday';
+return d.toLocaleDateString('en-IL', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 function updateHomeDate() {
-  const el = document.getElementById('home-date');
-  if (el) el.textContent = new Date().toLocaleDateString('en-IL', { weekday: 'long', month: 'long', day: 'numeric' });
+const el = document.getElementById('home-date');
+if (el) el.textContent = new Date().toLocaleDateString('en-IL', { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 let toastTimer;
 function showToast() {
-  const toast = document.getElementById('toast');
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+const toast = document.getElementById('toast');
+toast.classList.add('show');
+clearTimeout(toastTimer);
+toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// ============================================================
+// NAME PROMPT + PARTNER ACTIVITY
+// ============================================================
+function showNamePrompt() {
+document.getElementById('name-modal').classList.add('open');
+setTimeout(() => document.getElementById('name-input').focus(), 300);
+}
+
+function saveName() {
+const name = document.getElementById('name-input').value.trim();
+if (!name) return;
+MY_NAME = name;
+localStorage.setItem('my_name', name);
+document.getElementById('name-modal').classList.remove('open');
+}
+
+let lastSeenTxIds = new Set();
+function checkPartnerActivity(freshTxs) {
+if (!MY_NAME || !freshTxs.length) return;
+
+// On first load, just populate lastSeenTxIds without alerting
+if (lastSeenTxIds.size === 0) {
+freshTxs.forEach(t => lastSeenTxIds.add(t.id));
+return;
+}
+
+// Find new transactions not logged by me
+const newPartnerTxs = freshTxs.filter(t =>
+!lastSeenTxIds.has(t.id) && t.person && t.person !== MY_NAME
+);
+
+freshTxs.forEach(t => lastSeenTxIds.add(t.id));
+
+if (newPartnerTxs.length > 0) {
+const tx = newPartnerTxs[0];
+const who = tx.person;
+const what = tx.description ? ` · ${tx.description}` : '';
+const sign = tx.type === 'expense' ? '−' : '+';
+showPartnerBanner(`${who} logged ${sign}₪${tx.amount.toLocaleString()}${what}`);
+}
+}
+
+function showPartnerBanner(msg) {
+const banner = document.getElementById('partner-banner');
+const text = document.getElementById('partner-banner-text');
+text.textContent = msg;
+banner.style.display = 'block';
+setTimeout(dismissPartnerBanner, 6000);
+}
+
+function dismissPartnerBanner() {
+document.getElementById('partner-banner').style.display = 'none';
+}
+
+// ============================================================
+// SAFE MATH (replaces eval)
+// ============================================================
+function safeMath(expr) {
+// Only allow digits, operators, dots, spaces
+if (!/^[0-9+\-*/.() ]+$/.test(expr)) throw new Error('Invalid expression');
+// Simple recursive descent for +, -, *, /
+const tokens = expr.replace(/\s/g, '').match(/(\d+\.?\d*|[+\-*/])/g);
+if (!tokens) throw new Error('Empty');
+let i = 0;
+function parseExpr() {
+let left = parseTerm();
+while (i < tokens.length && (tokens[i] === '+' || tokens[i] === '-')) {
+const op = tokens[i++];
+const right = parseTerm();
+left = op === '+' ? left + right : left - right;
+}
+return left;
+}
+function parseTerm() {
+let left = parseNum();
+while (i < tokens.length && (tokens[i] === '*' || tokens[i] === '/')) {
+const op = tokens[i++];
+const right = parseNum();
+left = op === '*' ? left * right : left / right;
+}
+return left;
+}
+function parseNum() {
+const n = parseFloat(tokens[i++]);
+if (isNaN(n)) throw new Error('NaN');
+return n;
+}
+const result = parseExpr();
+if (isNaN(result) || !isFinite(result)) throw new Error('Bad result');
+return result;
+}
+
+// Add name display in settings
+function renderMyName() {
+const el = document.getElementById('my-name-display');
+if (el) el.textContent = MY_NAME || 'Not set';
 }
 
 function showUpdateBanner() {
-  const banner = document.getElementById('update-banner');
-  if (banner) banner.style.display = 'block';
+const banner = document.getElementById('update-banner');
+if (banner) banner.style.display = 'block';
 }
 
 function showToastSimple(msg) {
-  document.getElementById('toast-header').textContent = msg;
-  document.getElementById('toast-body').innerHTML = '';
-  showToast();
+document.getElementById('toast-header').textContent = msg;
+document.getElementById('toast-body').innerHTML = '';
+showToast();
 }
 </script>
+
 </body>
 </html>
