@@ -263,7 +263,7 @@ nav {
 
 /* ===== LOG SCREEN ===== */
 .log-screen {
-  padding: 20px 20px 100px;
+  padding: 8px 16px 90px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -274,11 +274,11 @@ nav {
   background: var(--bg3);
   border-radius: 12px;
   padding: 4px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .type-btn {
   flex: 1;
-  padding: 10px;
+  padding: 7px;
   border: none;
   background: none;
   border-radius: 9px;
@@ -299,22 +299,22 @@ nav {
 
 .amount-display {
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .amount-display-value {
   font-family: 'Outfit', sans-serif;
-  font-size: 44px;
+  font-size: 38px;
   font-weight: 800;
   color: var(--text);
   letter-spacing: -2px;
-  min-height: 54px;
+  min-height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
 }
 .amount-display-value .cursor {
-  width: 3px; height: 50px;
+  width: 3px; height: 42px;
   background: var(--green);
   border-radius: 2px;
   animation: blink 1s infinite;
@@ -333,16 +333,16 @@ nav {
 .numpad {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: 5px;
+  margin-bottom: 8px;
 }
 .num-btn {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 13px 6px;
+  padding: 10px 6px;
   font-family: 'Outfit', sans-serif;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
@@ -359,12 +359,12 @@ nav {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 10px 14px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text);
   outline: none;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   transition: border-color 0.2s;
 }
 .desc-input::placeholder { color: var(--text3); }
@@ -375,12 +375,12 @@ nav {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 10px 14px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text);
   outline: none;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   transition: border-color 0.2s;
   -webkit-appearance: none;
   color-scheme: dark;
@@ -389,12 +389,12 @@ nav {
 
 .submit-btn {
   width: 100%;
-  padding: 18px;
+  padding: 14px;
   background: var(--green);
   border: none;
   border-radius: 14px;
   font-family: 'Outfit', sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: #0f1117;
   cursor: pointer;
@@ -792,10 +792,7 @@ nav {
 
     <!-- LOG -->
     <div id="screen-log" class="screen">
-      <div class="page-header">
-        <div class="page-title" id="log-title">Log Expense</div>
-      </div>
-      <div class="log-screen" style="padding-top:8px;">
+      <div class="log-screen">
         <div class="type-toggle">
           <button class="type-btn expense active" onclick="setType('expense')">Expense</button>
           <button class="type-btn income" onclick="setType('income')">Income</button>
@@ -809,7 +806,7 @@ nav {
           </div>
         </div>
 
-        <div id="calc-display" style="font-size:13px;color:var(--text3);text-align:right;padding:0 4px 4px;min-height:18px;"></div>
+        <div id="calc-display" style="font-size:13px;color:var(--text3);text-align:right;padding:0 4px 4px;min-height:14px;"></div>
         <div class="numpad">
           <button class="num-btn" onclick="numpad('7')">7</button>
           <button class="num-btn" onclick="numpad('8')">8</button>
@@ -825,14 +822,15 @@ nav {
           <button class="num-btn op-btn" onclick="numpad('-')">−</button>
           <button class="num-btn" onclick="numpad('.')">.</button>
           <button class="num-btn" onclick="numpad('0')">0</button>
-          <button class="num-btn del" onclick="numpad('del')">⌫</button>
           <button class="num-btn op-btn" onclick="numpad('+')">+</button>
-          <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="grid-column:span 4;background:var(--green-dim);color:var(--green);font-size:20px;">=</button>
+          <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
+          <button class="num-btn del" style="grid-column:span 4;" onclick="numpad('del')">⌫ clear</button>
         </div>
 
-        <input type="text" id="desc-input" class="desc-input" placeholder="What's it for? (optional)">
-        <input type="date" id="date-input" class="date-input">
-
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)" style="margin-bottom:0;flex:1;">
+          <input type="date" id="date-input" class="date-input" style="margin-bottom:0;width:auto;flex:0 0 auto;">
+        </div>
         <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
       </div>
     </div>
