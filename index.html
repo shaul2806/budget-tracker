@@ -827,6 +827,7 @@ nav {
           <button class="num-btn" onclick="numpad('0')">0</button>
           <button class="num-btn del" onclick="numpad('del')">⌫</button>
           <button class="num-btn op-btn" onclick="numpad('+')">+</button>
+          <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="grid-column:span 4;background:var(--green-dim);color:var(--green);font-size:20px;">=</button>
         </div>
 
         <input type="text" id="desc-input" class="desc-input" placeholder="What's it for? (optional)">
@@ -1639,6 +1640,21 @@ function numpad(val) {
     } else {
       amountStr = amountStr.length > 1 ? amountStr.slice(0,-1) : '0';
     }
+  } else if (val === '=') {
+    // Evaluate expression
+    if (calcExpression) {
+      try {
+        const expr = ops.includes(calcExpression[calcExpression.length-1])
+          ? calcExpression.slice(0,-1)           // trailing operator — ignore it
+          : calcExpression + amountStr;
+        const result = Math.round(safeMath(expr) * 100) / 100;
+        document.getElementById('calc-display').textContent = expr + ' =';
+        amountStr = String(result);
+        calcExpression = '';
+        document.getElementById('amount-display').textContent = amountStr;
+      } catch(e) {}
+    }
+    return;
   } else if (ops.includes(val)) {
     // Starting an operation
     const current = calcExpression || amountStr;
