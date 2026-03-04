@@ -387,6 +387,27 @@ nav {
 }
 .date-input:focus { border-color: rgba(52,211,153,0.4); }
 
+.date-quick-btn {
+  flex: 1;
+  padding: 9px 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.date-quick-btn.active {
+  background: var(--bg3);
+  color: var(--text);
+  border-color: rgba(52,211,153,0.4);
+}
+.date-quick-btn:active { transform: scale(0.97); }
+
 .submit-btn {
   width: 100%;
   padding: 14px;
@@ -798,15 +819,22 @@ nav {
           <button class="type-btn income" onclick="setType('income')">Income</button>
         </div>
 
-        <div class="amount-display">
-          <div class="amount-display-value">
-            <span class="amount-currency">₪</span>
-            <span id="amount-display">0</span>
-            <span class="cursor"></span>
+        <!-- Amount row: number centered, ⌫ on the right aligned with ÷ column -->
+        <div style="position:relative;margin-bottom:2px;">
+          <div class="amount-display" style="margin-bottom:0;">
+            <div class="amount-display-value">
+              <span class="amount-currency">₪</span>
+              <span id="amount-display">0</span>
+              <span class="cursor"></span>
+            </div>
           </div>
+          <button class="num-btn del" onclick="numpad('del')"
+            style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);">⌫</button>
         </div>
 
-        <div id="calc-display" style="font-size:13px;color:var(--text3);text-align:right;padding:0 4px 4px;min-height:14px;"></div>
+        <div id="calc-display" style="display:none;"></div>
+
+        <!-- Numpad: ⌫ removed from here, = and + swapped -->
         <div class="numpad">
           <button class="num-btn" onclick="numpad('7')">7</button>
           <button class="num-btn" onclick="numpad('8')">8</button>
@@ -822,15 +850,19 @@ nav {
           <button class="num-btn op-btn" onclick="numpad('-')">−</button>
           <button class="num-btn" onclick="numpad('.')">.</button>
           <button class="num-btn" onclick="numpad('0')">0</button>
-          <button class="num-btn op-btn" onclick="numpad('+')">+</button>
           <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
-          <button class="num-btn del" style="grid-column:span 4;" onclick="numpad('del')">⌫ clear</button>
+          <button class="num-btn op-btn" onclick="numpad('+')">+</button>
         </div>
 
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)" style="margin-bottom:0;flex:1;">
-          <input type="date" id="date-input" class="date-input" style="margin-bottom:0;width:auto;flex:0 0 auto;">
+        <!-- Date row: Today / Yesterday / Other (opens hidden date input) -->
+        <div style="display:flex;gap:5px;margin-bottom:8px;">
+          <button class="date-quick-btn active" id="date-btn-today"    onclick="setQuickDate('today')">Today</button>
+          <button class="date-quick-btn"        id="date-btn-yesterday" onclick="setQuickDate('yesterday')">Yesterday</button>
+          <button class="date-quick-btn"        id="date-btn-other"    onclick="setQuickDate('other')">Other</button>
         </div>
+        <input type="date" id="date-input" style="display:none;" onchange="onDatePickerChange()">
+
+        <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)">
         <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
       </div>
     </div>
@@ -1607,6 +1639,32 @@ async function saveSettings() {
 // ============================================================
 // LOG TRANSACTION
 // ============================================================
+function setQuickDate(which) {
+  const today = new Date();
+  document.querySelectorAll('.date-quick-btn').forEach(b => b.classList.remove('active'));
+
+  if (which === 'today') {
+    document.getElementById('date-input').value = toDateStr(today);
+    document.getElementById('date-btn-today').classList.add('active');
+  } else if (which === 'yesterday') {
+    const y = new Date(today); y.setDate(today.getDate() - 1);
+    document.getElementById('date-input').value = toDateStr(y);
+    document.getElementById('date-btn-yesterday').classList.add('active');
+  } else {
+    // Open the native date picker
+    const inp = document.getElementById('date-input');
+    inp.style.display = 'block';
+    inp.focus();
+    inp.click();
+    document.getElementById('date-btn-other').classList.add('active');
+  }
+}
+
+function onDatePickerChange() {
+  // After picking a date, hide the input again
+  document.getElementById('date-input').style.display = 'none';
+}
+
 function setType(type) {
   currentType = type;
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
@@ -1901,6 +1959,9 @@ function switchTab(tab) {
   
   if (tab === 'log') {
     document.getElementById('date-input').value = toDateStr(new Date());
+    document.getElementById('date-input').style.display = 'none';
+    document.querySelectorAll('.date-quick-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('date-btn-today').classList.add('active');
     calcExpression = '0';
     document.getElementById('calc-display').textContent = '';
   }
