@@ -1753,21 +1753,18 @@ function selectIncomeSource(idx) {
   const newRow = document.getElementById('new-source-row');
 
   if (idx === -2) {
-    // New source — show input, clear amount
+    // New source — show input, keep amount as-is
     newRow.style.display = 'block';
     document.getElementById('new-source-input').value = '';
     document.getElementById('new-source-input').focus();
     document.getElementById('desc-input').value = '';
-    calcExpression = '0';
-    document.getElementById('amount-display').textContent = '0';
+    // Don't reset amount — user may have already typed it
   } else {
-    // Existing source — hide new input, pre-fill desc, clear amount for fresh entry
+    // Existing source — hide new input, pre-fill desc, keep amount as-is
     newRow.style.display = 'none';
     const inc = state.incomes[idx];
     document.getElementById('desc-input').value = inc.name;
-    // Don't pre-fill amount — user enters what they received this time
-    calcExpression = '0';
-    document.getElementById('amount-display').textContent = '0';
+    // Don't reset amount — user may have already typed it
   }
 }
 
@@ -2015,6 +2012,18 @@ async function deleteCurrentTx() {
       showToastSimple('⚠️ Offline — delete will retry when connected');
       offlineQueue.push({ action: 'deleteTransaction', data: { id: idToDelete } });
       localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+    }
+  }
+
+  // If this was an income transaction linked to a source, subtract its amount back
+  const deletedTx = state.transactions.find(t => t.id === idToDelete);
+  if (deletedTx && deletedTx.incomeSource) {
+    const srcIdx = state.incomes.findIndex(i => i.name === deletedTx.incomeSource);
+    if (srcIdx !== -1) {
+      state.incomes[srcIdx].amount = Math.max(0, state.incomes[srcIdx].amount - deletedTx.amount);
+      const today2 = new Date();
+      const mStr = String(today2.getFullYear()) + String(today2.getMonth()+1).padStart(2,'0');
+      apiCall('saveIncomes', { incomes: JSON.stringify(state.incomes), month: mStr }).catch(() => {});
     }
   }
 
