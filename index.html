@@ -387,6 +387,32 @@ nav {
 }
 .date-input:focus { border-color: rgba(52,211,153,0.4); }
 
+.income-src-btn {
+  padding: 7px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.income-src-btn.selected {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+  font-weight: 700;
+}
+.income-src-btn.add-new {
+  color: var(--blue);
+  border-color: rgba(96,165,250,0.3);
+  background: rgba(96,165,250,0.07);
+}
+.income-src-btn:active { transform: scale(0.96); }
+
 .date-quick-btn {
   flex: 1;
   padding: 9px 6px;
@@ -817,6 +843,17 @@ nav {
         <div class="type-toggle">
           <button class="type-btn expense active" onclick="setType('expense')">Expense</button>
           <button class="type-btn income" onclick="setType('income')">Income</button>
+        </div>
+
+        <!-- Income source picker (only shown when type=income) -->
+        <div id="income-source-row" style="display:none;margin-bottom:6px;">
+          <div style="font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px;margin-bottom:5px;">SELECT SOURCE</div>
+          <div id="income-source-btns" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+          <!-- New source inline input (hidden until + tapped) -->
+          <div id="new-source-row" style="display:none;margin-top:6px;display:none;">
+            <input type="text" id="new-source-input" class="desc-input"
+              placeholder="New source name..." style="margin-bottom:0;">
+          </div>
         </div>
 
         <!-- Amount row: number centered, ⌫ on the right aligned with ÷ column -->
@@ -1564,7 +1601,10 @@ function renderReport() {
   const fixedIncome      = state.incomes.reduce((s,i) => s+i.amount, 0);
   const constantsTotal   = state.constants.reduce((s,c) => s+c.amount, 0);
   const monthVarSpent    = getMonthSpent(monthStr);
-  const monthExtraIncome = getMonthIncome(monthStr);
+  // Only count income transactions that are NOT linked to a settings source (avoids double count)
+  const monthExtraIncome = state.transactions
+    .filter(t => t.type === 'income' && !t.incomeSource && t.date && t.date.toString().startsWith(monthStr))
+    .reduce((s,t) => s+t.amount, 0);
 
   const monthCard = document.getElementById('report-month-card');
   if (monthCard) monthCard.innerHTML = buildReportHTML(fixedIncome, constantsTotal, monthVarSpent, monthExtraIncome);
@@ -1573,7 +1613,7 @@ function renderReport() {
   const yearTxs = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
   const monthsElapsed = today.getMonth() + 1;
   const yearVarSpent    = yearTxs.filter(t => t.type === 'expense').reduce((s,t) => s+t.amount, 0);
-  const yearExtraIncome = yearTxs.filter(t => t.type === 'income').reduce((s,t)  => s+t.amount, 0);
+  const yearExtraIncome = yearTxs.filter(t => t.type === 'income' && !t.incomeSource).reduce((s,t) => s+t.amount, 0);
 
   // Sum actual per-month data if available, otherwise fall back to current × months
   let yearFixedIncome = 0, yearConstantsTotal = 0;
@@ -1665,6 +1705,8 @@ function onDatePickerChange() {
   document.getElementById('date-input').style.display = 'none';
 }
 
+let selectedIncomeSourceIdx = -1; // -1 = none, -2 = new source
+
 function setType(type) {
   currentType = type;
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
@@ -1674,11 +1716,58 @@ function setType(type) {
   if (type === 'expense') {
     submitBtn.textContent = 'Log Expense';
     submitBtn.className = 'submit-btn expense-btn';
-    logTitle.textContent = 'Log Expense';
+    if (logTitle) logTitle.textContent = 'Log Expense';
+    document.getElementById('income-source-row').style.display = 'none';
   } else {
     submitBtn.textContent = 'Log Income';
     submitBtn.className = 'submit-btn';
-    logTitle.textContent = 'Log Income';
+    if (logTitle) logTitle.textContent = 'Log Income';
+    selectedIncomeSourceIdx = -1;
+    renderIncomeSourcePicker();
+    document.getElementById('income-source-row').style.display = 'block';
+  }
+}
+
+function renderIncomeSourcePicker() {
+  const container = document.getElementById('income-source-btns');
+  container.innerHTML = '';
+  // Render each existing source as a pill button
+  state.incomes.forEach((inc, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'income-src-btn' + (selectedIncomeSourceIdx === i ? ' selected' : '');
+    btn.textContent = inc.name;
+    btn.onclick = () => selectIncomeSource(i);
+    container.appendChild(btn);
+  });
+  // Add "+ New" button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'income-src-btn add-new' + (selectedIncomeSourceIdx === -2 ? ' selected' : '');
+  addBtn.textContent = '+ New source';
+  addBtn.onclick = () => selectIncomeSource(-2);
+  container.appendChild(addBtn);
+}
+
+function selectIncomeSource(idx) {
+  selectedIncomeSourceIdx = idx;
+  renderIncomeSourcePicker();
+  const newRow = document.getElementById('new-source-row');
+
+  if (idx === -2) {
+    // New source — show input, clear amount
+    newRow.style.display = 'block';
+    document.getElementById('new-source-input').value = '';
+    document.getElementById('new-source-input').focus();
+    document.getElementById('desc-input').value = '';
+    calcExpression = '0';
+    document.getElementById('amount-display').textContent = '0';
+  } else {
+    // Existing source — hide new input, pre-fill desc, clear amount for fresh entry
+    newRow.style.display = 'none';
+    const inc = state.incomes[idx];
+    document.getElementById('desc-input').value = inc.name;
+    // Don't pre-fill amount — user enters what they received this time
+    calcExpression = '0';
+    document.getElementById('amount-display').textContent = '0';
   }
 }
 
@@ -1747,16 +1836,44 @@ async function submitTransaction() {
   const desc = document.getElementById('desc-input').value.trim();
   const date = document.getElementById('date-input').value || toDateStr(new Date());
 
+  // Income requires a source selection
+  let incomeSourceName = '';
+  if (currentType === 'income') {
+    if (selectedIncomeSourceIdx === -1) {
+      showToastSimple('⚠️ Select an income source'); return;
+    }
+    if (selectedIncomeSourceIdx === -2) {
+      // New source
+      const newName = document.getElementById('new-source-input').value.trim();
+      if (!newName) { showToastSimple('⚠️ Enter a name for the new source'); return; }
+      incomeSourceName = newName;
+      // Add to state.incomes
+      state.incomes.push({ name: newName, amount: amount });
+      const today2 = new Date();
+      const mStr = String(today2.getFullYear()) + String(today2.getMonth()+1).padStart(2,'0');
+      apiCall('saveIncomes', { incomes: JSON.stringify(state.incomes), month: mStr }).catch(() => {});
+    } else {
+      // Existing source — ADD to current amount (not replace)
+      incomeSourceName = state.incomes[selectedIncomeSourceIdx].name;
+      state.incomes[selectedIncomeSourceIdx].amount += amount;
+      const today2 = new Date();
+      const mStr = String(today2.getFullYear()) + String(today2.getMonth()+1).padStart(2,'0');
+      apiCall('saveIncomes', { incomes: JSON.stringify(state.incomes), month: mStr }).catch(() => {});
+    }
+  }
+
   const tx = {
     id: 'local_' + Date.now(),
-    date, type: currentType, amount, description: desc,
+    date, type: currentType, amount,
+    description: desc || incomeSourceName,
     person: MY_NAME || 'Me',
+    incomeSource: incomeSourceName,
     createdAt: new Date().toISOString()
   };
 
   // Add to local state immediately so UI updates instantly
   state.transactions.unshift(tx);
-  state.yearTransactions.unshift(tx);  // keep yearly in sync too
+  state.yearTransactions.unshift(tx);
   saveToCache();
   renderHome();
   renderHistory();
@@ -1769,6 +1886,10 @@ async function submitTransaction() {
   document.getElementById('amount-display').textContent = '0';
   document.getElementById('desc-input').value = '';
   document.getElementById('date-input').value = toDateStr(new Date());
+  // Reset income source picker
+  selectedIncomeSourceIdx = -1;
+  document.getElementById('new-source-row').style.display = 'none';
+  document.getElementById('income-source-row').style.display = 'none';
 
   // Sync to sheets — just write, no reload (avoids race condition wiping history)
   if (navigator.onLine) {
@@ -1962,6 +2083,10 @@ function switchTab(tab) {
     document.getElementById('date-input').style.display = 'none';
     document.querySelectorAll('.date-quick-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('date-btn-today').classList.add('active');
+    document.getElementById('income-source-row').style.display = 'none';
+    document.getElementById('new-source-row').style.display = 'none';
+    selectedIncomeSourceIdx = -1;
+    setType('expense'); // always reset to expense on tab switch
     calcExpression = '0';
     document.getElementById('calc-display').textContent = '';
   }
