@@ -434,6 +434,34 @@ nav {
 }
 .date-quick-btn:active { transform: scale(0.97); }
 
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--bg3);
+  border-radius: 26px;
+  transition: 0.2s;
+}
+.toggle-slider:before {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  left: 3px; bottom: 3px;
+  background: var(--text3);
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--green-dim); border: 1px solid var(--green); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(18px); background: var(--green); }
+
 .submit-btn {
   width: 100%;
   padding: 14px;
@@ -827,6 +855,9 @@ nav {
         </div>
       </div>
 
+      <!-- Exceptional notice -->
+      <div id="exceptional-notice" style="display:none;margin:0 16px 8px;padding:8px 12px;background:var(--amber-dim);border-radius:10px;font-size:12px;color:var(--amber);font-weight:600;"></div>
+
       <!-- Recent -->
       <div style="padding:8px 16px 4px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -900,6 +931,13 @@ nav {
         <input type="date" id="date-input" style="display:none;" onchange="onDatePickerChange()">
 
         <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)">
+        <div id="exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 2px;">
+          <label class="toggle-switch" style="width:36px;height:22px;">
+            <input type="checkbox" id="exceptional-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;color:var(--text2);">One-time / exceptional expense <span style="color:var(--text3);">(excluded from budget)</span></span>
+        </div>
         <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
       </div>
     </div>
@@ -917,6 +955,10 @@ nav {
         <div id="report-year-card" class="card" style="margin:0 0 16px;padding:20px;">
           <div style="color:var(--text3);font-size:14px;">Loading year data...</div>
         </div>
+
+        <div class="card-label" style="padding-left:4px;margin-bottom:8px;">PAST MONTHS</div>
+        <div id="past-months-pills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+        <div id="past-month-report" style="margin-bottom:24px;"></div>
       </div>
     </div>
 
@@ -958,6 +1000,21 @@ nav {
 
       <div class="settings-section" style="margin-top:8px;">
         <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Daily Email Digest</div>
+        <div class="setting-row" style="justify-content:space-between;align-items:center;">
+          <div class="setting-label">Send morning summary</div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="s-email-enabled" onchange="state.settings.emailEnabled = this.checked; toggleEmailFields();">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="email-fields" style="display:none;margin-top:8px;">
+          <input type="email" id="s-email1" class="desc-input" placeholder="Your email address" style="margin-bottom:8px;">
+          <input type="email" id="s-email2" class="desc-input" placeholder="Sara's email address (optional)" style="margin-bottom:0;">
+        </div>
       </div>
 
       <div class="settings-section">
@@ -1008,6 +1065,13 @@ nav {
       <input type="number" id="edit-amount" class="modal-input" placeholder="Amount">
       <input type="text" id="edit-desc" class="modal-input" placeholder="Description (optional)">
       <input type="date" id="edit-date" class="modal-input" style="color-scheme:dark;">
+      <div id="edit-exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <label class="toggle-switch" style="width:36px;height:22px;">
+          <input type="checkbox" id="edit-exceptional-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="font-size:13px;color:var(--text2);">Exceptional expense (excluded from budget)</span>
+      </div>
       <div class="modal-actions">
         <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
         <button class="modal-btn danger" onclick="deleteCurrentTx()">Delete</button>
@@ -1040,15 +1104,28 @@ nav {
 
   <!-- New Month Modal -->
   <div class="modal-overlay" id="new-month-modal">
-    <div class="modal">
-      <div class="modal-title">🎉 New Month!</div>
-      <p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px;">
-        New month! Your income sources and constant expenses from last month are shown.
-        Review any amounts that changed and tap <strong>Save Settings</strong> to confirm — this records them for the yearly report.
+    <div class="modal" style="max-height:80vh;overflow-y:auto;">
+      <div class="modal-title">🗓️ New Month Review</div>
+      <p style="color:var(--text2);font-size:13px;line-height:1.5;margin-bottom:14px;">
+        Check your income sources and expenses for the new month. Update anything that changed.
       </p>
+
+      <div id="nm-recurring-section">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;">RECURRING INCOMES ✓</div>
+        <div id="nm-recurring-list" style="margin-bottom:12px;"></div>
+      </div>
+
+      <div id="nm-onetime-section" style="display:none;">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:0.5px;margin-bottom:6px;">ONE-TIME INCOMES — INCLUDE THIS MONTH?</div>
+        <div id="nm-onetime-list" style="margin-bottom:12px;"></div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;margin-top:4px;">CONSTANT EXPENSES</div>
+      <div id="nm-constants-list" style="margin-bottom:14px;"></div>
+
       <div class="modal-actions">
         <button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
-        <button class="modal-btn save" onclick="goToSettings()">Review &amp; Save →</button>
+        <button class="modal-btn save" onclick="saveNewMonthReview()">Confirm &amp; Save →</button>
       </div>
     </div>
   </div>
@@ -1076,7 +1153,7 @@ let state = {
   transactions: [],
   yearTransactions: [],
   yearlySummary: null,
-  settings: { budget: 8000 },
+  settings: { budget: 8000, emailEnabled: false, email1: '', email2: '' },
   constants: [],
   incomes: [],
   constantsMonth: null,
@@ -1260,7 +1337,11 @@ async function loadAll() {
 
     // Update budget setting always (it's just a number, safe to sync)
     if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
-      state.settings.budget = parseFloat(settingsRes.settings.budget) || 8000;
+      const s = settingsRes.settings;
+      state.settings.budget       = parseFloat(s.budget) || 8000;
+      state.settings.emailEnabled = s.emailEnabled === '1';
+      state.settings.email1       = s.email1 || '';
+      state.settings.email2       = s.email2 || '';
     }
 
     // Only load incomes/constants from sheets if:
@@ -1384,9 +1465,16 @@ function getWeekRange(date) {
   return { start: effectiveStart, end: effectiveEnd };
 }
 
-function getMonthSpent(monthStr) {
+function getMonthSpent(monthStr, includeExceptional = false) {
   return state.transactions
-    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(monthStr))
+    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(monthStr)
+      && (includeExceptional || !t.isExceptional))
+    .reduce((sum, t) => sum + t.amount, 0);
+}
+
+function getMonthExceptional(monthStr) {
+  return state.transactions
+    .filter(t => t.type === 'expense' && t.isExceptional && t.date && t.date.toString().startsWith(monthStr))
     .reduce((sum, t) => sum + t.amount, 0);
 }
 
@@ -1400,7 +1488,7 @@ function getWeekSpent() {
   const { start, end } = getWeekRange();
   return state.transactions
     .filter(t => {
-      if (t.type !== 'expense') return false;
+      if (t.type !== 'expense' || t.isExceptional) return false;
       const txDate = parseLocalDate(t.date);
       return txDate >= start && txDate <= end;
     })
@@ -1410,13 +1498,15 @@ function getWeekSpent() {
 function getTodaySpent() {
   const todayStr = toDateStr(new Date());
   return state.transactions
-    .filter(t => t.type === 'expense' && t.date && t.date.toString().startsWith(todayStr))
+    .filter(t => t.type === 'expense' && !t.isExceptional && t.date && t.date.toString().startsWith(todayStr))
     .reduce((sum, t) => sum + t.amount, 0);
 }
 
 // ============================================================
 // RENDER HOME
 // ============================================================
+
+
 function renderHome() {
   const today = new Date();
   const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
@@ -1447,6 +1537,7 @@ function renderHome() {
   weekBar.style.width = weekPct + '%';
   weekBar.className = 'progress-fill ' + (weekPct > 40 ? 'green' : weekPct > 15 ? 'amber' : 'red');
 
+
   // Monthly
   const monthEl = document.getElementById('monthly-remaining');
   monthEl.textContent = formatCurrency(monthRemaining);
@@ -1456,6 +1547,18 @@ function renderHome() {
   // Today
   document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
   document.getElementById('today-count').textContent = todayTxs.length + ' transaction' + (todayTxs.length !== 1 ? 's' : '');
+
+  // Show exceptional expenses notice
+  const monthExceptional = getMonthExceptional(monthStr);
+  const exceptEl = document.getElementById('exceptional-notice');
+  if (exceptEl) {
+    if (monthExceptional > 0) {
+      exceptEl.style.display = 'block';
+      exceptEl.textContent = '⚡ ₪' + monthExceptional.toLocaleString() + ' in exceptional expenses this month (excluded from budget)';
+    } else {
+      exceptEl.style.display = 'none';
+    }
+  }
 
   // Recent
   const recent = [...state.transactions]
@@ -1483,7 +1586,10 @@ function renderTxItem(tx) {
         <div class="tx-desc">${escHtml(desc)}</div>
         <div class="tx-date">${formatDateFull(parseLocalDate(tx.date))}${tx.person && tx.person !== MY_NAME ? ' · <span style="color:var(--blue);font-size:11px;">' + escHtml(tx.person) + '</span>' : ''}</div>
       </div>
-      <div class="tx-amount ${tx.type}">${isExpense ? '−' : '+'}₪${tx.amount.toLocaleString()}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+        <div class="tx-amount ${tx.type}">${isExpense ? '−' : '+'}₪${tx.amount.toLocaleString()}</div>
+        ${tx.isExceptional ? '<span style="font-size:10px;color:var(--amber);font-weight:600;">⚡ exceptional</span>' : ''}
+      </div>
     </div>`;
 }
 
@@ -1527,22 +1633,40 @@ function renderHistory() {
 // ============================================================
 function renderSettings() {
   document.getElementById('s-budget').value = state.settings.budget;
+  const emailEnabled = !!state.settings.emailEnabled;
+  document.getElementById('s-email-enabled').checked = emailEnabled;
+  document.getElementById('s-email1').value = state.settings.email1 || '';
+  document.getElementById('s-email2').value = state.settings.email2 || '';
+  document.getElementById('email-fields').style.display = emailEnabled ? 'block' : 'none';
   renderIncomesList();
   renderConstantsList();
   renderMyName();
   renderReport();
 }
 
+function toggleEmailFields() {
+  document.getElementById('email-fields').style.display =
+    document.getElementById('s-email-enabled').checked ? 'block' : 'none';
+}
+
 function renderIncomesList() {
   const container = document.getElementById('incomes-list');
   container.innerHTML = state.incomes.map((inc, i) => `
-    <div class="constant-row income-row">
+    <div class="constant-row income-row" style="flex-wrap:wrap;gap:6px;">
       <input type="text" class="constant-name-input" value="${escHtml(inc.name)}"
         placeholder="Income name (e.g. Sara Salary)"
-        oninput="state.incomes[${i}].name = this.value">
+        data-list="incomes" data-idx="${i}" data-field="name">
       <input type="number" class="constant-amount-input" value="${inc.amount || ''}" placeholder="₪"
-        oninput="state.incomes[${i}].amount = parseFloat(this.value) || 0">
-      <button class="del-constant-btn" onclick="removeIncome(${i})">×</button>
+        data-list="incomes" data-idx="${i}" data-field="amount">
+      <button class="del-constant-btn" data-remove-income="${i}" style="touch-action:manipulation;">×</button>
+      <div style="width:100%;display:flex;align-items:center;gap:8px;padding-left:2px;">
+        <label class="toggle-switch" style="width:32px;height:18px;">
+          <input type="checkbox" ${inc.recurring !== false ? 'checked' : ''}
+            data-list="incomes" data-idx="${i}" data-field="recurring" style="opacity:0;width:0;height:0;">
+          <span class="toggle-slider" style="border-radius:18px;"></span>
+        </label>
+        <span style="font-size:12px;color:var(--text3);">Recurring (carries to next month)</span>
+      </div>
     </div>`).join('');
 }
 
@@ -1552,10 +1676,10 @@ function renderConstantsList() {
     <div class="constant-row">
       <input type="text" class="constant-name-input" value="${escHtml(c.name)}"
         placeholder="Expense name"
-        oninput="state.constants[${i}].name = this.value">
+        data-list="constants" data-idx="${i}" data-field="name">
       <input type="number" class="constant-amount-input" value="${c.amount || ''}" placeholder="₪"
-        oninput="state.constants[${i}].amount = parseFloat(this.value) || 0">
-      <button class="del-constant-btn" onclick="removeConstant(${i})">×</button>
+        data-list="constants" data-idx="${i}" data-field="amount">
+      <button class="del-constant-btn" data-remove-constant="${i}" style="touch-action:manipulation;">×</button>
     </div>`).join('');
 }
 
@@ -1589,6 +1713,106 @@ function buildReportHTML(incomeTotal, constantsTotal, varSpent, extraIncomeLogge
     </div>`;
 }
 
+
+// ============================================================
+// PAST MONTHLY REPORTS
+// ============================================================
+let _loadedPastMonth = null;
+
+function renderPastMonthPills() {
+  const today = new Date();
+  const pills = document.getElementById('past-months-pills');
+  if (!pills) return;
+  pills.innerHTML = '';
+  // Show completed months this year (all before current month)
+  for (let m = today.getMonth() - 1; m >= 0; m--) {
+    const d = new Date(today.getFullYear(), m, 1);
+    const label = d.toLocaleString('default', { month: 'short' });
+    const monthStr = d.getFullYear() + '-' + String(m+1).padStart(2,'0');
+    const pill = document.createElement('button');
+    pill.className = 'income-src-btn' + (_loadedPastMonth === monthStr ? ' selected' : '');
+    pill.textContent = label;
+    pill.onclick = () => loadPastMonthReport(monthStr);
+    pills.appendChild(pill);
+  }
+  // Also previous year's December if January
+  if (today.getMonth() === 0) {
+    const d = new Date(today.getFullYear()-1, 11, 1);
+    const pill = document.createElement('button');
+    pill.className = 'income-src-btn' + (_loadedPastMonth === (today.getFullYear()-1+'-12') ? ' selected' : '');
+    pill.textContent = 'Dec \'' + String(today.getFullYear()-1).slice(2);
+    pill.onclick = () => loadPastMonthReport((today.getFullYear()-1)+'-12');
+    pills.appendChild(pill);
+  }
+}
+
+async function loadPastMonthReport(monthStr) {
+  _loadedPastMonth = monthStr;
+  renderPastMonthPills(); // update selected pill
+  const container = document.getElementById('past-month-report');
+  container.innerHTML = '<div style="color:var(--text3);font-size:14px;padding:16px 0;">Loading...</div>';
+
+  try {
+    const res = await apiCall('getTransactions', { month: monthStr });
+    const txs = res.transactions || [];
+    const d = new Date(monthStr + '-01');
+    const monthLabel = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    const expenses  = txs.filter(t => t.type === 'expense');
+    const incomes   = txs.filter(t => t.type === 'income' && !t.incomeSource);
+    const exceptional = expenses.filter(t => t.isExceptional);
+    const regular   = expenses.filter(t => !t.isExceptional);
+    const varSpent  = regular.reduce((s,t) => s+t.amount, 0);
+    const exceptSpent = exceptional.reduce((s,t) => s+t.amount, 0);
+    const extraIncome = incomes.reduce((s,t) => s+t.amount, 0);
+
+    // Get fixed income/constants from yearly summary for this month
+    const yyyymm = monthStr.replace('-','');
+    const fixedIncome    = (state.yearlySummary?.monthlyIncomes?.[yyyymm])    || 0;
+    const constantsTotal = (state.yearlySummary?.monthlyConstants?.[yyyymm]) || 0;
+
+    const totalIncome  = fixedIncome + extraIncome;
+    const totalExpense = constantsTotal + varSpent + exceptSpent;
+    const saved = totalIncome - totalExpense;
+
+    container.innerHTML = `
+      <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;">${monthLabel}</div>
+        <div class="report-row">
+          <span class="label">Total income</span>
+          <span class="value positive">₪${totalIncome.toLocaleString()}</span>
+        </div>
+        <div class="report-row">
+          <span class="label">Total expenses</span>
+          <span class="value negative">−₪${totalExpense.toLocaleString()}</span>
+        </div>
+        <div class="report-row" style="padding-left:12px;">
+          <span class="label" style="font-size:13px;">· Constant</span>
+          <span class="value" style="font-size:13px;color:var(--text2);">₪${constantsTotal.toLocaleString()}</span>
+        </div>
+        <div class="report-row" style="padding-left:12px;">
+          <span class="label" style="font-size:13px;">· Variable</span>
+          <span class="value" style="font-size:13px;color:var(--text2);">₪${varSpent.toLocaleString()}</span>
+        </div>
+        ${exceptSpent > 0 ? `
+        <div class="report-row" style="padding-left:12px;">
+          <span class="label" style="font-size:13px;">· ⚡ Exceptional</span>
+          <span class="value" style="font-size:13px;color:var(--amber);">₪${exceptSpent.toLocaleString()}</span>
+        </div>` : ''}
+        <div class="report-divider"></div>
+        <div class="report-row">
+          <span class="label" style="font-weight:600;color:var(--text);">Balance</span>
+          <span class="value ${saved >= 0 ? 'positive' : 'negative'}" style="font-size:22px;font-weight:700;">
+            ${saved >= 0 ? '+' : '−'}₪${Math.abs(saved).toLocaleString()}
+          </span>
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('past-month-report').innerHTML =
+      '<div style="color:var(--red);font-size:14px;padding:12px 0;">⚠️ Could not load — check connection</div>';
+  }
+}
+
 function renderReport() {
   const today    = new Date();
   const monthStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
@@ -1596,6 +1820,7 @@ function renderReport() {
 
   const monthLabelEl = document.getElementById('report-month-label');
   if (monthLabelEl) monthLabelEl.textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+  renderPastMonthPills();
 
   // Monthly
   const fixedIncome      = state.incomes.reduce((s,i) => s+i.amount, 0);
@@ -1652,6 +1877,9 @@ function removeConstant(i) {
 
 async function saveSettings() {
   state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
+  state.settings.emailEnabled = document.getElementById('s-email-enabled').checked;
+  state.settings.email1 = document.getElementById('s-email1').value.trim();
+  state.settings.email2 = document.getElementById('s-email2').value.trim();
 
   // State already synced via oninput handlers — just filter empties
   state.incomes   = state.incomes.filter(i => i.name && i.name.trim());
@@ -1659,8 +1887,13 @@ async function saveSettings() {
 
   try {
     const today = new Date();
-    const monthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0'); // YYYYMM — no dashes so Sheets can't convert to date
-    const r1 = await apiCall('saveSettings',  { budget: state.settings.budget });
+    const monthStr = String(today.getFullYear()) + String(today.getMonth()+1).padStart(2,'0');
+    const r1 = await apiCall('saveSettings', {
+      budget: state.settings.budget,
+      emailEnabled: state.settings.emailEnabled ? '1' : '0',
+      email1: state.settings.email1,
+      email2: state.settings.email2
+    });
     const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
     const r3 = await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: monthStr });
     const err = r1.error || r2.error || r3.error;
@@ -1718,10 +1951,12 @@ function setType(type) {
     submitBtn.className = 'submit-btn expense-btn';
     if (logTitle) logTitle.textContent = 'Log Expense';
     document.getElementById('income-source-row').style.display = 'none';
+    document.getElementById('exceptional-row').style.display = 'flex';
   } else {
     submitBtn.textContent = 'Log Income';
     submitBtn.className = 'submit-btn';
     if (logTitle) logTitle.textContent = 'Log Income';
+    document.getElementById('exceptional-row').style.display = 'none';
     selectedIncomeSourceIdx = -1;
     renderIncomeSourcePicker();
     document.getElementById('income-source-row').style.display = 'block';
@@ -1859,12 +2094,15 @@ async function submitTransaction() {
     }
   }
 
+  const isExceptional = currentType === 'expense' && document.getElementById('exceptional-toggle').checked;
+
   const tx = {
     id: 'local_' + Date.now(),
     date, type: currentType, amount,
     description: desc || incomeSourceName,
     person: MY_NAME || 'Me',
     incomeSource: incomeSourceName,
+    isExceptional: isExceptional,
     createdAt: new Date().toISOString()
   };
 
@@ -1883,6 +2121,7 @@ async function submitTransaction() {
   document.getElementById('amount-display').textContent = '0';
   document.getElementById('desc-input').value = '';
   document.getElementById('date-input').value = toDateStr(new Date());
+  document.getElementById('exceptional-toggle').checked = false;
   // Reset income source picker
   selectedIncomeSourceIdx = -1;
   document.getElementById('new-source-row').style.display = 'none';
@@ -1944,6 +2183,10 @@ function openEditModal(id) {
   document.getElementById('edit-amount').value = tx.amount;
   document.getElementById('edit-desc').value = tx.description || '';
   document.getElementById('edit-date').value = tx.date ? tx.date.toString().substring(0,10) : toDateStr(new Date());
+  const editExcRow = document.getElementById('edit-exceptional-row');
+  if (editExcRow) editExcRow.style.display = tx.type === 'expense' ? 'flex' : 'none';
+  const editExcToggle = document.getElementById('edit-exceptional-toggle');
+  if (editExcToggle) editExcToggle.checked = !!tx.isExceptional;
   document.getElementById('edit-modal').classList.add('open');
 }
 
@@ -1953,11 +2196,84 @@ function closeModal() {
 }
 
 function showNewMonthModal(newMonth, prevMonth) {
-  const prevName = new Date(prevMonth + '-01').toLocaleString('default', { month: 'long' });
-  const modal = document.getElementById('new-month-modal');
-  modal.querySelector('p').textContent =
-    `Your income sources and constant expenses have been carried over from ${prevName}. Review and update any amounts that changed, then tap Save.`;
-  modal.classList.add('open');
+  // Split incomes into recurring and one-time
+  const recurring = state.incomes.filter(i => i.recurring !== false);
+  const onetime   = state.incomes.filter(i => i.recurring === false);
+
+  // Recurring list — just display with editable amounts
+  const recurringList = document.getElementById('nm-recurring-list');
+  recurringList.innerHTML = recurring.length === 0
+    ? '<div style="font-size:13px;color:var(--text3);padding:4px 0;">None</div>'
+    : recurring.map((inc, i) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:14px;color:var(--text);">${escHtml(inc.name)}</span>
+          <input type="number" value="${inc.amount || ''}" placeholder="₪"
+            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;"
+            onchange="state.incomes[${state.incomes.indexOf(inc)}].amount = parseFloat(this.value)||0;">
+        </div>`).join('');
+
+  // One-time list — with include checkbox
+  const onetimeSection = document.getElementById('nm-onetime-section');
+  const onetimeList = document.getElementById('nm-onetime-list');
+  if (onetime.length > 0) {
+    onetimeSection.style.display = 'block';
+    onetimeList.innerHTML = onetime.map((inc) => {
+      const idx = state.incomes.indexOf(inc);
+      return `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <label class="toggle-switch" style="width:32px;height:18px;">
+            <input type="checkbox" id="nm-onetime-${idx}">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:14px;color:var(--text);flex:1;">${escHtml(inc.name)}</span>
+          <input type="number" value="${inc.amount || ''}" placeholder="₪"
+            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;"
+            onchange="state.incomes[${idx}].amount = parseFloat(this.value)||0;">
+        </div>`;
+    }).join('');
+  } else {
+    onetimeSection.style.display = 'none';
+  }
+
+  // Constants list — editable amounts
+  const constList = document.getElementById('nm-constants-list');
+  constList.innerHTML = state.constants.length === 0
+    ? '<div style="font-size:13px;color:var(--text3);padding:4px 0;">None</div>'
+    : state.constants.map((c, i) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:14px;color:var(--text);">${escHtml(c.name)}</span>
+          <input type="number" value="${c.amount || ''}" placeholder="₪"
+            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;"
+            onchange="state.constants[${i}].amount = parseFloat(this.value)||0;">
+        </div>`).join('');
+
+  document.getElementById('new-month-modal').classList.add('open');
+}
+
+async function saveNewMonthReview() {
+  // For one-time incomes: only include if checkbox is checked
+  const onetime = state.incomes.filter(i => i.recurring === false);
+  onetime.forEach(inc => {
+    const idx = state.incomes.indexOf(inc);
+    const cb = document.getElementById('nm-onetime-' + idx);
+    if (cb && !cb.checked) {
+      // Remove from this month's incomes (don't delete permanently, just zero out)
+      state.incomes[idx].amount = 0;
+    }
+  });
+
+  const today2 = new Date();
+  const mStr = String(today2.getFullYear()) + String(today2.getMonth()+1).padStart(2,'0');
+  try {
+    await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: mStr });
+    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: mStr });
+    showToastSimple('✅ New month saved');
+  } catch(e) {
+    showToastSimple('⚠️ Could not save — try again');
+  }
+  closeNewMonthModal();
+  renderHome();
+  renderReport();
 }
 
 function closeNewMonthModal() {
@@ -1977,6 +2293,9 @@ async function saveEditedTx() {
   state.transactions[idx].amount = parseFloat(document.getElementById('edit-amount').value) || 0;
   state.transactions[idx].description = document.getElementById('edit-desc').value;
   state.transactions[idx].date = document.getElementById('edit-date').value;
+  if (state.transactions[idx].type === 'expense') {
+    state.transactions[idx].isExceptional = document.getElementById('edit-exceptional-toggle').checked;
+  }
 
   // Mirror update in yearTransactions
   const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
