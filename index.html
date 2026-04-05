@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -790,11 +791,13 @@ nav {
 
 .loading { text-align: center; padding: 40px; color: var(--text3); }
 </style>
+
 </head>
 <body>
 <div id="app">
 
   <!-- SETUP SCREEN (shown if no API URL configured) -->
+
   <div id="setup-screen" style="display:none; overflow-y:auto; flex:1; padding-bottom:40px;">
     <div class="setup-screen">
       <div class="setup-logo">💰</div>
@@ -803,259 +806,267 @@ nav {
       <input type="url" id="api-url-input" class="setup-input" placeholder="Paste your Google Apps Script URL here">
       <input type="password" id="api-secret-input" class="setup-input" placeholder="Shared password (from Code.gs)">
 
-      <div id="setup-error" style="color:var(--red);font-size:13px;margin-bottom:8px;display:none;background:var(--red-dim);padding:10px 14px;border-radius:10px;width:100%;text-align:left;"></div>
-      <button class="setup-btn" id="setup-btn" onclick="saveSetup()">Get Started →</button>
-      <div class="setup-hint">
-        <strong>How to set up:</strong><br>
-        1. Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a>, create a new spreadsheet<br>
-        2. Go to <strong>Extensions → Apps Script</strong><br>
-        3. Paste the contents of <strong>Code.gs</strong> (included in your download)<br>
-        4. Click <strong>Deploy → New deployment → Web App</strong><br>
-        5. Set "Who has access" to <strong>Anyone</strong><br>
-        6. Copy the URL and paste it above
-      </div>
-    </div>
+```
+  <div id="setup-error" style="color:var(--red);font-size:13px;margin-bottom:8px;display:none;background:var(--red-dim);padding:10px 14px;border-radius:10px;width:100%;text-align:left;"></div>
+  <button class="setup-btn" id="setup-btn" onclick="saveSetup()">Get Started →</button>
+  <div class="setup-hint">
+    <strong>How to set up:</strong><br>
+    1. Open <a href="https://sheets.google.com" target="_blank">Google Sheets</a>, create a new spreadsheet<br>
+    2. Go to <strong>Extensions → Apps Script</strong><br>
+    3. Paste the contents of <strong>Code.gs</strong> (included in your download)<br>
+    4. Click <strong>Deploy → New deployment → Web App</strong><br>
+    5. Set "Who has access" to <strong>Anyone</strong><br>
+    6. Copy the URL and paste it above
+  </div>
+</div>
+```
+
   </div>
 
   <!-- MAIN APP -->
+
   <div id="main-app" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
 
-    <!-- HOME -->
-    <div id="screen-home" class="screen active">
-      <div class="page-header">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="page-title">Overview</div>
-          <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;">
-            <span id="sync-dot" class="sync-dot"></span>
-            <span id="sync-label">Live</span>
-          </div>
-        </div>
-        <div class="page-sub" id="home-date"></div>
+```
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="page-title">Overview</div>
+      <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;">
+        <span id="sync-dot" class="sync-dot"></span>
+        <span id="sync-label">Live</span>
       </div>
+    </div>
+    <div class="page-sub" id="home-date"></div>
+  </div>
 
-      <!-- Weekly Card -->
-      <div class="card" id="weekly-card">
-        <div class="card-label">This week remaining</div>
-        <div class="big-amount positive" id="weekly-remaining">—</div>
-        <div class="amount-sub" id="weekly-sub"></div>
-        <div class="progress-bar"><div class="progress-fill green" id="weekly-bar" style="width:100%"></div></div>
-      </div>
+  <!-- Weekly Card -->
+  <div class="card" id="weekly-card">
+    <div class="card-label">This week remaining</div>
+    <div class="big-amount positive" id="weekly-remaining">—</div>
+    <div class="amount-sub" id="weekly-sub"></div>
+    <div class="progress-bar"><div class="progress-fill green" id="weekly-bar" style="width:100%"></div></div>
+  </div>
 
-      <!-- Monthly + spent row -->
-      <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-label">Monthly Left</div>
-          <div class="stat-value positive" id="monthly-remaining">—</div>
-          <div class="stat-sub" id="monthly-sub"></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Spent Today</div>
-          <div class="stat-value" id="today-spent">₪0</div>
-          <div class="stat-sub" id="today-count"></div>
-        </div>
-      </div>
+  <!-- Monthly + spent row -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-label">Monthly Left</div>
+      <div class="stat-value positive" id="monthly-remaining">—</div>
+      <div class="stat-sub" id="monthly-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Spent Today</div>
+      <div class="stat-value" id="today-spent">₪0</div>
+      <div class="stat-sub" id="today-count"></div>
+    </div>
+  </div>
 
-      <!-- Exceptional notice -->
-      <div id="exceptional-notice" style="display:none;margin:0 16px 8px;padding:8px 12px;background:var(--amber-dim);border-radius:10px;font-size:12px;color:var(--amber);font-weight:600;"></div>
+  <!-- Exceptional notice -->
+  <div id="exceptional-notice" style="display:none;margin:0 16px 8px;padding:8px 12px;background:var(--amber-dim);border-radius:10px;font-size:12px;color:var(--amber);font-weight:600;"></div>
 
-      <!-- Recent -->
-      <div style="padding:8px 16px 4px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="settings-title" style="margin:0">Recent</div>
-          <button onclick="switchTab('history')" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;">See all</button>
-        </div>
-      </div>
-      <div id="recent-list"><div class="loading">Loading...</div></div>
+  <!-- Recent -->
+  <div style="padding:8px 16px 4px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div class="settings-title" style="margin:0">Recent</div>
+      <button onclick="switchTab('history')" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;">See all</button>
+    </div>
+  </div>
+  <div id="recent-list"><div class="loading">Loading...</div></div>
+</div>
+
+<!-- LOG -->
+<div id="screen-log" class="screen">
+  <div class="log-screen">
+    <div class="type-toggle">
+      <button class="type-btn expense active" onclick="setType('expense')">Expense</button>
+      <button class="type-btn income" onclick="setType('income')">Income</button>
     </div>
 
-    <!-- LOG -->
-    <div id="screen-log" class="screen">
-      <div class="log-screen">
-        <div class="type-toggle">
-          <button class="type-btn expense active" onclick="setType('expense')">Expense</button>
-          <button class="type-btn income" onclick="setType('income')">Income</button>
-        </div>
-
-        <!-- Income source picker (only shown when type=income) -->
-        <div id="income-source-row" style="display:none;margin-bottom:6px;">
-          <div style="font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px;margin-bottom:5px;">SELECT SOURCE</div>
-          <div id="income-source-btns" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
-          <!-- New source inline input (hidden until + tapped) -->
-          <div id="new-source-row" style="display:none;margin-top:6px;display:none;">
-            <input type="text" id="new-source-input" class="desc-input"
-              placeholder="New source name..." style="margin-bottom:0;">
-          </div>
-        </div>
-
-        <!-- Amount row: number centered, ⌫ on the right aligned with ÷ column -->
-        <div style="position:relative;margin-bottom:2px;">
-          <div class="amount-display" style="margin-bottom:0;">
-            <div class="amount-display-value">
-              <span class="amount-currency">₪</span>
-              <span id="amount-display">0</span>
-              <span class="cursor"></span>
-            </div>
-          </div>
-          <button class="num-btn del" onclick="numpad('del')"
-            style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);">⌫</button>
-        </div>
-
-        <div id="calc-display" style="display:none;"></div>
-
-        <!-- Numpad: ⌫ removed from here, = and + swapped -->
-        <div class="numpad">
-          <button class="num-btn" onclick="numpad('7')">7</button>
-          <button class="num-btn" onclick="numpad('8')">8</button>
-          <button class="num-btn" onclick="numpad('9')">9</button>
-          <button class="num-btn op-btn" onclick="numpad('/')">÷</button>
-          <button class="num-btn" onclick="numpad('4')">4</button>
-          <button class="num-btn" onclick="numpad('5')">5</button>
-          <button class="num-btn" onclick="numpad('6')">6</button>
-          <button class="num-btn op-btn" onclick="numpad('*')">×</button>
-          <button class="num-btn" onclick="numpad('1')">1</button>
-          <button class="num-btn" onclick="numpad('2')">2</button>
-          <button class="num-btn" onclick="numpad('3')">3</button>
-          <button class="num-btn op-btn" onclick="numpad('-')">−</button>
-          <button class="num-btn" onclick="numpad('.')">.</button>
-          <button class="num-btn" onclick="numpad('0')">0</button>
-          <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
-          <button class="num-btn op-btn" onclick="numpad('+')">+</button>
-        </div>
-
-        <!-- Date row: Today / Yesterday / Other (opens hidden date input) -->
-        <div style="display:flex;gap:5px;margin-bottom:8px;">
-          <button class="date-quick-btn active" id="date-btn-today"    onclick="setQuickDate('today')">Today</button>
-          <button class="date-quick-btn"        id="date-btn-yesterday" onclick="setQuickDate('yesterday')">Yesterday</button>
-          <button class="date-quick-btn"        id="date-btn-other"    onclick="setQuickDate('other')">Other</button>
-        </div>
-        <input type="date" id="date-input" style="display:none;" onchange="onDatePickerChange()">
-
-        <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)">
-        <div id="exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 2px;">
-          <input type="checkbox" id="exceptional-toggle" style="width:16px;height:16px;accent-color:var(--amber);cursor:pointer;flex-shrink:0;">
-          <span style="font-size:13px;color:var(--text2);">One-time / exceptional <span style="color:var(--text3);">(excluded from budget)</span></span>
-        </div>
-        <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
+    <!-- Income source picker (only shown when type=income) -->
+    <div id="income-source-row" style="display:none;margin-bottom:6px;">
+      <div style="font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.5px;margin-bottom:5px;">SELECT SOURCE</div>
+      <div id="income-source-btns" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+      <!-- New source inline input (hidden until + tapped) -->
+      <div id="new-source-row" style="display:none;margin-top:6px;display:none;">
+        <input type="text" id="new-source-input" class="desc-input"
+          placeholder="New source name..." style="margin-bottom:0;">
       </div>
     </div>
 
-    <!-- REPORT -->
-    <div id="screen-report" class="screen">
-      <div class="page-header">
-        <div class="page-title">Report</div>
-        <div class="page-sub" id="report-month-label"></div>
-      </div>
-      <div style="padding: 8px 16px 0;">
-        <div class="card-label" style="padding-left:4px;margin-bottom:6px;">THIS MONTH</div>
-        <div id="report-month-card" class="card" style="margin:0 0 16px;padding:20px;"></div>
-        <div class="card-label" style="padding-left:4px;margin-bottom:6px;">YEAR TO DATE</div>
-        <div id="report-year-card" class="card" style="margin:0 0 16px;padding:20px;">
-          <div style="color:var(--text3);font-size:14px;">Loading year data...</div>
+    <!-- Amount row: number centered, ⌫ on the right aligned with ÷ column -->
+    <div style="position:relative;margin-bottom:2px;">
+      <div class="amount-display" style="margin-bottom:0;">
+        <div class="amount-display-value">
+          <span class="amount-currency">₪</span>
+          <span id="amount-display">0</span>
+          <span class="cursor"></span>
         </div>
-
-        <div class="card-label" style="padding-left:4px;margin-bottom:8px;">PAST MONTHS</div>
-        <div id="past-months-pills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
-        <div id="past-month-report" style="margin-bottom:24px;"></div>
       </div>
+      <button class="num-btn del" onclick="numpad('del')"
+        style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);">⌫</button>
     </div>
 
-    <!-- HISTORY -->
-    <div id="screen-history" class="screen">
-      <div class="page-header">
-        <div class="page-title">History</div>
-        <div class="page-sub" id="history-month"></div>
-      </div>
-      <div id="history-list"><div class="loading">Loading...</div></div>
+    <div id="calc-display" style="display:none;"></div>
+
+    <!-- Numpad: ⌫ removed from here, = and + swapped -->
+    <div class="numpad">
+      <button class="num-btn" onclick="numpad('7')">7</button>
+      <button class="num-btn" onclick="numpad('8')">8</button>
+      <button class="num-btn" onclick="numpad('9')">9</button>
+      <button class="num-btn op-btn" onclick="numpad('/')">÷</button>
+      <button class="num-btn" onclick="numpad('4')">4</button>
+      <button class="num-btn" onclick="numpad('5')">5</button>
+      <button class="num-btn" onclick="numpad('6')">6</button>
+      <button class="num-btn op-btn" onclick="numpad('*')">×</button>
+      <button class="num-btn" onclick="numpad('1')">1</button>
+      <button class="num-btn" onclick="numpad('2')">2</button>
+      <button class="num-btn" onclick="numpad('3')">3</button>
+      <button class="num-btn op-btn" onclick="numpad('-')">−</button>
+      <button class="num-btn" onclick="numpad('.')">.</button>
+      <button class="num-btn" onclick="numpad('0')">0</button>
+      <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
+      <button class="num-btn op-btn" onclick="numpad('+')">+</button>
     </div>
 
-    <!-- SETTINGS -->
-    <div id="screen-settings" class="screen">
-      <div class="page-header">
-        <div class="page-title">Settings</div>
-        <div class="page-sub">Budget, income & expenses</div>
-      </div>
+    <!-- Date row: Today / Yesterday / Other (opens hidden date input) -->
+    <div style="display:flex;gap:5px;margin-bottom:8px;">
+      <button class="date-quick-btn active" id="date-btn-today"    onclick="setQuickDate('today')">Today</button>
+      <button class="date-quick-btn"        id="date-btn-yesterday" onclick="setQuickDate('yesterday')">Yesterday</button>
+      <button class="date-quick-btn"        id="date-btn-other"    onclick="setQuickDate('other')">Other</button>
+    </div>
+    <input type="date" id="date-input" style="display:none;" onchange="onDatePickerChange()">
 
-      <div class="settings-section">
-        <div class="settings-title">Flexible Budget</div>
-        <div class="setting-row">
-          <div class="setting-label">Monthly flexible budget</div>
-          <input type="number" id="s-budget" class="setting-input" placeholder="8000">
-        </div>
-      </div>
+    <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)">
+    <div id="exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 2px;">
+      <input type="checkbox" id="exceptional-toggle" style="width:16px;height:16px;accent-color:var(--amber);cursor:pointer;flex-shrink:0;">
+      <span style="font-size:13px;color:var(--text2);">One-time / exceptional <span style="color:var(--text3);">(excluded from budget)</span></span>
+    </div>
+    <button class="submit-btn expense-btn" id="submit-btn" onclick="submitTransaction()">Log Expense</button>
+  </div>
+</div>
 
-      <div class="settings-section">
-        <div class="settings-title">Income Sources</div>
-        <div id="incomes-list"></div>
-        <button class="add-constant-btn" onclick="addIncomeRow()">+ Add income source</button>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-title">Constant Expenses</div>
-        <div id="constants-list"></div>
-        <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
-      </div>
-
-      <div class="settings-section" style="margin-top:8px;">
-        <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-title">Daily Email Digest</div>
-        <div class="setting-row" style="justify-content:space-between;align-items:center;">
-          <div class="setting-label">Send morning summary</div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="s-email-enabled" onchange="state.settings.emailEnabled = this.checked; toggleEmailFields();">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div id="email-fields" style="display:none;margin-top:8px;">
-          <input type="email" id="s-email1" class="desc-input" placeholder="Your email address" style="margin-bottom:8px;">
-          <input type="email" id="s-email2" class="desc-input" placeholder="Sara's email address (optional)" style="margin-bottom:0;">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-title">Your Profile</div>
-        <div class="setting-row" style="justify-content:space-between;cursor:pointer;" onclick="showNamePrompt()">
-          <div class="setting-label">Your name</div>
-          <div style="color:var(--text2);font-size:14px;" id="my-name-display">Not set</div>
-        </div>
-        <div class="setting-row" style="justify-content:space-between;cursor:pointer;margin-top:4px;" onclick="confirmReset()">
-          <div class="setting-label" style="color:var(--red);">Change API URL</div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3)"><path d="m9 18 6-6-6-6"/></svg>
-        </div>
-      </div>
-
+<!-- REPORT -->
+<div id="screen-report" class="screen">
+  <div class="page-header">
+    <div class="page-title">Report</div>
+    <div class="page-sub" id="report-month-label"></div>
+  </div>
+  <div style="padding: 8px 16px 0;">
+    <div class="card-label" style="padding-left:4px;margin-bottom:6px;">THIS MONTH</div>
+    <div id="report-month-card" class="card" style="margin:0 0 16px;padding:20px;"></div>
+    <div class="card-label" style="padding-left:4px;margin-bottom:6px;">YEAR TO DATE</div>
+    <div id="report-year-card" class="card" style="margin:0 0 16px;padding:20px;">
+      <div style="color:var(--text3);font-size:14px;">Loading year data...</div>
     </div>
 
-    <!-- NAV -->
-    <nav>
-      <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Home
-      </button>
-      <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-        History
-      </button>
-      <button class="nav-btn log-btn" onclick="switchTab('log')">
-        <div class="log-btn-inner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>
-        Log
-      </button>
-      <button class="nav-btn" id="nav-report" onclick="switchTab('report')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Report
-      </button>
-      <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </button>
-    </nav>
+    <div class="card-label" style="padding-left:4px;margin-bottom:8px;">PAST MONTHS</div>
+    <div id="past-months-pills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+    <div id="past-month-report" style="margin-bottom:24px;"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="screen-history" class="screen">
+  <div class="page-header">
+    <div class="page-title">History</div>
+    <div class="page-sub" id="history-month"></div>
+  </div>
+  <div id="history-list"><div class="loading">Loading...</div></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="screen-settings" class="screen">
+  <div class="page-header">
+    <div class="page-title">Settings</div>
+    <div class="page-sub">Budget, income & expenses</div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">Flexible Budget</div>
+    <div class="setting-row">
+      <div class="setting-label">Monthly flexible budget</div>
+      <input type="number" id="s-budget" class="setting-input" placeholder="8000">
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">Income Sources</div>
+    <div id="incomes-list"></div>
+    <button class="add-constant-btn" onclick="addIncomeRow()">+ Add income source</button>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">Constant Expenses</div>
+    <div id="constants-list"></div>
+    <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
+  </div>
+
+  <div class="settings-section" style="margin-top:8px;">
+    <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">Daily Email Digest</div>
+    <div class="setting-row" style="justify-content:space-between;align-items:center;">
+      <div class="setting-label">Send morning summary</div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="s-email-enabled" onchange="state.settings.emailEnabled = this.checked; toggleEmailFields();">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div id="email-fields" style="display:none;margin-top:8px;">
+      <input type="email" id="s-email1" class="desc-input" placeholder="Your email address" style="margin-bottom:8px;">
+      <input type="email" id="s-email2" class="desc-input" placeholder="Sara's email address (optional)" style="margin-bottom:0;">
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">Your Profile</div>
+    <div class="setting-row" style="justify-content:space-between;cursor:pointer;" onclick="showNamePrompt()">
+      <div class="setting-label">Your name</div>
+      <div style="color:var(--text2);font-size:14px;" id="my-name-display">Not set</div>
+    </div>
+    <div class="setting-row" style="justify-content:space-between;cursor:pointer;margin-top:4px;" onclick="confirmReset()">
+      <div class="setting-label" style="color:var(--red);">Change API URL</div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3)"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAV -->
+<nav>
+  <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+    History
+  </button>
+  <button class="nav-btn log-btn" onclick="switchTab('log')">
+    <div class="log-btn-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    Log
+  </button>
+  <button class="nav-btn" id="nav-report" onclick="switchTab('report')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Report
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+```
+
   </div>
 
   <!-- Edit Modal -->
+
   <div class="modal-overlay" id="edit-modal">
     <div class="modal">
       <div class="modal-title">Edit Entry</div>
@@ -1063,11 +1074,8 @@ nav {
       <input type="text" id="edit-desc" class="modal-input" placeholder="Description (optional)">
       <input type="date" id="edit-date" class="modal-input" style="color-scheme:dark;">
       <div id="edit-exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <label class="toggle-switch" style="width:36px;height:22px;">
-          <input type="checkbox" id="edit-exceptional-toggle">
-          <span class="toggle-slider"></span>
-        </label>
-        <span style="font-size:13px;color:var(--text2);">Exceptional expense (excluded from budget)</span>
+          <input type="checkbox" id="edit-exceptional-toggle" style="width:16px;height:16px;accent-color:var(--amber);cursor:pointer;flex-shrink:0;">
+          <span style="font-size:13px;color:var(--text2);">Exceptional expense (excluded from budget)</span>
       </div>
       <div class="modal-actions">
         <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
@@ -1078,6 +1086,7 @@ nav {
   </div>
 
   <!-- Name Prompt Modal -->
+
   <div class="modal-overlay" id="name-modal" style="z-index:300;">
     <div class="modal">
       <div class="modal-title">👋 Who are you?</div>
@@ -1094,12 +1103,14 @@ nav {
   </div>
 
   <!-- Partner Activity Banner -->
+
   <div id="partner-banner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--blue);color:#000;padding:10px 16px;font-size:13px;font-weight:600;z-index:250;cursor:pointer;border-radius:0 0 12px 12px;" onclick="dismissPartnerBanner()">
     <span id="partner-banner-text"></span>
     <span style="float:right;opacity:0.7;">✕</span>
   </div>
 
   <!-- New Month Modal -->
+
   <div class="modal-overlay" id="new-month-modal">
     <div class="modal" style="max-height:80vh;overflow-y:auto;">
       <div class="modal-title">🗓️ New Month Review</div>
@@ -1107,32 +1118,37 @@ nav {
         Check your income sources and expenses for the new month. Update anything that changed.
       </p>
 
-      <div id="nm-recurring-section">
-        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;">RECURRING INCOMES ✓</div>
-        <div id="nm-recurring-list" style="margin-bottom:12px;"></div>
-      </div>
+```
+  <div id="nm-recurring-section">
+    <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;">RECURRING INCOMES ✓</div>
+    <div id="nm-recurring-list" style="margin-bottom:12px;"></div>
+  </div>
 
-      <div id="nm-onetime-section" style="display:none;">
-        <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:0.5px;margin-bottom:6px;">ONE-TIME INCOMES — INCLUDE THIS MONTH?</div>
-        <div id="nm-onetime-list" style="margin-bottom:12px;"></div>
-      </div>
+  <div id="nm-onetime-section" style="display:none;">
+    <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:0.5px;margin-bottom:6px;">ONE-TIME INCOMES — INCLUDE THIS MONTH?</div>
+    <div id="nm-onetime-list" style="margin-bottom:12px;"></div>
+  </div>
 
-      <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;margin-top:4px;">CONSTANT EXPENSES</div>
-      <div id="nm-constants-list" style="margin-bottom:14px;"></div>
+  <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.5px;margin-bottom:6px;margin-top:4px;">CONSTANT EXPENSES</div>
+  <div id="nm-constants-list" style="margin-bottom:14px;"></div>
 
-      <div class="modal-actions">
-        <button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
-        <button class="modal-btn save" onclick="saveNewMonthReview()">Confirm &amp; Save →</button>
-      </div>
-    </div>
+  <div class="modal-actions">
+    <button class="modal-btn cancel" onclick="closeNewMonthModal()">Later</button>
+    <button class="modal-btn save" onclick="saveNewMonthReview()">Confirm &amp; Save →</button>
+  </div>
+</div>
+```
+
   </div>
 
   <!-- Update Banner -->
+
   <div id="update-banner" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--green);color:#000;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;z-index:999;cursor:pointer;" onclick="window.location.reload()">
     ✨ Update available — tap to refresh
   </div>
 
   <!-- Toast -->
+
   <div class="toast" id="toast">
     <div class="toast-header" id="toast-header"></div>
     <div id="toast-body"></div>
@@ -2373,11 +2389,12 @@ async function saveEditedTx() {
   state.transactions[idx].amount = parseFloat(document.getElementById('edit-amount').value) || 0;
   state.transactions[idx].description = document.getElementById('edit-desc').value;
   state.transactions[idx].date = document.getElementById('edit-date').value;
-  if (state.transactions[idx].type === 'expense') {
-    state.transactions[idx].isExceptional = document.getElementById('edit-exceptional-toggle').checked;
-  }
+  // Set isExceptional BEFORE mirroring to yearTransactions
+  state.transactions[idx].isExceptional = (state.transactions[idx].type === 'expense')
+    ? document.getElementById('edit-exceptional-toggle').checked
+    : false;
 
-  // Mirror update in yearTransactions
+  // Mirror update in yearTransactions (after all fields set)
   const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
   if (yearIdx !== -1) state.yearTransactions[yearIdx] = { ...state.transactions[idx] };
 
@@ -2660,5 +2677,6 @@ function showToastSimple(msg) {
   showToast();
 }
 </script>
+
 </body>
 </html>
