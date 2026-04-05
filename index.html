@@ -1174,6 +1174,23 @@ let state = {
   settingsLoaded: false,  // true once settings have been loaded from sheets
   isOnline: navigator.onLine
 };
+// Exceptional overrides — stored in localStorage, survives syncs
+// { [txId]: true/false }
+let exceptionalOverrides = JSON.parse(localStorage.getItem('exceptional_overrides') || '{}');
+
+function saveExceptionalOverrides() {
+  localStorage.setItem('exceptional_overrides', JSON.stringify(exceptionalOverrides));
+}
+
+function applyExceptionalOverrides(txs) {
+  return txs.map(tx => ({
+    ...tx,
+    isExceptional: exceptionalOverrides.hasOwnProperty(tx.id)
+      ? exceptionalOverrides[tx.id]
+      : !!tx.isExceptional
+  }));
+}
+
 let currentType = 'expense';
 // amountStr replaced by calcExpression
 let currentEditId = null;
@@ -1345,8 +1362,8 @@ async function loadAll() {
     const yearTxRes   = await apiCall('getTransactions',   { year: yearStr });
     const yearSumRes  = await apiCall('getYearlySummary',  { year: yearStr });
 
-    if (txRes.transactions)     state.transactions     = txRes.transactions;
-    if (yearTxRes.transactions) state.yearTransactions = yearTxRes.transactions;
+    if (txRes.transactions)     state.transactions     = applyExceptionalOverrides(txRes.transactions);
+    if (yearTxRes.transactions) state.yearTransactions = applyExceptionalOverrides(yearTxRes.transactions);
 
     // Update budget setting always (it's just a number, safe to sync)
     if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
@@ -2187,6 +2204,12 @@ async function submitTransaction() {
     createdAt: new Date().toISOString()
   };
 
+  // Save exceptional override to localStorage so it survives syncs
+  if (tx.isExceptional) {
+    exceptionalOverrides[tx.id] = true;
+    saveExceptionalOverrides();
+  }
+
   // Add to local state immediately so UI updates instantly
   state.transactions.unshift(tx);
   state.yearTransactions.unshift(tx);
@@ -2213,8 +2236,17 @@ async function submitTransaction() {
     try {
       const res = await apiCall('addTransaction', tx);
       if (res.id) {
+        // Remap exceptional override from local_ id to real sheet id
+        if (exceptionalOverrides.hasOwnProperty(tx.id)) {
+          exceptionalOverrides[res.id] = exceptionalOverrides[tx.id];
+          delete exceptionalOverrides[tx.id];
+          saveExceptionalOverrides();
+        }
         const idx = state.transactions.findIndex(t => t.id === tx.id);
-        if (idx !== -1) state.transactions[idx].id = res.id;
+        if (idx !== -1) {
+          state.transactions[idx].id = res.id;
+          state.yearTransactions.forEach(t => { if (t.id === tx.id) t.id = res.id; });
+        }
         saveToCache();
         renderHome();
         renderHistory();
@@ -2375,9 +2407,14 @@ async function saveEditedTx() {
   state.transactions[idx].description = document.getElementById('edit-desc').value;
   state.transactions[idx].date = document.getElementById('edit-date').value;
   // Set isExceptional BEFORE mirroring to yearTransactions
-  state.transactions[idx].isExceptional = (state.transactions[idx].type === 'expense')
+  const newExceptional = (state.transactions[idx].type === 'expense')
     ? document.getElementById('edit-exceptional-toggle').checked
     : false;
+  state.transactions[idx].isExceptional = newExceptional;
+
+  // Persist override to localStorage so sync can't wipe it
+  exceptionalOverrides[currentEditId] = newExceptional;
+  saveExceptionalOverrides();
 
   // Mirror update in yearTransactions (after all fields set)
   const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
@@ -2428,6 +2465,11 @@ async function deleteCurrentTx() {
     }
   }
 
+  // Clean up override when transaction deleted
+  if (exceptionalOverrides.hasOwnProperty(idToDelete)) {
+    delete exceptionalOverrides[idToDelete];
+    saveExceptionalOverrides();
+  }
   state.transactions = state.transactions.filter(t => t.id !== idToDelete);
   state.yearTransactions = state.yearTransactions.filter(t => t.id !== idToDelete);
   closeModal();
