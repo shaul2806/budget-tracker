@@ -1793,10 +1793,14 @@ async function loadPastMonthReport(monthStr) {
       <div class="card" style="margin:0;padding:20px;">
         <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;">${mLabel}</div>
 
-        <div class="report-row">
+        <div class="report-row" style="cursor:pointer;" onclick="togglePastBreakdown('income','${monthStr}')">
           <span class="label">Total income</span>
-          <span class="value positive">₪${totalIncome.toLocaleString()}</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span class="value positive">₪${totalIncome.toLocaleString()}</span>
+            <span id="arrow-income-${monthStr}" style="color:var(--text3);font-size:11px;transition:transform 0.2s;">▶</span>
+          </span>
         </div>
+        <div id="breakdown-income-${monthStr}" style="display:none;padding:4px 0 6px 24px;"></div>
 
         <div class="report-row" style="margin-top:4px;">
           <span class="label">Total expenses</span>
@@ -1858,16 +1862,33 @@ async function togglePastBreakdown(section, monthStr) {
   const yyyymm = monthStr.replace('-','');
 
   try {
-    // Only 'const' section is expandable now
-    const res = await apiCall('getConstants', { month: yyyymm });
-    const constants = res.constants || [];
-    breakdownEl.innerHTML = constants.length === 0
-      ? '<div style="font-size:13px;color:var(--text3);">No data</div>'
-      : constants.map(c =>
-          `<div class="report-row" style="font-size:13px;">
-            <span class="label" style="color:var(--text2);">${escHtml(c.name)}</span>
-            <span style="font-size:13px;color:var(--text2);">₪${c.amount.toLocaleString()}</span>
-          </div>`).join('');
+    if (section === 'income') {
+      const res = await apiCall('getIncomes', { month: yyyymm });
+      const sources = res.incomes || [];
+      const cachedTxs = _pastMonthCache[monthStr]?.txs || [];
+      const extraInc = cachedTxs.filter(t => t.type === 'income' && !t.incomeSource);
+      let rows = sources.map(s =>
+        `<div class="report-row" style="font-size:13px;">
+          <span class="label" style="color:var(--text2);">${escHtml(s.name)}</span>
+          <span style="font-size:13px;color:var(--green);">₪${s.amount.toLocaleString()}</span>
+        </div>`).join('');
+      rows += extraInc.map(t =>
+        `<div class="report-row" style="font-size:13px;">
+          <span class="label" style="color:var(--text2);">${escHtml(t.description || 'Extra income')}</span>
+          <span style="font-size:13px;color:var(--green);">₪${t.amount.toLocaleString()}</span>
+        </div>`).join('');
+      breakdownEl.innerHTML = rows || '<div style="font-size:13px;color:var(--text3);">No data</div>';
+    } else {
+      const res = await apiCall('getConstants', { month: yyyymm });
+      const constants = res.constants || [];
+      breakdownEl.innerHTML = constants.length === 0
+        ? '<div style="font-size:13px;color:var(--text3);">No data</div>'
+        : constants.map(c =>
+            `<div class="report-row" style="font-size:13px;">
+              <span class="label" style="color:var(--text2);">${escHtml(c.name)}</span>
+              <span style="font-size:13px;color:var(--text2);">₪${c.amount.toLocaleString()}</span>
+            </div>`).join('');
+    }
   } catch(e) {
     breakdownEl.innerHTML = '<div style="font-size:13px;color:var(--red);">⚠️ Could not load</div>';
   }
