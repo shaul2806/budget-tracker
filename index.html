@@ -895,7 +895,7 @@ nav {
       </div>
     </div>
 
-    <!-- Amount row: number centered, ⌫ on the right aligned with ÷ column -->
+    <!-- Amount row: $→₪ on left, number centered, ⌫ on right -->
     <div style="position:relative;margin-bottom:2px;">
       <div class="amount-display" style="margin-bottom:0;">
         <div class="amount-display-value">
@@ -906,7 +906,10 @@ nav {
       </div>
       <button class="num-btn del" onclick="numpad('del')"
         style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);">⌫</button>
+      <button class="num-btn op-btn" id="usd-convert-btn" onclick="convertUSD()"
+        style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);font-size:11px;font-weight:700;letter-spacing:-0.3px;">$→₪</button>
     </div>
+    <div id="usd-rate-hint" style="display:none;font-size:11px;color:var(--text3);text-align:center;margin-bottom:2px;"></div>
 
     <div id="calc-display" style="display:none;"></div>
 
@@ -1070,7 +1073,11 @@ nav {
   <div class="modal-overlay" id="edit-modal">
     <div class="modal">
       <div class="modal-title">Edit Entry</div>
-      <input type="number" id="edit-amount" class="modal-input" placeholder="Amount">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+        <input type="number" id="edit-amount" class="modal-input" placeholder="Amount (₪)" style="margin-bottom:0;flex:1;">
+        <button onclick="convertUSDEdit()" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:var(--green);white-space:nowrap;cursor:pointer;">$→₪</button>
+      </div>
+      <div id="edit-usd-hint" style="display:none;font-size:11px;color:var(--text3);margin:-8px 0 10px;text-align:right;"></div>
       <input type="text" id="edit-desc" class="modal-input" placeholder="Description (optional)">
       <input type="date" id="edit-date" class="modal-input" style="color-scheme:dark;">
       <div id="edit-exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
@@ -2103,6 +2110,79 @@ function selectIncomeSource(idx) {
 
 let calcExpression = '';
 
+// ── USD → ILS conversion ──────────────────────────────────────
+let _cachedRate = null;
+let _cachedRateTime = 0;
+
+async function fetchUSDRate() {
+  const now = Date.now();
+  // Cache for 2 hours
+  if (_cachedRate && (now - _cachedRateTime) < 7200000) return _cachedRate;
+  // Try localStorage cache first
+  const stored = localStorage.getItem('usd_ils_rate');
+  if (stored) {
+    const { rate, time } = JSON.parse(stored);
+    if (now - time < 7200000) {
+      _cachedRate = rate; _cachedRateTime = time;
+      return rate;
+    }
+  }
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const data = await res.json();
+    const rate = data.rates.ILS;
+    _cachedRate = rate; _cachedRateTime = now;
+    localStorage.setItem('usd_ils_rate', JSON.stringify({ rate, time: now }));
+    return rate;
+  } catch(e) {
+    // Fallback to last stored rate even if old
+    if (stored) return JSON.parse(stored).rate;
+    return null;
+  }
+}
+
+async function convertUSD() {
+  const btn = document.getElementById('usd-convert-btn');
+  const hint = document.getElementById('usd-rate-hint');
+  const ops = ['+','-','*','/'];
+
+  // Evaluate expression first if needed
+  let usdAmount = parseFloat(calcExpression);
+  if (ops.some(op => calcExpression.slice(1).includes(op))) {
+    try { usdAmount = Math.round(safeMath(calcExpression) * 100) / 100; } catch(e) {}
+  }
+  if (!usdAmount || usdAmount <= 0) { showToastSimple('⚠️ Enter a USD amount first'); return; }
+
+  btn.textContent = '...';
+  btn.disabled = true;
+  const rate = await fetchUSDRate();
+  btn.textContent = '$→₪';
+  btn.disabled = false;
+
+  if (!rate) { showToastSimple('⚠️ Could not fetch rate — check connection'); return; }
+
+  const ils = Math.round(usdAmount * rate);
+  hint.textContent = `$${usdAmount} × ${rate.toFixed(2)} = ₪${ils.toLocaleString()}`;
+  hint.style.display = 'block';
+  calcExpression = String(ils);
+  document.getElementById('amount-display').textContent = calcExpression;
+}
+
+async function convertUSDEdit() {
+  const input = document.getElementById('edit-amount');
+  const hint  = document.getElementById('edit-usd-hint');
+  const usdAmount = parseFloat(input.value);
+  if (!usdAmount || usdAmount <= 0) { showToastSimple('⚠️ Enter a USD amount first'); return; }
+
+  const rate = await fetchUSDRate();
+  if (!rate) { showToastSimple('⚠️ Could not fetch rate — check connection'); return; }
+
+  const ils = Math.round(usdAmount * rate);
+  hint.textContent = `$${usdAmount} × ${rate.toFixed(2)} = ₪${ils.toLocaleString()}`;
+  hint.style.display = 'block';
+  input.value = ils;
+}
+
 function numpad(val) {
   const ops = ['+', '-', '*', '/'];
 
@@ -2226,6 +2306,7 @@ async function submitTransaction() {
   document.getElementById('desc-input').value = '';
   document.getElementById('date-input').value = toDateStr(new Date());
   document.getElementById('exceptional-toggle').checked = false;
+  document.getElementById('usd-rate-hint').style.display = 'none';
   // Reset income source picker
   selectedIncomeSourceIdx = -1;
   document.getElementById('new-source-row').style.display = 'none';
