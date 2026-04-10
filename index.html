@@ -1190,12 +1190,21 @@ function saveExceptionalOverrides() {
 }
 
 function applyExceptionalOverrides(txs) {
-  return txs.map(tx => ({
-    ...tx,
-    isExceptional: exceptionalOverrides.hasOwnProperty(tx.id)
-      ? exceptionalOverrides[tx.id]
-      : !!tx.isExceptional
-  }));
+  let changed = false;
+  const result = txs.map(tx => {
+    if (exceptionalOverrides.hasOwnProperty(tx.id)) {
+      // Local override wins
+      return { ...tx, isExceptional: exceptionalOverrides[tx.id] };
+    }
+    // No local override — trust sheet value and cache it locally so it sticks
+    if (tx.isExceptional) {
+      exceptionalOverrides[tx.id] = true;
+      changed = true;
+    }
+    return tx;
+  });
+  if (changed) saveExceptionalOverrides();
+  return result;
 }
 
 let currentType = 'expense';
