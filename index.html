@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
 <meta name="theme-color" content="#0f1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -322,6 +322,7 @@ nav {
   margin-left: 2px;
 }
 @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .amount-currency {
   font-size: 24px;
   color: var(--text3);
@@ -833,7 +834,12 @@ nav {
   <div class="page-header">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div class="page-title">Overview</div>
-      <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;">
+      <div style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px;">
+        <button id="sync-refresh-btn" onclick="manualSync()" style="background:none;border:none;padding:4px;cursor:pointer;color:var(--text3);display:flex;align-items:center;line-height:1;">
+          <svg id="sync-refresh-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
         <span id="sync-dot" class="sync-dot"></span>
         <span id="sync-label">Live</span>
       </div>
@@ -904,7 +910,7 @@ nav {
           <span class="cursor"></span>
         </div>
       </div>
-      <button class="num-btn del" onclick="numpad('del')"
+      <button class="num-btn del" ontouchstart="handleNumpadTouch(event,'del')" onclick="handleNumpadClick('del')"
         style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);">⌫</button>
       <button class="num-btn op-btn" id="usd-convert-btn" onclick="convertUSD()"
         style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);font-size:11px;font-weight:700;letter-spacing:-0.3px;">$→₪</button>
@@ -915,22 +921,22 @@ nav {
 
     <!-- Numpad: ⌫ removed from here, = and + swapped -->
     <div class="numpad">
-      <button class="num-btn" onclick="numpad('7')">7</button>
-      <button class="num-btn" onclick="numpad('8')">8</button>
-      <button class="num-btn" onclick="numpad('9')">9</button>
-      <button class="num-btn op-btn" onclick="numpad('/')">÷</button>
-      <button class="num-btn" onclick="numpad('4')">4</button>
-      <button class="num-btn" onclick="numpad('5')">5</button>
-      <button class="num-btn" onclick="numpad('6')">6</button>
-      <button class="num-btn op-btn" onclick="numpad('*')">×</button>
-      <button class="num-btn" onclick="numpad('1')">1</button>
-      <button class="num-btn" onclick="numpad('2')">2</button>
-      <button class="num-btn" onclick="numpad('3')">3</button>
-      <button class="num-btn op-btn" onclick="numpad('-')">−</button>
-      <button class="num-btn" onclick="numpad('.')">.</button>
-      <button class="num-btn" onclick="numpad('0')">0</button>
-      <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
-      <button class="num-btn op-btn" onclick="numpad('+')">+</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'7')" onclick="handleNumpadClick('7')">7</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'8')" onclick="handleNumpadClick('8')">8</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'9')" onclick="handleNumpadClick('9')">9</button>
+      <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'/')" onclick="handleNumpadClick('/')">÷</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'4')" onclick="handleNumpadClick('4')">4</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'5')" onclick="handleNumpadClick('5')">5</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'6')" onclick="handleNumpadClick('6')">6</button>
+      <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'*')" onclick="handleNumpadClick('*')">×</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'1')" onclick="handleNumpadClick('1')">1</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'2')" onclick="handleNumpadClick('2')">2</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'3')" onclick="handleNumpadClick('3')">3</button>
+      <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'-')" onclick="handleNumpadClick('-')">−</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'.')" onclick="handleNumpadClick('.')">.</button>
+      <button class="num-btn" ontouchstart="handleNumpadTouch(event,'0')" onclick="handleNumpadClick('0')">0</button>
+      <button class="num-btn op-btn eq-btn" ontouchstart="handleNumpadTouch(event,'=')" onclick="handleNumpadClick('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
+      <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'+')" onclick="handleNumpadClick('+')">+</button>
     </div>
 
     <!-- Date row: Today / Yesterday / Other (opens hidden date input) -->
@@ -1181,30 +1187,34 @@ let state = {
   settingsLoaded: false,  // true once settings have been loaded from sheets
   isOnline: navigator.onLine
 };
-// Exceptional overrides — stored in localStorage, survives syncs
-// { [txId]: true/false }
-let exceptionalOverrides = JSON.parse(localStorage.getItem('exceptional_overrides') || '{}');
+// Exceptional IDs — shared via Settings sheet, synced to both phones
+// Set of transaction IDs marked as exceptional
+let exceptionalIds = new Set(JSON.parse(localStorage.getItem('exceptional_ids') || '[]'));
 
-function saveExceptionalOverrides() {
-  localStorage.setItem('exceptional_overrides', JSON.stringify(exceptionalOverrides));
+function saveExceptionalIdsLocally() {
+  localStorage.setItem('exceptional_ids', JSON.stringify([...exceptionalIds]));
+}
+
+async function pushExceptionalIdsToSheet() {
+  const ids = [...exceptionalIds].join(',');
+  try {
+    await apiCall('saveSettings', { exceptionalIds: ids });
+  } catch(e) {}
+}
+
+function loadExceptionalIdsFromSettings(settingsObj) {
+  const raw = settingsObj.exceptionalIds || '';
+  if (raw) {
+    raw.split(',').filter(Boolean).forEach(id => exceptionalIds.add(id));
+    saveExceptionalIdsLocally();
+  }
 }
 
 function applyExceptionalOverrides(txs) {
-  let changed = false;
-  const result = txs.map(tx => {
-    if (exceptionalOverrides.hasOwnProperty(tx.id)) {
-      // Local override wins
-      return { ...tx, isExceptional: exceptionalOverrides[tx.id] };
-    }
-    // No local override — trust sheet value and cache it locally so it sticks
-    if (tx.isExceptional) {
-      exceptionalOverrides[tx.id] = true;
-      changed = true;
-    }
-    return tx;
-  });
-  if (changed) saveExceptionalOverrides();
-  return result;
+  return txs.map(tx => ({
+    ...tx,
+    isExceptional: exceptionalIds.has(tx.id)
+  }));
 }
 
 let currentType = 'expense';
@@ -1254,10 +1264,17 @@ window.addEventListener('load', async () => {
   updateSyncIndicator();
   updateHomeDate();
 
-  // Auto-refresh every 30 seconds, but not while editing settings
+  // Smart sync: check lastModified every 10s, full sync only if changed
   setInterval(() => {
-    if (navigator.onLine && API_URL && activeTab !== 'settings') loadAll();
-  }, 30000);
+    if (navigator.onLine && API_URL && activeTab !== 'settings') smartSync();
+  }, 10000);
+
+  // Sync immediately when app comes to foreground
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && navigator.onLine && API_URL) {
+      smartSync(true); // force full sync on foreground
+    }
+  });
 });
 
 function showMainApp() {
@@ -1356,6 +1373,61 @@ async function apiCall(action, data = {}) {
   }
 }
 
+// ============================================================
+// SMART SYNC
+// ============================================================
+let _lastKnownModified = null;
+let _isSyncing = false;
+
+async function smartSync(force = false) {
+  if (_isSyncing) return; // prevent concurrent syncs
+  try {
+    if (!force) {
+      // Quick check: has anything changed since last sync?
+      const res = await apiCall('getLastModified', {});
+      const ts = res.lastModified || null;
+      if (ts && ts === _lastKnownModified) return; // nothing changed
+      _lastKnownModified = ts;
+    }
+    await loadAll();
+  } catch(e) {}
+}
+
+async function manualSync() {
+  const icon = document.getElementById('sync-refresh-icon');
+  if (icon) icon.style.animation = 'spin 0.8s linear infinite';
+  try {
+    _lastKnownModified = null; // force full reload
+    await loadAll();
+  } finally {
+    if (icon) icon.style.animation = '';
+  }
+}
+
+// ============================================================
+// NUMPAD TOUCH HELPERS — instant response on touchstart
+// ============================================================
+let _numpadTouchFired = false;
+
+function handleNumpadTouch(e, val) {
+  e.preventDefault(); // prevent 300ms click delay AND double-tap zoom
+  _numpadTouchFired = true;
+  numpad(val);
+  // Visual feedback
+  const btn = e.currentTarget;
+  btn.style.transform = 'scale(0.93)';
+  btn.style.background = 'var(--bg3)';
+  setTimeout(() => {
+    btn.style.transform = '';
+    btn.style.background = '';
+  }, 100);
+}
+
+function handleNumpadClick(val) {
+  if (_numpadTouchFired) { _numpadTouchFired = false; return; } // already handled by touchstart
+  numpad(val);
+}
+
 async function loadAll() {
   // Show cached data instantly while fetching
   loadFromCache();
@@ -1388,6 +1460,8 @@ async function loadAll() {
       state.settings.emailEnabled = s.emailEnabled === '1';
       state.settings.email1       = s.email1 || '';
       state.settings.email2       = s.email2 || '';
+      // Load shared exceptional IDs from sheet — works on both phones
+      loadExceptionalIdsFromSettings(s);
     }
 
     // Only load incomes/constants from sheets if:
@@ -2293,10 +2367,10 @@ async function submitTransaction() {
     createdAt: new Date().toISOString()
   };
 
-  // Save exceptional override to localStorage so it survives syncs
+  // Save exceptional ID to shared set (will be pushed after real ID assigned)
   if (tx.isExceptional) {
-    exceptionalOverrides[tx.id] = true;
-    saveExceptionalOverrides();
+    exceptionalIds.add(tx.id);
+    saveExceptionalIdsLocally();
   }
 
   // Add to local state immediately so UI updates instantly
@@ -2326,11 +2400,12 @@ async function submitTransaction() {
     try {
       const res = await apiCall('addTransaction', tx);
       if (res.id) {
-        // Remap exceptional override from local_ id to real sheet id
-        if (exceptionalOverrides.hasOwnProperty(tx.id)) {
-          exceptionalOverrides[res.id] = exceptionalOverrides[tx.id];
-          delete exceptionalOverrides[tx.id];
-          saveExceptionalOverrides();
+        // Remap exceptional id from local_ to real sheet id
+        if (exceptionalIds.has(tx.id)) {
+          exceptionalIds.delete(tx.id);
+          exceptionalIds.add(res.id);
+          saveExceptionalIdsLocally();
+          pushExceptionalIdsToSheet(); // share with partner's phone
         }
         const idx = state.transactions.findIndex(t => t.id === tx.id);
         if (idx !== -1) {
@@ -2502,9 +2577,14 @@ async function saveEditedTx() {
     : false;
   state.transactions[idx].isExceptional = newExceptional;
 
-  // Persist override to localStorage so sync can't wipe it
-  exceptionalOverrides[currentEditId] = newExceptional;
-  saveExceptionalOverrides();
+  // Update shared exceptional IDs set and push to sheet
+  if (newExceptional) {
+    exceptionalIds.add(currentEditId);
+  } else {
+    exceptionalIds.delete(currentEditId);
+  }
+  saveExceptionalIdsLocally();
+  pushExceptionalIdsToSheet();
 
   // Mirror update in yearTransactions (after all fields set)
   const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
@@ -2555,10 +2635,11 @@ async function deleteCurrentTx() {
     }
   }
 
-  // Clean up override when transaction deleted
-  if (exceptionalOverrides.hasOwnProperty(idToDelete)) {
-    delete exceptionalOverrides[idToDelete];
-    saveExceptionalOverrides();
+  // Remove from exceptional set and push
+  if (exceptionalIds.has(idToDelete)) {
+    exceptionalIds.delete(idToDelete);
+    saveExceptionalIdsLocally();
+    pushExceptionalIdsToSheet();
   }
   state.transactions = state.transactions.filter(t => t.id !== idToDelete);
   state.yearTransactions = state.yearTransactions.filter(t => t.id !== idToDelete);
@@ -2634,6 +2715,7 @@ function switchTab(tab) {
   }
   if (tab === 'settings') renderSettings();
   if (tab === 'report') renderReport();
+  if (tab === 'history' && navigator.onLine && API_URL) smartSync(true);
 }
 
 // ============================================================
