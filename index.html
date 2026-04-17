@@ -92,7 +92,7 @@ nav {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 10px 0 8px;
+  padding: 5px 0 6px;
   background: none;
   border: none;
   color: var(--text3);
@@ -1662,7 +1662,7 @@ function renderHome() {
   const monthEl = document.getElementById('monthly-remaining');
   monthEl.textContent = formatCurrency(monthRemaining);
   monthEl.className = 'stat-value ' + (monthRemaining >= 0 ? 'positive' : 'negative');
-  document.getElementById('monthly-sub').textContent = `spent ₪${monthSpent.toLocaleString()} of ₪${monthBudget.toLocaleString()}`;
+  document.getElementById('monthly-sub').textContent = `spent ₪${Math.round(monthSpent).toLocaleString()} of ₪${Math.round(monthBudget).toLocaleString()}`;
 
   // Today
   document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
