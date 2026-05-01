@@ -1450,7 +1450,23 @@ async function loadAll() {
     const yearTxRes   = await apiCall('getTransactions',   { year: yearStr });
     const yearSumRes  = await apiCall('getYearlySummary',  { year: yearStr });
 
-    if (txRes.transactions)     state.transactions     = applyExceptionalOverrides(txRes.transactions);
+    // Also fetch previous month so history doesn't go blank at month boundary
+    let prevMonthTxs = [];
+    const prevDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const prevMonthStr = prevDate.getFullYear() + '-' + String(prevDate.getMonth()+1).padStart(2,'0');
+    if (today.getDate() <= 7) { // only fetch prev month in first week of new month
+      const prevTxRes = await apiCall('getTransactions', { month: prevMonthStr });
+      prevMonthTxs = prevTxRes.transactions || [];
+    }
+
+    // Merge current + prev month, deduplicate by id, sort newest first
+    if (txRes.transactions) {
+      const merged = [...txRes.transactions, ...prevMonthTxs];
+      const seen = new Set();
+      const deduped = merged.filter(t => { if (seen.has(t.id)) return false; seen.add(t.id); return true; });
+      deduped.sort((a, b) => new Date(b.date) - new Date(a.date) || new Date(b.createdAt) - new Date(a.createdAt));
+      state.transactions = applyExceptionalOverrides(deduped);
+    }
     if (yearTxRes.transactions) state.yearTransactions = applyExceptionalOverrides(yearTxRes.transactions);
 
     // Update budget setting always (it's just a number, safe to sync)
