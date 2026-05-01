@@ -1738,7 +1738,9 @@ function renderHistory() {
   document.getElementById('history-month').textContent = 
     today.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-  const sorted = [...state.transactions]
+  // Use yearTransactions so history shows all months, not just current month
+  const source = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
+  const sorted = [...source]
     .sort((a,b) => parseLocalDate(b.date) - parseLocalDate(a.date) || new Date(b.createdAt) - new Date(a.createdAt));
   
   if (sorted.length === 0) {
