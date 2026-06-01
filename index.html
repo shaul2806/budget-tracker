@@ -2104,7 +2104,20 @@ async function saveSettings() {
   state.settings.email1 = document.getElementById('s-email1').value.trim();
   state.settings.email2 = document.getElementById('s-email2').value.trim();
 
-  // State already synced via oninput handlers — just filter empties
+  // Read values directly from DOM — don't trust oninput to have fired on iOS
+  document.querySelectorAll('#incomes-list [data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx);
+    if (isNaN(idx) || !state.incomes[idx]) return;
+    if (el.dataset.field === 'name')      state.incomes[idx].name      = el.value;
+    if (el.dataset.field === 'amount')    state.incomes[idx].amount    = parseFloat(el.value) || 0;
+    if (el.dataset.field === 'recurring') state.incomes[idx].recurring = el.checked;
+  });
+  document.querySelectorAll('#constants-list [data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx);
+    if (isNaN(idx) || !state.constants[idx]) return;
+    if (el.dataset.field === 'name')   state.constants[idx].name   = el.value;
+    if (el.dataset.field === 'amount') state.constants[idx].amount = parseFloat(el.value) || 0;
+  });
   state.incomes   = state.incomes.filter(i => i.name && i.name.trim());
   state.constants = state.constants.filter(c => c.name && c.name.trim());
 
