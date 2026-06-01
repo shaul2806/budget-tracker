@@ -1245,6 +1245,33 @@ window.addEventListener('load', async () => {
   updateSyncIndicator();
   updateHomeDate();
 
+  // Delegated handlers for settings lists (reliable on mobile)
+  document.getElementById('incomes-list').addEventListener('input', e => {
+    const el = e.target;
+    const idx = parseInt(el.dataset.idx);
+    if (isNaN(idx) || el.dataset.list !== 'incomes') return;
+    if (el.dataset.field === 'name')      state.incomes[idx].name      = el.value;
+    if (el.dataset.field === 'amount')    state.incomes[idx].amount    = parseFloat(el.value) || 0;
+    if (el.dataset.field === 'recurring') state.incomes[idx].recurring = el.checked;
+  });
+  document.getElementById('constants-list').addEventListener('input', e => {
+    const el = e.target;
+    const idx = parseInt(el.dataset.idx);
+    if (isNaN(idx) || el.dataset.list !== 'constants') return;
+    if (el.dataset.field === 'name')   state.constants[idx].name   = el.value;
+    if (el.dataset.field === 'amount') state.constants[idx].amount = parseFloat(el.value) || 0;
+  });
+  document.getElementById('incomes-list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove-income]');
+    if (!btn) return;
+    removeIncome(parseInt(btn.dataset.removeIncome));
+  });
+  document.getElementById('constants-list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove-constant]');
+    if (!btn) return;
+    removeConstant(parseInt(btn.dataset.removeConstant));
+  });
+
   // Smart sync: check lastModified every 10s, full sync only if changed
   setInterval(() => {
     if (navigator.onLine && API_URL && activeTab !== 'settings') smartSync();
@@ -2495,8 +2522,8 @@ function showNewMonthModal(newMonth, prevMonth) {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:14px;color:var(--text);">${escHtml(inc.name)}</span>
           <input type="number" value="${inc.amount || ''}" placeholder="₪"
-            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;"
-            onchange="state.incomes[${state.incomes.indexOf(inc)}].amount = parseFloat(this.value)||0;">
+            data-nm-income="${escHtml(inc.name)}"
+            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;">
         </div>`).join('');
 
   // One-time list — with include checkbox
@@ -2514,8 +2541,8 @@ function showNewMonthModal(newMonth, prevMonth) {
           </label>
           <span style="font-size:14px;color:var(--text);flex:1;">${escHtml(inc.name)}</span>
           <input type="number" value="${inc.amount || ''}" placeholder="₪"
-            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;"
-            onchange="state.incomes[${idx}].amount = parseFloat(this.value)||0;">
+            data-nm-income="${escHtml(inc.name)}"
+            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;">
         </div>`;
     }).join('');
   } else {
@@ -2530,31 +2557,51 @@ function showNewMonthModal(newMonth, prevMonth) {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:14px;color:var(--text);">${escHtml(c.name)}</span>
           <input type="number" value="${c.amount || ''}" placeholder="₪"
-            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;"
-            onchange="state.constants[${i}].amount = parseFloat(this.value)||0;">
+            data-nm-constant="${escHtml(c.name)}"
+            style="width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:14px;color:var(--text);text-align:right;">
         </div>`).join('');
 
   document.getElementById('new-month-modal').classList.add('open');
 }
 
 async function saveNewMonthReview() {
-  // For one-time incomes: only include if checkbox is checked
+  // Read values DIRECTLY from DOM inputs — don't rely on onchange firing
+  // Income inputs
+  const incomeInputs = document.querySelectorAll('[data-nm-income]');
+  incomeInputs.forEach(input => {
+    const name = input.dataset.nmIncome;
+    const amount = parseFloat(input.value) || 0;
+    const idx = state.incomes.findIndex(i => i.name === name);
+    if (idx !== -1) state.incomes[idx].amount = amount;
+  });
+
+  // For one-time incomes: zero out if not checked
   const onetime = state.incomes.filter(i => i.recurring === false);
   onetime.forEach(inc => {
     const idx = state.incomes.indexOf(inc);
     const cb = document.getElementById('nm-onetime-' + idx);
-    if (cb && !cb.checked) {
-      // Remove from this month's incomes (don't delete permanently, just zero out)
-      state.incomes[idx].amount = 0;
-    }
+    if (cb && !cb.checked) state.incomes[idx].amount = 0;
+  });
+
+  // Constant inputs
+  const constInputs = document.querySelectorAll('[data-nm-constant]');
+  constInputs.forEach(input => {
+    const name = input.dataset.nmConstant;
+    const amount = parseFloat(input.value) || 0;
+    const idx = state.constants.findIndex(c => c.name === name);
+    if (idx !== -1) state.constants[idx].amount = amount;
   });
 
   const today2 = new Date();
   const mStr = String(today2.getFullYear()) + String(today2.getMonth()+1).padStart(2,'0');
+
   try {
-    await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: mStr });
-    await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: mStr });
-    // Mark as loaded so next sync doesn't overwrite what we just saved
+    const r1 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: mStr });
+    const r2 = await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: mStr });
+    if (r1.error || r2.error) {
+      showToastSimple('⚠️ Save error — try again');
+      return;
+    }
     state.settingsLoaded = true;
     state.constantsMonth = mStr;
     state.incomesMonth   = mStr;
@@ -2562,10 +2609,12 @@ async function saveNewMonthReview() {
     saveToCache();
     showToastSimple('✅ New month saved');
   } catch(e) {
-    showToastSimple('⚠️ Could not save — try again');
+    showToastSimple('⚠️ Could not save — check connection');
+    return;
   }
   closeNewMonthModal();
   renderHome();
+  renderSettings();
   renderReport();
 }
 
