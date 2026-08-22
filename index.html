@@ -2675,15 +2675,17 @@ async function saveEditedTx() {
   const yearIdx = state.yearTransactions.findIndex(t => t.id === currentEditId);
   if (yearIdx !== -1) state.yearTransactions[yearIdx] = { ...state.transactions[idx] };
 
-  try {
-    await apiCall('updateTransaction', state.transactions[idx]);
-  } catch (e) {}
-
+  // Close modal immediately — don't wait for server
   closeModal();
   saveToCache();
   renderHome();
   renderHistory();
   showToastSimple('✅ Updated');
+
+  // Save to sheet in background
+  apiCall('updateTransaction', state.transactions[idx]).catch(() => {
+    showToastSimple('⚠️ Could not sync — try again');
+  });
 }
 
 async function deleteCurrentTx() {
@@ -2779,6 +2781,9 @@ function updateSyncIndicator() {
 // NAVIGATION
 // ============================================================
 function switchTab(tab) {
+  // Debug: show what's open when switching
+  const openModals = [...document.querySelectorAll('.modal-overlay.open')].map(m => m.id).join(',');
+  if (openModals) showToastSimple('DEBUG: closing ' + openModals + ' → going to ' + tab);
   // Always close any open modal before switching tabs
   document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
   currentEditId = null;
