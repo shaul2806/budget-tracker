@@ -902,7 +902,7 @@ nav {
               <span class="cursor"></span>
             </div>
           </div>
-          <button class="num-btn del" ontouchstart="handleNumpadTouch(event,'del')" onclick="handleNumpadClick('del')"
+          <button class="num-btn del" onclick="numpad('del')"
             style="position:absolute;right:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);">⌫</button>
           <button class="num-btn op-btn" id="usd-convert-btn" onclick="convertUSD()"
             style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:calc(25% - 4px);font-size:11px;font-weight:700;letter-spacing:-0.3px;">$→₪</button>
@@ -913,22 +913,22 @@ nav {
 
         <!-- Numpad: ⌫ removed from here, = and + swapped -->
         <div class="numpad">
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'7')" onclick="handleNumpadClick('7')">7</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'8')" onclick="handleNumpadClick('8')">8</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'9')" onclick="handleNumpadClick('9')">9</button>
-          <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'/')" onclick="handleNumpadClick('/')">÷</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'4')" onclick="handleNumpadClick('4')">4</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'5')" onclick="handleNumpadClick('5')">5</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'6')" onclick="handleNumpadClick('6')">6</button>
-          <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'*')" onclick="handleNumpadClick('*')">×</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'1')" onclick="handleNumpadClick('1')">1</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'2')" onclick="handleNumpadClick('2')">2</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'3')" onclick="handleNumpadClick('3')">3</button>
-          <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'-')" onclick="handleNumpadClick('-')">−</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'.')" onclick="handleNumpadClick('.')">.</button>
-          <button class="num-btn" ontouchstart="handleNumpadTouch(event,'0')" onclick="handleNumpadClick('0')">0</button>
-          <button class="num-btn op-btn eq-btn" ontouchstart="handleNumpadTouch(event,'=')" onclick="handleNumpadClick('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
-          <button class="num-btn op-btn" ontouchstart="handleNumpadTouch(event,'+')" onclick="handleNumpadClick('+')">+</button>
+          <button class="num-btn" onclick="numpad('7')">7</button>
+          <button class="num-btn" onclick="numpad('8')">8</button>
+          <button class="num-btn" onclick="numpad('9')">9</button>
+          <button class="num-btn op-btn" onclick="numpad('/')">÷</button>
+          <button class="num-btn" onclick="numpad('4')">4</button>
+          <button class="num-btn" onclick="numpad('5')">5</button>
+          <button class="num-btn" onclick="numpad('6')">6</button>
+          <button class="num-btn op-btn" onclick="numpad('*')">×</button>
+          <button class="num-btn" onclick="numpad('1')">1</button>
+          <button class="num-btn" onclick="numpad('2')">2</button>
+          <button class="num-btn" onclick="numpad('3')">3</button>
+          <button class="num-btn op-btn" onclick="numpad('-')">−</button>
+          <button class="num-btn" onclick="numpad('.')">.</button>
+          <button class="num-btn" onclick="numpad('0')">0</button>
+          <button class="num-btn op-btn eq-btn" onclick="numpad('=')" style="background:var(--green-dim);color:var(--green);font-weight:800;">=</button>
+          <button class="num-btn op-btn" onclick="numpad('+')">+</button>
         </div>
 
         <!-- Date row: Today / Yesterday / Other (opens hidden date input) -->
@@ -2407,7 +2407,11 @@ async function submitTransaction() {
     }
   }
 
-  _lastLogTime = Date.now(); // guard against ghost tap opening edit modal
+  // Block ALL touch/click events for 1 second after submit (CSS-level, beats any ghost tap)
+  document.body.style.pointerEvents = 'none';
+  setTimeout(() => { document.body.style.pointerEvents = ''; }, 1000);
+
+  _lastLogTime = Date.now();
   const isExceptional = currentType === 'expense' && document.getElementById('exceptional-toggle').checked;
 
   const tx = {
