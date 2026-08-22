@@ -1387,6 +1387,7 @@ async function apiCall(action, data = {}) {
 // ============================================================
 let _lastKnownModified = null;
 let _isSyncing = false;
+let _lastLogTime = 0;
 let _settingsSavedAt = 0; // timestamp of last settings save
 
 async function smartSync(force = false) {
@@ -1733,7 +1734,7 @@ function renderTxItem(tx) {
   const icon = isExpense ? '💸' : '💰';
   const desc = tx.description || (isExpense ? 'Expense' : 'Income');
   return `
-    <div class="tx-item" onclick="openEditModal('${tx.id}')">
+    <div class="tx-item" onclick="if(Date.now()-(_lastLogTime||0)<800)return;openEditModal('${tx.id}')">
       <div class="tx-icon ${tx.type}">${icon}</div>
       <div class="tx-info">
         <div class="tx-desc">${escHtml(desc)}</div>
@@ -2131,6 +2132,8 @@ async function saveSettings() {
       email2: state.settings.email2
     });
     const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
+    // DEBUG: show what incomes are about to be saved
+    showToastSimple('Saving ' + state.incomes.length + ' incomes: ' + state.incomes.map(i => i.name + '=' + i.amount).join(', '));
     const r3 = await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: monthStr });
     const err = r1.error || r2.error || r3.error;
     if (err) { showToastSimple('⚠️ Save error: ' + err); return; }
@@ -2404,6 +2407,7 @@ async function submitTransaction() {
     }
   }
 
+  _lastLogTime = Date.now(); // guard against ghost tap opening edit modal
   const isExceptional = currentType === 'expense' && document.getElementById('exceptional-toggle').checked;
 
   const tx = {
@@ -2429,7 +2433,7 @@ async function submitTransaction() {
   renderHome();
   renderHistory();
   showExpenseToast(tx);
-  setTimeout(() => switchTab('home'), 300);
+  setTimeout(() => switchTab('home'), 600);
 
   // Reset form
   calcExpression = '0';
