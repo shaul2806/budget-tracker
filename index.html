@@ -699,7 +699,7 @@ nav {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.7);
-  z-index: 200;
+  z-index: 1000;
   align-items: flex-end;
   justify-content: center;
 }
@@ -2775,6 +2775,9 @@ function updateSyncIndicator() {
 // NAVIGATION
 // ============================================================
 function switchTab(tab) {
+  // Always close any open modal before switching tabs
+  document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  currentEditId = null;
   activeTab = tab;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
