@@ -168,7 +168,102 @@ nav {
   color: var(--text2);
 }
 
-/* progress bar */
+/* liquid wave bar (weekly) */
+.liquid-bar-wrap {
+  margin-top: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 14px;
+  background: var(--bg3);
+  position: relative;
+}
+#weekly-bar-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* monthly liquid card */
+.monthly-liquid-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.monthly-liquid-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.monthly-liquid-canvas-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+#monthly-liquid-canvas {
+  display: block;
+  border-radius: 50%;
+}
+.monthly-liquid-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.monthly-liquid-pct {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.monthly-liquid-label-small {
+  font-size: 9px;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.monthly-liquid-amount-left {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.monthly-liquid-right {
+  flex: 1;
+  min-width: 0;
+}
+.monthly-liquid-right .stat-label { margin-bottom: 4px; }
+.monthly-spent-of {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 2px 0;
+}
+.monthly-spent-of-sub {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+.monthly-liquid-right .stat-label-bottom {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* legacy progress bar — kept for any other uses */
 .progress-bar {
   height: 6px;
   background: var(--bg3);
@@ -844,15 +939,31 @@ nav {
         <div class="card-label">This week remaining</div>
         <div class="big-amount positive" id="weekly-remaining">—</div>
         <div class="amount-sub" id="weekly-sub"></div>
-        <div class="progress-bar"><div class="progress-fill green" id="weekly-bar" style="width:100%"></div></div>
+        <div class="liquid-bar-wrap">
+          <canvas id="weekly-bar-canvas" height="14"></canvas>
+        </div>
       </div>
 
       <!-- Monthly + spent row -->
       <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-label">Monthly Left</div>
-          <div class="stat-value positive" id="monthly-remaining">—</div>
-          <div class="stat-sub" id="monthly-sub"></div>
+        <!-- Monthly liquid card -->
+        <div class="monthly-liquid-card">
+          <div class="monthly-liquid-left">
+            <div class="monthly-liquid-canvas-wrap">
+              <canvas id="monthly-liquid-canvas" width="72" height="72"></canvas>
+              <div class="monthly-liquid-overlay">
+                <div class="monthly-liquid-pct" id="monthly-liquid-pct">—</div>
+                <div class="monthly-liquid-label-small">spent</div>
+              </div>
+            </div>
+            <div class="monthly-liquid-amount-left positive" id="monthly-remaining">—</div>
+            <div class="stat-label" style="text-align:center">left</div>
+          </div>
+          <div class="monthly-liquid-right">
+            <div class="stat-label">Monthly Budget</div>
+            <div class="monthly-spent-of" id="monthly-spent-display">—</div>
+            <div class="monthly-spent-of-sub" id="monthly-sub"></div>
+          </div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Spent Today</div>
@@ -1700,16 +1811,17 @@ function renderHome() {
     `spent ₪${weekSpent.toLocaleString()} of ₪${weekBudget.toLocaleString()} · ${formatDate(start)}–${formatDate(end)}`;
   
   const weekPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekRemaining / weekBudget) * 100)) : 0;
-  const weekBar = document.getElementById('weekly-bar');
-  weekBar.style.width = weekPct + '%';
-  weekBar.className = 'progress-fill ' + (weekPct > 40 ? 'green' : weekPct > 15 ? 'amber' : 'red');
-
+  startLiquidBar('weekly-bar-canvas', weekPct, budgetColor(weekPct));
 
   // Monthly
+  const monthSpentPct = monthBudget > 0 ? Math.min(110, Math.round((monthSpent / monthBudget) * 100)) : 0;
   const monthEl = document.getElementById('monthly-remaining');
   monthEl.textContent = formatCurrency(monthRemaining);
-  monthEl.className = 'stat-value ' + (monthRemaining >= 0 ? 'positive' : 'negative');
-  document.getElementById('monthly-sub').textContent = `spent ₪${Math.round(monthSpent).toLocaleString()} of ₪${Math.round(monthBudget).toLocaleString()}`;
+  monthEl.className = 'monthly-liquid-amount-left ' + (monthRemaining >= 0 ? 'positive' : 'negative');
+  document.getElementById('monthly-liquid-pct').textContent = monthSpentPct + '%';
+  document.getElementById('monthly-spent-display').textContent = formatCurrency(monthSpent);
+  document.getElementById('monthly-sub').textContent = `of ₪${Math.round(monthBudget).toLocaleString()} budget`;
+  startLiquidCircle('monthly-liquid-canvas', monthSpentPct, budgetColor(100 - monthSpentPct));
 
   // Today
   document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
@@ -2910,6 +3022,157 @@ function switchTab(tab) {
   if (tab === 'settings') renderSettings();
   if (tab === 'report') renderReport();
   if (tab === 'history' && navigator.onLine && API_URL) smartSync(true);
+}
+
+// ============================================================
+// ============================================================
+// LIQUID ANIMATIONS
+// ============================================================
+function budgetColor(remainingPct) {
+  // remainingPct = % remaining (100 - spentPct). green if >30, amber if >10, red if ≤10
+  if (remainingPct > 30) return '#34d399';
+  if (remainingPct > 10) return '#fbbf24';
+  return '#f87171';
+}
+
+const _liquidAnims = {}; // canvasId → { raf, target, current }
+
+function _hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return [r,g,b];
+}
+
+// Horizontal liquid wave bar for weekly card
+function startLiquidBar(canvasId, pct, color) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  // Set pixel dimensions to match display size
+  const W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = 14 * window.devicePixelRatio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = '14px';
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio;
+  const H = 14 * dpr;
+  const PW = W * dpr;
+
+  if (_liquidAnims[canvasId]) cancelAnimationFrame(_liquidAnims[canvasId].raf);
+
+  const state = { offset: 0, current: pct, target: pct, color };
+  _liquidAnims[canvasId] = state;
+  const [r,g,b] = _hexToRgb(color);
+
+  function draw() {
+    state.current += (state.target - state.current) * 0.06;
+    state.offset += 0.04;
+    ctx.clearRect(0, 0, PW, H);
+
+    // Background
+    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+    ctx.beginPath();
+    ctx.roundRect(0, 0, PW, H, 7 * dpr);
+    ctx.fill();
+
+    // Clip fill to rounded rect
+    const fillW = PW * Math.max(0, Math.min(state.current / 100, 1));
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(0, 0, fillW, H, 7 * dpr);
+    ctx.clip();
+
+    // Wave fill
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= fillW; x++) {
+      const y = H * 0.5
+        + Math.sin((x / PW) * Math.PI * 5 + state.offset) * (H * 0.18)
+        + Math.sin((x / PW) * Math.PI * 3 + state.offset * 1.3) * (H * 0.1);
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(fillW, H);
+    ctx.closePath();
+    ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+    ctx.fill();
+
+    // Solid bottom half
+    ctx.fillStyle = `rgba(${r},${g},${b},0.7)`;
+    ctx.fillRect(0, H * 0.6, fillW, H * 0.4);
+
+    ctx.restore();
+    state.raf = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// Circular liquid fill for monthly card
+function startLiquidCircle(canvasId, spentPct, color) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+
+  if (_liquidAnims[canvasId]) cancelAnimationFrame(_liquidAnims[canvasId].raf);
+
+  const state = { offset: 0, current: 0, target: Math.min(spentPct, 100) / 100, color };
+  _liquidAnims[canvasId] = state;
+  const [r,g,b] = _hexToRgb(color);
+
+  function draw() {
+    state.current += (state.target - state.current) * 0.05;
+    state.offset += 0.04;
+    ctx.clearRect(0, 0, W, H);
+
+    // Dark bg circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(W/2, H/2, W/2 - 1, 0, Math.PI*2);
+    ctx.clip();
+
+    ctx.fillStyle = '#1a2030';
+    ctx.fillRect(0, 0, W, H);
+
+    const fillY = H * (1 - state.current);
+
+    // Back wave
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x++) {
+      const y = fillY
+        + Math.sin((x/W)*Math.PI*3 + state.offset) * 4
+        + Math.sin((x/W)*Math.PI*1.8 + state.offset*1.2) * 2.5;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.closePath();
+    ctx.fillStyle = `rgba(${r},${g},${b},0.25)`;
+    ctx.fill();
+
+    // Front wave
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x++) {
+      const y = fillY
+        + Math.sin((x/W)*Math.PI*3 + state.offset + 1.2) * 3
+        + Math.sin((x/W)*Math.PI*4 + state.offset*0.8) * 2;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H); ctx.closePath();
+    ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
+    ctx.fill();
+    ctx.restore();
+
+    // Border ring
+    ctx.beginPath();
+    ctx.arc(W/2, H/2, W/2 - 1.5, 0, Math.PI*2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    state.raf = requestAnimationFrame(draw);
+  }
+  draw();
 }
 
 // ============================================================
