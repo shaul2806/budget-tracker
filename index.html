@@ -944,9 +944,8 @@ nav {
         </div>
       </div>
 
-      <!-- Monthly + spent row -->
-      <div class="stat-row">
-        <!-- Monthly liquid card -->
+      <!-- Monthly card (full width) -->
+      <div style="padding:0 16px 12px;">
         <div class="monthly-liquid-card">
           <div class="monthly-liquid-left">
             <div class="monthly-liquid-canvas-wrap">
@@ -956,20 +955,24 @@ nav {
                 <div class="monthly-liquid-label-small">spent</div>
               </div>
             </div>
-            <div class="monthly-liquid-amount-left positive" id="monthly-remaining">—</div>
-            <div class="stat-label" style="text-align:center">left</div>
+            <div class="monthly-liquid-amount-left" id="monthly-spent-display">—</div>
+            <div class="stat-label" style="text-align:center">spent</div>
           </div>
           <div class="monthly-liquid-right">
-            <div class="stat-label">Monthly Budget</div>
-            <div class="monthly-spent-of" id="monthly-spent-display">—</div>
+            <div class="stat-label">Monthly Left</div>
+            <div class="monthly-spent-of positive" id="monthly-remaining">—</div>
             <div class="monthly-spent-of-sub" id="monthly-sub"></div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Spent Today</div>
-          <div class="stat-value" id="today-spent">₪0</div>
-          <div class="stat-sub" id="today-count"></div>
-        </div>
+      </div>
+
+      <!-- Today line -->
+      <div style="padding:0 16px 4px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">Today</span>
+        <span style="font-size:13px;color:var(--text2);">
+          <span id="today-spent" style="font-weight:600;color:var(--fg)">₪0</span>
+          &nbsp;·&nbsp;<span id="today-count">0 transactions</span>
+        </span>
       </div>
 
       <!-- Exceptional notice -->
@@ -1815,11 +1818,11 @@ function renderHome() {
 
   // Monthly
   const monthSpentPct = monthBudget > 0 ? Math.min(110, Math.round((monthSpent / monthBudget) * 100)) : 0;
-  const monthEl = document.getElementById('monthly-remaining');
-  monthEl.textContent = formatCurrency(monthRemaining);
-  monthEl.className = 'monthly-liquid-amount-left ' + (monthRemaining >= 0 ? 'positive' : 'negative');
   document.getElementById('monthly-liquid-pct').textContent = monthSpentPct + '%';
   document.getElementById('monthly-spent-display').textContent = formatCurrency(monthSpent);
+  const monthEl = document.getElementById('monthly-remaining');
+  monthEl.textContent = formatCurrency(monthRemaining);
+  monthEl.className = 'monthly-spent-of ' + (monthRemaining >= 0 ? 'positive' : 'negative');
   document.getElementById('monthly-sub').textContent = `of ₪${Math.round(monthBudget).toLocaleString()} budget`;
   startLiquidCircle('monthly-liquid-canvas', monthSpentPct, budgetColor(100 - monthSpentPct));
 
