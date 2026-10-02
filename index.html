@@ -263,6 +263,34 @@ nav {
   margin-top: 8px;
 }
 
+/* weekly card redesign */
+.weekly-top-row { display: flex; align-items: flex-start; gap: 12px; }
+.weekly-left { flex: 1; min-width: 0; }
+.weekly-right { flex-shrink: 0; text-align: right; }
+.weekly-right-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-bottom: 4px; }
+.weekly-right-stat { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: var(--text2); line-height: 1.2; }
+.weekly-right-dates { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.weekly-day-dots { display: flex; gap: 6px; margin: 10px 0 6px; }
+.weekly-day-dot { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
+.weekly-day-dot .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg3); }
+.weekly-day-dot .dot.past { background: var(--text3); opacity: 0.5; }
+.weekly-day-dot .dot.today-dot { background: transparent; border: 2px solid var(--green); box-sizing: border-box; }
+.weekly-day-dot .dot.today-dot.warning { border-color: var(--amber); }
+.weekly-day-dot .dot.today-dot.negative { border-color: var(--red); }
+.weekly-day-dot .dlabel { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+.weekly-day-dot.is-today .dlabel { color: var(--text2); font-weight: 700; }
+
+/* mini calendar in monthly card */
+.mini-cal { flex-shrink: 0; }
+.mini-cal-header { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; text-align: center; }
+.mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px 0; }
+.mini-cal-day { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text3); font-weight: 500; border-radius: 50%; }
+.mini-cal-day.other-month { color: var(--bg3); }
+.mini-cal-day.past { color: var(--text3); opacity: 0.5; }
+.mini-cal-day.today-cal { background: var(--green); color: #fff; font-weight: 800; }
+.mini-cal-day.today-cal.warning { background: var(--amber); }
+.mini-cal-day.today-cal.negative { background: var(--red); }
+
 /* legacy progress bar — kept for any other uses */
 .progress-bar {
   height: 6px;
@@ -936,9 +964,18 @@ nav {
 
       <!-- Weekly Card -->
       <div class="card" id="weekly-card">
-        <div class="card-label">This week remaining</div>
-        <div class="big-amount positive" id="weekly-remaining">—</div>
-        <div class="amount-sub" id="weekly-sub"></div>
+        <div class="weekly-top-row">
+          <div class="weekly-left">
+            <div class="card-label">This week remaining</div>
+            <div class="big-amount positive" id="weekly-remaining">—</div>
+          </div>
+          <div class="weekly-right">
+            <div class="weekly-right-label">Week Spent</div>
+            <div class="weekly-right-stat" id="weekly-spent-display">—</div>
+            <div class="weekly-right-dates" id="weekly-dates">—</div>
+          </div>
+        </div>
+        <div class="weekly-day-dots" id="weekly-day-dots"></div>
         <div class="liquid-bar-wrap">
           <canvas id="weekly-bar-canvas" height="14"></canvas>
         </div>
@@ -963,6 +1000,7 @@ nav {
             <div class="monthly-spent-of positive" id="monthly-remaining">—</div>
             <div class="monthly-spent-of-sub" id="monthly-sub"></div>
           </div>
+          <div class="mini-cal" id="mini-cal"></div>
         </div>
       </div>
 
@@ -1805,14 +1843,34 @@ function renderHome() {
   const todayTxs = state.transactions.filter(t => t.date && t.date.toString().startsWith(toDateStr(today)));
 
   // Weekly card
+  const weekColorClass = weekRemaining > weekBudget * 0.3 ? 'positive' : weekRemaining > 0 ? 'warning' : 'negative';
   const weekEl = document.getElementById('weekly-remaining');
   weekEl.textContent = formatCurrency(weekRemaining);
-  weekEl.className = 'big-amount ' + (weekRemaining > weekBudget * 0.3 ? 'positive' : weekRemaining > 0 ? 'warning' : 'negative');
-  
+  weekEl.className = 'big-amount ' + weekColorClass;
+
+  // Weekly right column: spent of budget + dates
+  const spentDisp = document.getElementById('weekly-spent-display');
+  const datesDisp = document.getElementById('weekly-dates');
+  if (spentDisp) spentDisp.textContent = `₪${Math.round(weekSpent).toLocaleString()} of ₪${Math.round(weekBudget).toLocaleString()}`;
   const { start, end } = getWeekRange();
-  document.getElementById('weekly-sub').textContent =
-    `spent ₪${weekSpent.toLocaleString()} of ₪${weekBudget.toLocaleString()} · ${formatDate(start)}–${formatDate(end)}`;
-  
+  if (datesDisp) datesDisp.textContent = `${formatDate(start)} – ${formatDate(end)}`;
+
+  // Day dots
+  const dotsEl = document.getElementById('weekly-day-dots');
+  if (dotsEl) {
+    const DAY_LABELS = ['S','M','T','W','T','F','S'];
+    const todayDow = today.getDay(); // 0=Sun
+    dotsEl.innerHTML = DAY_LABELS.map((lbl, i) => {
+      const isPast = i < todayDow;
+      const isToday = i === todayDow;
+      const dotClass = isPast ? 'past' : isToday ? `today-dot ${weekColorClass}` : '';
+      return `<div class="weekly-day-dot${isToday ? ' is-today' : ''}">
+        <div class="dot ${dotClass}"></div>
+        <span class="dlabel">${lbl}</span>
+      </div>`;
+    }).join('');
+  }
+
   const weekPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekRemaining / weekBudget) * 100)) : 0;
   startLiquidBar('weekly-bar-canvas', weekPct, budgetColor(weekPct));
 
@@ -1825,6 +1883,29 @@ function renderHome() {
   monthEl.className = 'monthly-spent-of ' + (monthRemaining >= 0 ? 'positive' : 'negative');
   document.getElementById('monthly-sub').textContent = `of ₪${Math.round(monthBudget).toLocaleString()} budget`;
   startLiquidCircle('monthly-liquid-canvas', monthSpentPct, budgetColor(100 - monthSpentPct));
+
+  // Mini calendar
+  const calEl = document.getElementById('mini-cal');
+  if (calEl) {
+    const yr = today.getFullYear(), mo = today.getMonth();
+    const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const firstDow = new Date(yr, mo, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(yr, mo + 1, 0).getDate();
+    const todayDate = today.getDate();
+    const calColor = monthRemaining >= 0
+      ? (monthRemaining > monthBudget * 0.1 ? 'positive' : 'warning')
+      : 'negative';
+    const todayCls = calColor === 'positive' ? '' : calColor;
+    let cells = '';
+    for (let i = 0; i < firstDow; i++) cells += `<div class="mini-cal-day other-month"></div>`;
+    for (let d = 1; d <= daysInMonth; d++) {
+      let cls = '';
+      if (d < todayDate) cls = 'past';
+      else if (d === todayDate) cls = `today-cal ${todayCls}`;
+      cells += `<div class="mini-cal-day ${cls}">${d}</div>`;
+    }
+    calEl.innerHTML = `<div class="mini-cal-header">${MONTH_SHORT[mo]} ${yr}</div><div class="mini-cal-grid">${cells}</div>`;
+  }
 
   // Today
   document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
