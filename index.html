@@ -1014,12 +1014,12 @@ nav {
         <div class="page-sub" id="home-date"></div>
       </div>
 
-      <!-- Weekly Card -->
-      <div class="card" id="weekly-card">
+      <!-- Weekly Hero (no card box — primary focus) -->
+      <div id="weekly-card" style="padding:8px 20px 16px;">
         <div class="weekly-top-row">
           <div class="weekly-left">
             <div class="card-label">This week remaining</div>
-            <div class="big-amount positive" id="weekly-remaining">—</div>
+            <div class="big-amount positive" id="weekly-remaining" style="font-size:52px;">—</div>
           </div>
           <div class="weekly-right">
             <div class="weekly-right-label">Week Spent</div>
@@ -1028,7 +1028,7 @@ nav {
           </div>
         </div>
         <div class="weekly-day-dots" id="weekly-day-dots"></div>
-        <div class="liquid-bar-wrap">
+        <div class="liquid-bar-wrap" style="margin-top:8px;">
           <canvas id="weekly-bar-canvas" height="14"></canvas>
         </div>
       </div>
@@ -1178,6 +1178,14 @@ nav {
       <div class="page-header">
         <div class="page-title">History</div>
         <div class="page-sub" id="history-month"></div>
+      </div>
+      <div style="padding:0 16px 10px;">
+        <div style="position:relative;">
+          <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:0.4;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="history-search" placeholder="Search transactions…"
+            oninput="renderHistory()"
+            style="width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:9px 14px 9px 34px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;">
+        </div>
       </div>
       <div id="history-list"><div class="loading">Loading...</div></div>
     </div>
@@ -2030,12 +2038,21 @@ function renderHistory() {
 
   // Use yearTransactions so history shows all months, not just current month
   const source = state.yearTransactions.length > 0 ? state.yearTransactions : state.transactions;
-  const sorted = [...source]
+  const searchEl = document.getElementById('history-search');
+  const query = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  const filtered = query
+    ? source.filter(tx =>
+        (tx.description || '').toLowerCase().includes(query) ||
+        String(tx.amount).includes(query) ||
+        (tx.date || '').toString().includes(query)
+      )
+    : source;
+  const sorted = [...filtered]
     .sort((a,b) => parseLocalDate(b.date) - parseLocalDate(a.date) || new Date(b.createdAt) - new Date(a.createdAt));
-  
+
   if (sorted.length === 0) {
-    document.getElementById('history-list').innerHTML = 
-      '<div class="empty-state"><div class="icon">📋</div><p>No transactions this month</p></div>';
+    document.getElementById('history-list').innerHTML =
+      `<div class="empty-state"><div class="icon">📋</div><p>${query ? 'No results for "' + query + '"' : 'No transactions'}</p></div>`;
     return;
   }
 
