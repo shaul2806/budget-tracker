@@ -494,6 +494,58 @@ nav {
 .desc-input::placeholder { color: var(--text3); }
 .desc-input:focus { border-color: rgba(52,211,153,0.4); }
 
+/* category pills */
+.cat-pills-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.cat-pill {
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-pill:active { background: var(--bg3); }
+.cat-pill.selected { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+/* settings categories */
+.cat-tag-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.cat-tag {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+}
+.cat-tag-del {
+  background: none; border: none; color: var(--text3);
+  font-size: 14px; line-height: 1; cursor: pointer; padding: 0; margin: 0;
+  display: flex; align-items: center;
+}
+.cat-tag-del:active { color: var(--red); }
+.cat-add-row { display: flex; gap: 8px; align-items: center; }
+.cat-add-input {
+  flex: 1; background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 12px; font-size: 13px;
+  font-family: 'DM Sans', sans-serif; color: var(--text); outline: none;
+  transition: border-color 0.2s;
+}
+.cat-add-input:focus { border-color: rgba(52,211,153,0.4); }
+.cat-add-btn {
+  padding: 8px 14px; border-radius: 10px; border: none;
+  background: var(--green-dim); color: var(--green);
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; flex-shrink: 0;
+}
+
 .date-input {
   width: 100%;
   background: var(--card);
@@ -1091,7 +1143,8 @@ nav {
         </div>
         <input type="date" id="date-input" style="display:none;" onchange="onDatePickerChange()">
 
-        <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)">
+        <div class="cat-pills-wrap" id="cat-pills"></div>
+        <input type="text" id="desc-input" class="desc-input" placeholder="Description (optional)" oninput="syncPillSelection()">
         <div id="exceptional-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:0 2px;">
           <input type="checkbox" id="exceptional-toggle" style="width:16px;height:16px;accent-color:var(--amber);cursor:pointer;flex-shrink:0;">
           <span style="font-size:13px;color:var(--text2);">One-time / exceptional <span style="color:var(--text3);">(excluded from budget)</span></span>
@@ -1154,6 +1207,16 @@ nav {
         <div class="settings-title">Constant Expenses</div>
         <div id="constants-list"></div>
         <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Quick Categories</div>
+        <div class="cat-tag-wrap" id="settings-cat-tags"></div>
+        <div class="cat-add-row">
+          <input type="text" id="cat-add-input" class="cat-add-input" placeholder="New category..." maxlength="30"
+            onkeydown="if(event.key==='Enter'){addCategory();event.preventDefault();}">
+          <button class="cat-add-btn" onclick="addCategory()">Add</button>
+        </div>
       </div>
 
       <div class="settings-section" style="margin-top:8px;">
@@ -2656,6 +2719,7 @@ async function submitTransaction() {
   document.getElementById('date-input').value = toDateStr(new Date());
   document.getElementById('exceptional-toggle').checked = false;
   document.getElementById('usd-rate-hint').style.display = 'none';
+  renderCatPills();
   // Reset income source picker
   selectedIncomeSourceIdx = -1;
   document.getElementById('new-source-row').style.display = 'none';
@@ -3102,8 +3166,10 @@ function switchTab(tab) {
     setType('expense'); // always reset to expense on tab switch
     calcExpression = '0';
     document.getElementById('calc-display').textContent = '';
+    document.getElementById('desc-input').value = '';
+    renderCatPills();
   }
-  if (tab === 'settings') renderSettings();
+  if (tab === 'settings') { renderSettings(); renderSettingsCats(); }
   if (tab === 'report') renderReport();
   if (tab === 'history' && navigator.onLine && API_URL) smartSync(true);
 }
@@ -3262,6 +3328,85 @@ function startLiquidCircle(canvasId, spentPct, color) {
 // ============================================================
 // UTILS
 // ============================================================
+// ============================================================
+// QUICK CATEGORIES
+// ============================================================
+const DEFAULT_CATS = ['Groceries','Restaurant','Gas','Coffee','Pharmacy','Kids','Transport','Utilities'];
+
+function loadCategories() {
+  try {
+    const saved = localStorage.getItem('quick_categories');
+    return saved ? JSON.parse(saved) : [...DEFAULT_CATS];
+  } catch(e) { return [...DEFAULT_CATS]; }
+}
+
+function saveCategories(cats) {
+  try { localStorage.setItem('quick_categories', JSON.stringify(cats)); } catch(e) {}
+}
+
+function renderCatPills() {
+  const el = document.getElementById('cat-pills');
+  if (!el) return;
+  const cats = loadCategories();
+  if (!cats.length) { el.innerHTML = ''; return; }
+  const current = (document.getElementById('desc-input') || {}).value || '';
+  el.innerHTML = cats.map(c => {
+    const sel = current.trim().toLowerCase() === c.toLowerCase() ? ' selected' : '';
+    return `<button class="cat-pill${sel}" onclick="selectCatPill(this,'${c.replace(/'/g,"\\'")}')">
+      ${c}</button>`;
+  }).join('');
+}
+
+function selectCatPill(btn, name) {
+  const inp = document.getElementById('desc-input');
+  if (!inp) return;
+  if (inp.value.trim().toLowerCase() === name.toLowerCase()) {
+    inp.value = '';  // toggle off
+  } else {
+    inp.value = name;
+  }
+  renderCatPills();
+}
+
+function syncPillSelection() {
+  // keep pill highlight in sync when user types manually
+  renderCatPills();
+}
+
+function renderSettingsCats() {
+  const el = document.getElementById('settings-cat-tags');
+  if (!el) return;
+  const cats = loadCategories();
+  el.innerHTML = cats.map((c, i) =>
+    `<div class="cat-tag">
+      <span>${c}</span>
+      <button class="cat-tag-del" onclick="deleteCategory(${i})" aria-label="Remove">×</button>
+    </div>`
+  ).join('');
+}
+
+function addCategory() {
+  const inp = document.getElementById('cat-add-input');
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (!val) return;
+  const cats = loadCategories();
+  if (cats.some(c => c.toLowerCase() === val.toLowerCase())) { inp.value = ''; return; }
+  cats.push(val);
+  saveCategories(cats);
+  inp.value = '';
+  renderSettingsCats();
+  renderCatPills();
+}
+
+function deleteCategory(idx) {
+  const cats = loadCategories();
+  cats.splice(idx, 1);
+  saveCategories(cats);
+  renderSettingsCats();
+  renderCatPills();
+}
+
 function formatCurrency(n) {
   const abs = Math.abs(n);
   return (n < 0 ? '−' : '') + '₪' + abs.toLocaleString('en-IL', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
