@@ -1942,8 +1942,8 @@ function renderHome() {
     }).join('');
   }
 
-  const weekPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekRemaining / weekBudget) * 100)) : 0;
-  startLiquidBar('weekly-bar-canvas', weekPct, budgetColor(weekPct));
+  const weekSpentPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekSpent / weekBudget) * 100)) : 0;
+  startLiquidBar('weekly-bar-canvas', weekSpentPct, budgetColor(100 - weekSpentPct));
 
   // Monthly
   const monthSpentPct = monthBudget > 0 ? Math.min(110, Math.round((monthSpent / monthBudget) * 100)) : 0;
