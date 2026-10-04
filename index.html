@@ -2100,7 +2100,7 @@ function renderHome() {
       + state.transactions.filter(t => t.type === 'income' && !t.incomeSource && t.date && t.date.toString().startsWith(monthStr)).reduce((s,t) => s+t.amount, 0);
     const totalConstants = state.constants.reduce((s, c) => s + c.amount, 0);
     const monthBudget = state.settings.budget || 0;
-    const savings = totalIncome - totalConstants - monthBudget;
+    const savings = totalIncome - totalConstants - monthBudget - monthExceptional;
     const hasData = totalIncome > 0 || totalConstants > 0;
     if (hasData) {
       savingsCard.style.display = 'block';
