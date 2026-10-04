@@ -2030,7 +2030,7 @@ function renderHome() {
   const rollingOn = !!state.settings.rollingBudget;
   if (spentDisp) {
     const spentOfLabel = `₪${Math.round(weekSpent).toLocaleString()} of ₪${Math.round(weekBudget).toLocaleString()}`;
-    const adjustedLabel = (rollingOn && Math.abs(weekBudget - baseWeekBudget) >= 5)
+    const adjustedLabel = (rollingOn && Math.abs(weekBudget - baseWeekBudget) >= 1)
       ? `<span style="color:var(--text3);font-size:11px;"> · was ₪${Math.round(baseWeekBudget).toLocaleString()}</span>`
       : '';
     spentDisp.innerHTML = spentOfLabel + adjustedLabel;
@@ -2099,7 +2099,8 @@ function renderHome() {
     const totalIncome = state.incomes.reduce((s, i) => s + i.amount, 0)
       + state.transactions.filter(t => t.type === 'income' && !t.incomeSource && t.date && t.date.toString().startsWith(monthStr)).reduce((s,t) => s+t.amount, 0);
     const totalConstants = state.constants.reduce((s, c) => s + c.amount, 0);
-    const savings = totalIncome - totalConstants - monthSpent;
+    const monthBudget = state.settings.budget || 0;
+    const savings = totalIncome - totalConstants - monthBudget;
     const hasData = totalIncome > 0 || totalConstants > 0;
     if (hasData) {
       savingsCard.style.display = 'block';
