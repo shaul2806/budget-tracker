@@ -1038,7 +1038,6 @@ nav {
           </div>
         </div>
         <div class="weekly-day-dots" id="weekly-day-dots"></div>
-        <div class="weekly-pace" id="weekly-pace"></div>
         <div class="liquid-bar-wrap" style="margin-top:4px;">
           <canvas id="weekly-bar-canvas" height="14"></canvas>
         </div>
@@ -1075,6 +1074,7 @@ nav {
         </div>
         <div class="savings-amount positive" id="savings-amount">—</div>
         <div class="savings-exceptional" id="savings-exceptional" style="display:none;"></div>
+        <div class="savings-exceptional" id="monthly-pace" style="display:none;"></div>
       </div>
 
       <!-- Today line -->
@@ -2036,26 +2036,25 @@ function renderHome() {
     spentDisp.innerHTML = spentOfLabel + adjustedLabel;
   }
 
-  // Pace line
-  const paceEl = document.getElementById('weekly-pace');
-  if (paceEl) {
-    const { start: wStart, end: wEnd } = getWeekRange();
-    const msDay = 86400000;
-    const daysElapsed = Math.max(1, Math.round((today - wStart) / msDay) + 1);
-    const weekDays = Math.round((wEnd - wStart) / msDay) + 1;
-    if (weekSpent > 0 && daysElapsed > 0) {
-      const projectedSpend = (weekSpent / daysElapsed) * weekDays;
-      const paceGap = weekBudget - projectedSpend;
+  // Monthly pace line (shown from day 8 onward)
+  const monthPaceEl = document.getElementById('monthly-pace');
+  if (monthPaceEl) {
+    const dayOfMonth = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    if (dayOfMonth >= 8 && monthSpent > 0) {
+      const projectedMonthSpend = (monthSpent / dayOfMonth) * daysInMonth;
+      const monthBudgetVal = state.settings.budget || 0;
+      const paceGap = monthBudgetVal - projectedMonthSpend;
       const absGap = Math.abs(Math.round(paceGap));
       const paceColor = paceGap >= 0
-        ? (paceGap > weekBudget * 0.1 ? 'var(--green)' : 'var(--amber)')
+        ? (paceGap > monthBudgetVal * 0.1 ? 'var(--green)' : 'var(--amber)')
         : 'var(--red)';
-      const paceText = paceGap >= 0
-        ? `<span class="pace-val" style="color:${paceColor};">₪${absGap.toLocaleString()} under</span>`
-        : `<span class="pace-val" style="color:${paceColor};">₪${absGap.toLocaleString()} over</span>`;
-      paceEl.innerHTML = `At this pace · ${paceText}`;
+      const paceWord = paceGap >= 0 ? 'under' : 'over';
+      monthPaceEl.style.display = 'block';
+      monthPaceEl.style.color = 'var(--text3)';
+      monthPaceEl.innerHTML = `At this pace · <span style="color:${paceColor};font-weight:700;">₪${absGap.toLocaleString()} ${paceWord}</span> budget this month`;
     } else {
-      paceEl.textContent = '';
+      monthPaceEl.style.display = 'none';
     }
   }
 
