@@ -1246,7 +1246,7 @@ nav {
             <div style="font-size:12px;color:var(--text3);margin-top:2px;line-height:1.4;">Adjusts each week based on previous over/underspend</div>
           </div>
           <label class="toggle-switch" style="flex-shrink:0;">
-            <input type="checkbox" id="s-rolling-budget" onchange="state.settings.rollingBudget = this.checked; renderHome();">
+            <input type="checkbox" id="s-rolling-budget" onchange="state.settings.rollingBudget = this.checked; try{localStorage.setItem('rollingBudget', this.checked?'1':'0');}catch(e){} renderHome();">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -1760,7 +1760,7 @@ async function loadAll() {
       state.settings.emailEnabled   = s.emailEnabled === '1';
       state.settings.email1         = s.email1 || '';
       state.settings.email2         = s.email2 || '';
-      state.settings.rollingBudget  = s.rollingBudget === '1';
+      state.settings.rollingBudget  = s.rollingBudget === '1' || (s.rollingBudget === undefined && (()=>{try{return localStorage.getItem('rollingBudget')==='1';}catch(e){return false;}})());
       // Load shared exceptional IDs from sheet — works on both phones
       loadExceptionalIdsFromSettings(s);
     }
@@ -2226,7 +2226,12 @@ function renderSettings() {
   document.getElementById('s-email2').value = state.settings.email2 || '';
   document.getElementById('email-fields').style.display = emailEnabled ? 'block' : 'none';
   const rollingEl = document.getElementById('s-rolling-budget');
-  if (rollingEl) rollingEl.checked = !!state.settings.rollingBudget;
+  if (rollingEl) {
+    // fallback: read from localStorage if state not yet loaded from sheet
+    const fromStorage = (()=>{try{return localStorage.getItem('rollingBudget')==='1';}catch(e){return false;}})();
+    rollingEl.checked = !!state.settings.rollingBudget || fromStorage;
+    if (!state.settings.rollingBudget && fromStorage) state.settings.rollingBudget = true;
+  }
   renderIncomesList();
   renderConstantsList();
   renderMyName();
