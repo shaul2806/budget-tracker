@@ -2031,7 +2031,7 @@ function renderHome() {
   if (spentDisp) {
     const spentOfLabel = `₪${Math.round(weekSpent).toLocaleString()} of ₪${Math.round(weekBudget).toLocaleString()}`;
     const adjustedLabel = (rollingOn && Math.abs(weekBudget - baseWeekBudget) >= 1)
-      ? `<span style="color:var(--text3);font-size:11px;"> · was ₪${Math.round(baseWeekBudget).toLocaleString()}</span>`
+      ? `<div style="color:var(--text3);font-size:11px;margin-top:2px;">(₪${Math.round(baseWeekBudget).toLocaleString()} before adjustment)</div>`
       : '';
     spentDisp.innerHTML = spentOfLabel + adjustedLabel;
   }
@@ -2112,7 +2112,7 @@ function renderHome() {
       const excEl = document.getElementById('savings-exceptional');
       if (monthExceptional > 0) {
         excEl.style.display = 'block';
-        excEl.textContent = `⚡ ₪${Math.round(monthExceptional).toLocaleString()} exceptional this month`;
+        excEl.textContent = `⚡ ₪${Math.round(monthExceptional).toLocaleString()} exceptional (excluded from budget)`;
       } else {
         excEl.style.display = 'none';
       }
@@ -2129,8 +2129,7 @@ function renderHome() {
   const exceptEl = document.getElementById('exceptional-notice');
   if (exceptEl) {
     if (monthExceptional > 0) {
-      exceptEl.style.display = 'block';
-      exceptEl.textContent = '⚡ ₪' + monthExceptional.toLocaleString() + ' in exceptional expenses this month (excluded from budget)';
+      exceptEl.style.display = 'none'; // shown in savings card instead
     } else {
       exceptEl.style.display = 'none';
     }
