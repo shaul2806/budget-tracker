@@ -3237,11 +3237,7 @@ function startLiquidBar(canvasId, pct, color) {
     state.offset += 0.04;
     ctx.clearRect(0, 0, PW, H);
 
-    // Background
-    ctx.fillStyle = 'rgba(255,255,255,0.07)';
-    ctx.beginPath();
-    ctx.roundRect(0, 0, PW, H, 7 * dpr);
-    ctx.fill();
+    // Background — let container bg show through, canvas is transparent
 
     // Clip fill to rounded rect
     const fillW = PW * Math.max(0, Math.min(state.current / 100, 1));
