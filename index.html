@@ -494,6 +494,16 @@ nav {
 .desc-input::placeholder { color: var(--text3); }
 .desc-input:focus { border-color: rgba(52,211,153,0.4); }
 
+/* savings card */
+.savings-card { margin: 0 16px 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.savings-card-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2px; }
+.savings-amount { font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 800; line-height: 1.1; }
+.savings-exceptional { font-size: 12px; color: var(--amber); margin-top: 4px; font-weight: 500; }
+
+/* pace line */
+.weekly-pace { font-size: 12px; color: var(--text3); margin: 4px 0 6px; min-height: 16px; font-weight: 500; }
+.weekly-pace .pace-val { font-weight: 700; }
+
 /* category pills */
 .cat-pills-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .cat-pill {
@@ -1028,7 +1038,8 @@ nav {
           </div>
         </div>
         <div class="weekly-day-dots" id="weekly-day-dots"></div>
-        <div class="liquid-bar-wrap" style="margin-top:8px;">
+        <div class="weekly-pace" id="weekly-pace"></div>
+        <div class="liquid-bar-wrap" style="margin-top:4px;">
           <canvas id="weekly-bar-canvas" height="14"></canvas>
         </div>
       </div>
@@ -1054,6 +1065,16 @@ nav {
           </div>
           <div class="mini-cal" id="mini-cal"></div>
         </div>
+      </div>
+
+      <!-- Savings card -->
+      <div class="savings-card" id="savings-card" style="display:none;">
+        <div class="savings-card-top">
+          <div class="card-label">Projected Savings</div>
+          <div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:0.05em;" id="savings-month-label"></div>
+        </div>
+        <div class="savings-amount positive" id="savings-amount">—</div>
+        <div class="savings-exceptional" id="savings-exceptional" style="display:none;"></div>
       </div>
 
       <!-- Today line -->
@@ -1215,6 +1236,20 @@ nav {
         <div class="settings-title">Constant Expenses</div>
         <div id="constants-list"></div>
         <button class="add-constant-btn" onclick="addConstantRow()">+ Add constant expense</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Weekly Budget</div>
+        <div class="setting-row" style="justify-content:space-between;align-items:center;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <div class="setting-label">Rolling weekly budget</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px;line-height:1.4;">Adjusts each week based on previous over/underspend</div>
+          </div>
+          <label class="toggle-switch" style="flex-shrink:0;">
+            <input type="checkbox" id="s-rolling-budget" onchange="state.settings.rollingBudget = this.checked; renderHome();">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
 
       <div class="settings-section">
@@ -1396,7 +1431,7 @@ let state = {
   transactions: [],
   yearTransactions: [],
   yearlySummary: null,
-  settings: { budget: 8000, emailEnabled: false, email1: '', email2: '' },
+  settings: { budget: 8000, emailEnabled: false, email1: '', email2: '', rollingBudget: false },
   constants: [],
   incomes: [],
   constantsMonth: null,
@@ -1721,10 +1756,11 @@ async function loadAll() {
     // Update budget setting always (it's just a number, safe to sync)
     if (settingsRes.settings && Object.keys(settingsRes.settings).length > 0) {
       const s = settingsRes.settings;
-      state.settings.budget       = parseFloat(s.budget) || 8000;
-      state.settings.emailEnabled = s.emailEnabled === '1';
-      state.settings.email1       = s.email1 || '';
-      state.settings.email2       = s.email2 || '';
+      state.settings.budget         = parseFloat(s.budget) || 8000;
+      state.settings.emailEnabled   = s.emailEnabled === '1';
+      state.settings.email1         = s.email1 || '';
+      state.settings.email2         = s.email2 || '';
+      state.settings.rollingBudget  = s.rollingBudget === '1';
       // Load shared exceptional IDs from sheet — works on both phones
       loadExceptionalIdsFromSettings(s);
     }
@@ -1835,6 +1871,51 @@ function getWeekBudget(date) {
   // Pure integer day difference — no time component to cause rounding issues
   const msPerDay = 86400000;
   const days = Math.round((effectiveEnd - effectiveStart) / msPerDay) + 1;
+  const baseWeekBudget = Math.round(dailyRate * days);
+
+  if (!state.settings.rollingBudget) return baseWeekBudget;
+
+  // Rolling: redistribute leftover/deficit from past weeks across remaining days in month
+  const monthStr = `${year}-${String(month+1).padStart(2,'0')}`;
+  const weekStartStr = toDateStr(effectiveStart);
+
+  // Spending before this week (non-exceptional, this month)
+  const spentBeforeThisWeek = state.transactions
+    .filter(t => t.type === 'expense' && !t.isExceptional
+      && t.date && t.date.toString().startsWith(monthStr)
+      && t.date.toString() < weekStartStr)
+    .reduce((s, t) => s + t.amount, 0);
+
+  // Budget before this week
+  const daysBeforeWeek = Math.round((effectiveStart - monthStart) / msPerDay);
+  const budgetBeforeWeek = dailyRate * daysBeforeWeek;
+  const carryOver = budgetBeforeWeek - spentBeforeThisWeek; // +surplus / -deficit
+
+  // Spread carry-over across remaining days from this week start
+  const daysFromWeekStart = Math.round((monthEnd - effectiveStart) / msPerDay) + 1;
+  const adjustedDailyRate = daysFromWeekStart > 0
+    ? (dailyRate * daysFromWeekStart + carryOver) / daysFromWeekStart
+    : dailyRate;
+
+  return Math.max(0, Math.round(adjustedDailyRate * days));
+}
+
+// Returns original (non-rolling) week budget for display purposes
+function getBaseWeekBudget(date) {
+  const now = date || new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const day = now.getDate();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dailyRate = state.settings.budget / daysInMonth;
+  const weekStart = new Date(year, month, day - now.getDay());
+  const weekEnd   = new Date(year, month, day - now.getDay() + 6);
+  const monthStart = new Date(year, month, 1);
+  const monthEnd   = new Date(year, month + 1, 0);
+  const effectiveStart = weekStart < monthStart ? monthStart : weekStart;
+  const effectiveEnd   = weekEnd   > monthEnd   ? monthEnd   : weekEnd;
+  const msPerDay = 86400000;
+  const days = Math.round((effectiveEnd - effectiveStart) / msPerDay) + 1;
   return Math.round(dailyRate * days);
 }
 
@@ -1922,7 +2003,6 @@ function renderHome() {
   // Weekly right column: spent of budget + dates
   const spentDisp = document.getElementById('weekly-spent-display');
   const datesDisp = document.getElementById('weekly-dates');
-  if (spentDisp) spentDisp.textContent = `₪${Math.round(weekSpent).toLocaleString()} of ₪${Math.round(weekBudget).toLocaleString()}`;
   const { start, end } = getWeekRange();
   if (datesDisp) datesDisp.textContent = `${formatDate(start)} – ${formatDate(end)}`;
 
@@ -1944,6 +2024,40 @@ function renderHome() {
 
   const weekSpentPct = weekBudget > 0 ? Math.max(0, Math.min(100, (weekSpent / weekBudget) * 100)) : 0;
   startLiquidBar('weekly-bar-canvas', weekSpentPct, budgetColor(100 - weekSpentPct));
+
+  // Rolling budget: show adjusted vs. original
+  const baseWeekBudget = getBaseWeekBudget();
+  const rollingOn = !!state.settings.rollingBudget;
+  if (spentDisp) {
+    const spentOfLabel = `₪${Math.round(weekSpent).toLocaleString()} of ₪${Math.round(weekBudget).toLocaleString()}`;
+    const adjustedLabel = (rollingOn && Math.abs(weekBudget - baseWeekBudget) >= 5)
+      ? `<span style="color:var(--text3);font-size:11px;"> · was ₪${Math.round(baseWeekBudget).toLocaleString()}</span>`
+      : '';
+    spentDisp.innerHTML = spentOfLabel + adjustedLabel;
+  }
+
+  // Pace line
+  const paceEl = document.getElementById('weekly-pace');
+  if (paceEl) {
+    const { start: wStart, end: wEnd } = getWeekRange();
+    const msDay = 86400000;
+    const daysElapsed = Math.max(1, Math.round((today - wStart) / msDay) + 1);
+    const weekDays = Math.round((wEnd - wStart) / msDay) + 1;
+    if (weekSpent > 0 && daysElapsed > 0) {
+      const projectedSpend = (weekSpent / daysElapsed) * weekDays;
+      const paceGap = weekBudget - projectedSpend;
+      const absGap = Math.abs(Math.round(paceGap));
+      const paceColor = paceGap >= 0
+        ? (paceGap > weekBudget * 0.1 ? 'var(--green)' : 'var(--amber)')
+        : 'var(--red)';
+      const paceText = paceGap >= 0
+        ? `<span class="pace-val" style="color:${paceColor};">₪${absGap.toLocaleString()} under</span>`
+        : `<span class="pace-val" style="color:${paceColor};">₪${absGap.toLocaleString()} over</span>`;
+      paceEl.innerHTML = `At this pace · ${paceText}`;
+    } else {
+      paceEl.textContent = '';
+    }
+  }
 
   // Monthly
   const monthSpentPct = monthBudget > 0 ? Math.min(110, Math.round((monthSpent / monthBudget) * 100)) : 0;
@@ -1978,12 +2092,39 @@ function renderHome() {
     calEl.innerHTML = `<div class="mini-cal-header">${MONTH_SHORT[mo]} ${yr}</div><div class="mini-cal-grid">${cells}</div>`;
   }
 
+  // Savings card
+  const monthExceptional = getMonthExceptional(monthStr);
+  const savingsCard = document.getElementById('savings-card');
+  if (savingsCard) {
+    const totalIncome = state.incomes.reduce((s, i) => s + i.amount, 0)
+      + state.transactions.filter(t => t.type === 'income' && !t.incomeSource && t.date && t.date.toString().startsWith(monthStr)).reduce((s,t) => s+t.amount, 0);
+    const totalConstants = state.constants.reduce((s, c) => s + c.amount, 0);
+    const savings = totalIncome - totalConstants - monthSpent;
+    const hasData = totalIncome > 0 || totalConstants > 0;
+    if (hasData) {
+      savingsCard.style.display = 'block';
+      const savingsAmtEl = document.getElementById('savings-amount');
+      savingsAmtEl.textContent = formatCurrency(Math.abs(savings));
+      savingsAmtEl.className = 'savings-amount ' + (savings >= 0 ? 'positive' : 'negative');
+      const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      document.getElementById('savings-month-label').textContent = MONTH_NAMES[today.getMonth()].toUpperCase();
+      const excEl = document.getElementById('savings-exceptional');
+      if (monthExceptional > 0) {
+        excEl.style.display = 'block';
+        excEl.textContent = `⚡ ₪${Math.round(monthExceptional).toLocaleString()} exceptional this month`;
+      } else {
+        excEl.style.display = 'none';
+      }
+    } else {
+      savingsCard.style.display = 'none';
+    }
+  }
+
   // Today
   document.getElementById('today-spent').textContent = formatCurrency(todaySpent);
   document.getElementById('today-count').textContent = todayTxs.length + ' transaction' + (todayTxs.length !== 1 ? 's' : '');
 
   // Show exceptional expenses notice
-  const monthExceptional = getMonthExceptional(monthStr);
   const exceptEl = document.getElementById('exceptional-notice');
   if (exceptEl) {
     if (monthExceptional > 0) {
@@ -2083,6 +2224,8 @@ function renderSettings() {
   document.getElementById('s-email1').value = state.settings.email1 || '';
   document.getElementById('s-email2').value = state.settings.email2 || '';
   document.getElementById('email-fields').style.display = emailEnabled ? 'block' : 'none';
+  const rollingEl = document.getElementById('s-rolling-budget');
+  if (rollingEl) rollingEl.checked = !!state.settings.rollingBudget;
   renderIncomesList();
   renderConstantsList();
   renderMyName();
@@ -2391,6 +2534,7 @@ function removeConstant(i) {
 async function saveSettings() {
   state.settings.budget = parseFloat(document.getElementById('s-budget').value) || 8000;
   state.settings.emailEnabled = document.getElementById('s-email-enabled').checked;
+  state.settings.rollingBudget = document.getElementById('s-rolling-budget')?.checked || false;
   state.settings.email1 = document.getElementById('s-email1').value.trim();
   state.settings.email2 = document.getElementById('s-email2').value.trim();
 
@@ -2418,7 +2562,8 @@ async function saveSettings() {
       budget: state.settings.budget,
       emailEnabled: state.settings.emailEnabled ? '1' : '0',
       email1: state.settings.email1,
-      email2: state.settings.email2
+      email2: state.settings.email2,
+      rollingBudget: state.settings.rollingBudget ? '1' : '0'
     });
     const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
     // DEBUG: show what incomes are about to be saved
