@@ -1074,6 +1074,7 @@ nav {
         </div>
         <div class="savings-amount positive" id="savings-amount">—</div>
         <div class="savings-exceptional" id="savings-exceptional" style="display:none;"></div>
+        <div class="savings-exceptional" id="savings-over-warning" style="display:none;color:var(--red);"></div>
         <div class="savings-exceptional" id="monthly-pace" style="display:none;"></div>
       </div>
 
@@ -2099,7 +2100,10 @@ function renderHome() {
       + state.transactions.filter(t => t.type === 'income' && !t.incomeSource && t.date && t.date.toString().startsWith(monthStr)).reduce((s,t) => s+t.amount, 0);
     const totalConstants = state.constants.reduce((s, c) => s + c.amount, 0);
     const monthBudget = state.settings.budget || 0;
-    const savings = totalIncome - totalConstants - monthBudget - monthExceptional;
+    const overBudget = monthSpent > monthBudget;
+    // Use actual spend when over budget so overspend directly reduces savings
+    const effectiveSpend = Math.max(monthSpent, monthBudget);
+    const savings = totalIncome - totalConstants - effectiveSpend - monthExceptional;
     const hasData = totalIncome > 0 || totalConstants > 0;
     if (hasData) {
       savingsCard.style.display = 'block';
@@ -2114,6 +2118,16 @@ function renderHome() {
         excEl.textContent = `⚡ ₪${Math.round(monthExceptional).toLocaleString()} exceptional (excluded from budget)`;
       } else {
         excEl.style.display = 'none';
+      }
+      // Warning when budget is exhausted
+      const overEl = document.getElementById('savings-over-warning');
+      if (overEl) {
+        if (overBudget) {
+          overEl.style.display = 'block';
+          overEl.textContent = '⚠️ Budget exceeded · every expense now reduces your savings';
+        } else {
+          overEl.style.display = 'none';
+        }
       }
     } else {
       savingsCard.style.display = 'none';
