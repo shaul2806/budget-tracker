@@ -1,12 +1,12 @@
 // ============================================================
-// Budget Tracker Service Worker v9
+// Budget Tracker Service Worker v10
 // Strategy:
 //   - index.html → pre-cached on install + network-first on fetch
 //   - fonts/manifest → cache-first
 //   - API/proxy calls → never intercepted
 // ============================================================
 
-const CACHE_NAME = 'budget-shell-v9';
+const CACHE_NAME = 'budget-shell-v10';
 const START_URL  = '/budget-tracker/';
 
 self.addEventListener('install', event => {
