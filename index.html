@@ -1643,7 +1643,8 @@ async function apiCall(action, data = {}) {
   const proxyUrl = 'https://budget-proxy.shaul2806.workers.dev/?target=' + encodeURIComponent(targetUrl);
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000); // 12s timeout
+  const isSave = ['saveSettings','saveConstants','saveIncomes','saveTransaction','deleteTransaction','saveExceptionalIds','saveNewMonth'].includes(action);
+  const timeout = setTimeout(() => controller.abort(), isSave ? 25000 : 12000); // saves get 25s, reads 12s
   try {
     const res = await fetch(proxyUrl, { signal: controller.signal });
     const text = await res.text();
@@ -2584,8 +2585,6 @@ async function saveSettings() {
       rollingBudget: state.settings.rollingBudget ? '1' : '0'
     });
     const r2 = await apiCall('saveConstants', { constants: JSON.stringify(state.constants), month: monthStr });
-    // DEBUG: show what incomes are about to be saved
-    showToastSimple('Saving ' + state.incomes.length + ' incomes: ' + state.incomes.map(i => i.name + '=' + i.amount).join(', '));
     const r3 = await apiCall('saveIncomes',   { incomes:   JSON.stringify(state.incomes),   month: monthStr });
     const err = r1.error || r2.error || r3.error;
     if (err) { showToastSimple('⚠️ Save error: ' + err); return; }
